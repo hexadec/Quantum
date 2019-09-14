@@ -10,18 +10,21 @@ import java.util.List;
 public class MainActivity extends Activity {
 
     // Used to load the 'native-lib' library on application startup.
-    static {
+    /*static {
         System.loadLibrary("native-lib");
-    }
+    }*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Example of a call to a native method
+
         TextView tv = (TextView) findViewById(R.id.sample_text);
-        QBit q = new QBit();
+        tv.setText(Complex.exponent(new Complex(2, 5), new Complex (4, 7)).toString());
+        tv.setText(tv.getText() + "\n---\n" + Complex.sin(new Complex(-2, 0.5)).toString());
+        tv.setText(tv.getText() + "\n---\n" + Complex.cos(new Complex(-2, 0.5)).toString());
+        /* QBit q = new QBit();
         q.applyOperator(LinearOperator.HADAMARD);
         tv.setText(tv.getText() + "\n----\n" + q.toString());
 
@@ -35,12 +38,13 @@ public class MainActivity extends Activity {
         List<String> gates = GateView.getPredefinedGateNames();
         for (String s : gates) {
             Log.d("?", s);
-        }
+        }*/
+
     }
 
     /**
      * A native method that is implemented by the 'native-lib' native library,
      * which is packaged with this application.
      */
-    public native String stringFromJNI();
+    //public native String stringFromJNI();
 }

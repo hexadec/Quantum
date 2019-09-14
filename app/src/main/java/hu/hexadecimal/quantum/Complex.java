@@ -26,10 +26,10 @@ public class Complex {
     }
 
     public double arg() {
-        if (Math.abs(real) < 0.0000001 && Math.abs(imaginary) < 0.0000001) return 0;
-        if (Math.abs(real) < 0.0000001) return Math.PI / 2 * imaginary < 0 ? -1 : 1;
-        if (Math.abs(imaginary) < 0.0000001) return real < 0 ? Math.PI : 0;
-        return Math.atan(imaginary / real);
+        //if (Math.abs(real) < 0.00000001 && Math.abs(imaginary) < 0.00000001) return 0;
+        //if (Math.abs(real) < 0.00000001) return Math.PI / 2 * imaginary < 0 ? -1 : 1;
+        //if (Math.abs(imaginary) < 0.00000001) return real < 0 ? Math.PI : 0;
+        return Math.atan(imaginary / real) + (real < 0 ? Math.PI : 0);
     }
 
     public void invert() {
@@ -83,12 +83,12 @@ public class Complex {
     public void reciprocal() {
         double mod2 = real * real + imaginary * imaginary;
         real /= mod2;
-        imaginary /= -mod2;
+        imaginary /= (-1) * mod2;
     }
 
     public static Complex reciprocal(Complex z) {
         double mod2 = z.real * z.real + z.imaginary * z.imaginary;
-        return new Complex(z.real / mod2, z.imaginary / -mod2);
+        return new Complex(z.real / mod2, (-1) * z.imaginary / mod2);
     }
 
     public void divide(Complex complex) {
@@ -99,11 +99,38 @@ public class Complex {
         return Complex.multiply(z, Complex.reciprocal(w));
     }
 
+    public void exponent(Complex complex) {
+        double realExpPart = Math.log(this.mod()) * complex.real - (complex.imaginary * this.arg());
+        double imagExpPart = this.arg() * complex.real + complex.imaginary * Math.log(this.mod());
+        double modulus = Math.exp(realExpPart);
+        real = Math.cos(imagExpPart) * modulus;
+        imaginary = Math.sin(imagExpPart) * modulus;
+    }
+
+    public static Complex exponent(Complex base, Complex power) {
+        double realExpPart = Math.log(base.mod()) * power.real - (power.imaginary * base.arg());
+        double imagExpPart = base.arg() * power.real + power.imaginary * Math.log(base.mod());
+        double modulus = Math.exp(realExpPart);
+        return new Complex(modulus, imagExpPart, false);
+    }
+
+    public static Complex sin(Complex complex) {
+        Complex epz = Complex.exponent(new Complex(Math.E), new Complex((-1) * complex.imaginary, complex.real));
+        Complex enz = Complex.exponent(new Complex(Math.E), new Complex(complex.imaginary, (-1) * complex.real));
+        return Complex.divide(Complex.sub(epz, enz), new Complex(0, 2));
+    }
+
+    public static Complex cos(Complex complex) {
+        Complex epz = Complex.exponent(new Complex(Math.E), new Complex((-1) * complex.imaginary, complex.real));
+        Complex enz = Complex.exponent(new Complex(Math.E), new Complex(complex.imaginary, (-1) * complex.real));
+        return Complex.multiply(Complex.add(epz, enz), new Complex(0.5, 0));
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(real);
-        sb.append(imaginary < 0 ? " " : " + ");
-        sb.append(imaginary);
+        sb.append(new DecimalFormat("0.000#####").format(real));
+        sb.append(imaginary < 0 ? " - " : " + ");
+        sb.append(new DecimalFormat("0.000#####").format(Math.abs(imaginary)));
         sb.append('i');
         return sb.toString();
     }
@@ -128,13 +155,19 @@ public class Complex {
     }
 
     public boolean equalsExact(Complex complex) {
-        return Math.abs(imaginary - complex.imaginary) < 0.0000001
-                && Math.abs(real - complex.real) < 0.0000001;
+        return Math.abs(imaginary - complex.imaginary) < 0.00000001
+                && Math.abs(real - complex.real) < 0.00000001;
     }
 
     public boolean equals3Decimals(Complex complex) {
         boolean realEq = Math.abs(real - complex.real) < 0.001;
         boolean imaginaryEq = Math.abs(imaginary - complex.imaginary) < 0.001;
         return realEq && imaginaryEq;
+    }
+
+    @Override
+    public boolean equals(Object complex) {
+        if (!(complex instanceof Complex)) return false;
+        else return equalsExact((Complex) complex);
     }
 }

@@ -34,8 +34,8 @@ public class QBit {
     public boolean measureZ() {
         double prob0 = Complex.multiply(Complex.conjugate(matrix[0]), matrix[0]).real;
         double prob1 = Complex.multiply(Complex.conjugate(matrix[1]), matrix[1]).real;
-        if (prob0 + prob1 < 0.999) {
-            Log.e("QBIT Error", "Too low probability sum:\t" + (prob0 + prob1));
+        if (prob0 + prob1 < 0.999 || prob0 + prob1 > 1.001) {
+            Log.e("QBIT Error", "Too HIGH/low probability sum:\t" + (prob0 + prob1));
         }
         boolean value = random.nextDouble() > prob0;
         prepare(value);
