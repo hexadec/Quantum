@@ -26,9 +26,14 @@ public class Complex {
     }
 
     public double arg() {
-        //if (Math.abs(real) < 0.00000001 && Math.abs(imaginary) < 0.00000001) return 0;
-        //if (Math.abs(real) < 0.00000001) return Math.PI / 2 * imaginary < 0 ? -1 : 1;
-        //if (Math.abs(imaginary) < 0.00000001) return real < 0 ? Math.PI : 0;
+        if (Math.abs(real) < 0.000000001) {
+            real = 0;
+            if (Math.abs(imaginary) < 0.000000001) {
+                imaginary = 0;
+                return 0;
+            } else return (imaginary >= 0 ? Math.PI / 2 : -1 * Math.PI / 2);
+        }
+        if (Math.abs(imaginary) < 0.000000001) imaginary = 0;
         return Math.atan(imaginary / real) + (real < 0 ? Math.PI : 0);
     }
 
@@ -126,6 +131,12 @@ public class Complex {
         return Complex.multiply(Complex.add(epz, enz), new Complex(0.5, 0));
     }
 
+    /**
+     * Converts the complex number to a string with a precision of 3 decimal places
+     *
+     * @return
+     */
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(new DecimalFormat("0.000#####").format(real));
@@ -135,6 +146,11 @@ public class Complex {
         return sb.toString();
     }
 
+    /**
+     * Converts the complex number to a string with a precision of 3 decimal places
+     *
+     * @return
+     */
     public String toString3Decimals() {
         StringBuilder sb = new StringBuilder();
         sb.append(real < 0 ? " " : " +");
@@ -145,7 +161,26 @@ public class Complex {
         return sb.toString();
     }
 
+    /**
+     * Converts the complex number to a string in modulus-argument form with a precision of 8 decimal places
+     *
+     * @return
+     */
     public String toStringModArg() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(new DecimalFormat("0.000#####").format(mod()));
+        sb.append('*');
+        sb.append("e^i");
+        sb.append(new DecimalFormat("0.000#####").format(arg()));
+        return sb.toString();
+    }
+
+    /**
+     * Converts the complex number to a string in modulus-argument form with a precision of 3 decimal places
+     *
+     * @return
+     */
+    public String toStringModArg3Decimals() {
         StringBuilder sb = new StringBuilder();
         sb.append(new DecimalFormat("0.000").format(mod()));
         sb.append('*');
@@ -154,17 +189,35 @@ public class Complex {
         return sb.toString();
     }
 
+    /**
+     * Returns if the given complex number is equal to 8 decimal places
+     *
+     * @param complex a complex number
+     * @return true if the both real and imaginary parts are equal to the corresponding one 8 decimal places
+     */
     public boolean equalsExact(Complex complex) {
         return Math.abs(imaginary - complex.imaginary) < 0.00000001
                 && Math.abs(real - complex.real) < 0.00000001;
     }
 
+    /**
+     * Returns if the given complex number is equal to 3 decimal places
+     *
+     * @param complex a complex number
+     * @return true if the both real and imaginary parts are equal to the corresponding one 3 decimal places
+     */
     public boolean equals3Decimals(Complex complex) {
         boolean realEq = Math.abs(real - complex.real) < 0.001;
         boolean imaginaryEq = Math.abs(imaginary - complex.imaginary) < 0.001;
         return realEq && imaginaryEq;
     }
 
+    /**
+     * Returns if the given complex number is equal to 8 decimal places
+     *
+     * @param complex a complex number
+     * @return true if the both real and imaginary parts are equal to the corresponding one 8 decimal places false otherwise
+     */
     @Override
     public boolean equals(Object complex) {
         if (!(complex instanceof Complex)) return false;

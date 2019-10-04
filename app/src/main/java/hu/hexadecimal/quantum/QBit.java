@@ -6,7 +6,7 @@ import java.util.Random;
 
 public class QBit {
 
-    protected Complex[] matrix;
+    public Complex[] matrix;
     private Random random;
 
     QBit() {
@@ -37,6 +37,8 @@ public class QBit {
         if (prob0 + prob1 < 0.999 || prob0 + prob1 > 1.001) {
             Log.e("QBIT Error", "Too HIGH/low probability sum:\t" + (prob0 + prob1));
         }
+        Log.i("QBit Info", "Prob0: " + prob0 + "  Prob1: " + prob1);
+        Log.i("QBit Info", "Matrix[0]: " + matrix[0].toString3Decimals() + "    Matrix[1]: " + matrix[1].toString3Decimals());
         boolean value = random.nextDouble() > prob0;
         prepare(value);
         return value;
