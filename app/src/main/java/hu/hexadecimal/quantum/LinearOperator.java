@@ -1,9 +1,14 @@
 package hu.hexadecimal.quantum;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
 public class LinearOperator {
 
     protected Complex[][] matrix;
     private String name;
+    private String symbol;
     private static final int MATRIX_DIM = 2;
 
     public static final LinearOperator HADAMARD =
@@ -11,44 +16,45 @@ public class LinearOperator {
                     new LinearOperator(new Complex[][]{
                             new Complex[]{new Complex(1), new Complex(1)},
                             new Complex[]{new Complex(1), new Complex(-1)}
-                    }, "Hadamard"), new Complex(1 / Math.sqrt(2)));
+                    }, "Hadamard", "ℍ"), new Complex(1 / Math.sqrt(2)));
 
     public static final LinearOperator PAULI_Z =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(-1)}
-            }, "Pauli-Z");
+            }, "Pauli-Z", "ℤ");
 
     public static final LinearOperator PAULI_Y =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(0), new Complex(0, -1)},
                     new Complex[]{new Complex(0, 1), new Complex(0)}
-            }, "Pauli-Y");
+            }, "Pauli-Y", "\uD835\uDD50");
 
     public static final LinearOperator PAULI_X =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(0), new Complex(1)},
                     new Complex[]{new Complex(1), new Complex(0)}
-            }, "Pauli-X");
+            }, "Pauli-X", "\uD835\uDD4F");
 
     public static final LinearOperator T_GATE =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(1, Math.PI / 4 ,true)}
-            }, "PI/4 Phase-shift");
+            }, "PI/4 Phase-shift", "\uD835\uDD4B");
 
     public static final LinearOperator S_GATE =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(0, 1)}
-            }, "PI/2 Phase-shift");
+            }, "PI/2 Phase-shift", "\uD835\uDD4A");
 
-    public LinearOperator(Complex[][] M, String name) {
+    public LinearOperator(Complex[][] M, String name, String symbol) {
         if (M == null) {
             throw new NullPointerException();
         }
         if (M.length == MATRIX_DIM && M[0].length == MATRIX_DIM && M[1].length == MATRIX_DIM) {
             this.name = name;
+            this.symbol = symbol;
             matrix = M;
         } else {
             throw new NullPointerException("Invalid array");
@@ -56,7 +62,7 @@ public class LinearOperator {
     }
 
     public LinearOperator(Complex[][] M) {
-        this(M, "Custom");
+        this(M, "Custom", "CU");
     }
 
     /**
@@ -71,8 +77,16 @@ public class LinearOperator {
         return name;
     }
 
+    public String getSymbol() {
+        return symbol;
+    }
+
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 
     public void transpose() {
@@ -111,15 +125,14 @@ public class LinearOperator {
         conjugate();
     }
 
-    public static LinearOperator hermitianCOnjugate(LinearOperator linearOperator) {
+    public static LinearOperator hermitianConjugate(LinearOperator linearOperator) {
         LinearOperator l = linearOperator.copy();
         l.hermitianConjugate();
         return l;
     }
 
     public boolean isHermitian() {
-        LinearOperator hermiConj = LinearOperator.transpose(this);
-        hermiConj.conjugate();
+        LinearOperator hermiConj = LinearOperator.hermitianConjugate(this);
         return equals(hermiConj);
     }
 
@@ -141,7 +154,7 @@ public class LinearOperator {
         Complex[][] m = linearOperator.matrix;
         for (int i = 0; i < MATRIX_DIM; i++) {
             for (int j = 0; j < MATRIX_DIM; j++) {
-                if (!matrix[i][j].equalsExact(linearOperator.matrix[i][j])) {
+                if (!this.matrix[i][j].equalsExact(m[i][j])) {
                     return false;
                 }
             }
@@ -153,7 +166,7 @@ public class LinearOperator {
         return new LinearOperator(new Complex[][]{
                 new Complex[]{matrix[0][0], matrix[1][0]},
                 new Complex[]{matrix[0][1], matrix[1][1]}
-        }, name);
+        }, name, symbol);
     }
 
     public String toString() {
@@ -175,5 +188,43 @@ public class LinearOperator {
         q.matrix[1] = Complex.multiply(matrix[1][0], qbit.matrix[0]);
         q.matrix[1].add(Complex.multiply(matrix[1][1], qbit.matrix[1]));
         return q;
+    }
+
+    public static List<String> getPredefinedGateNames() {
+        List<String> list = new ArrayList<>();
+        LinearOperator linearOperator = new LinearOperator();
+        try {
+            Field[] fields = linearOperator.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+                        && field.get(linearOperator) instanceof LinearOperator) {
+                    list.add(((LinearOperator)field.get(linearOperator)).getName());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return list;
+    }
+
+    static List<String> getPredefinedGateSymbols() {
+        List<String> list = new ArrayList<>();
+        LinearOperator linearOperator = new LinearOperator();
+        try {
+            Field[] fields = linearOperator.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+                        && field.get(linearOperator) instanceof LinearOperator) {
+                    list.add(((LinearOperator)field.get(linearOperator)).getSymbol());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return list;
     }
 }

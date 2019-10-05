@@ -8,6 +8,7 @@ import android.content.pm.ConfigurationInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,13 +16,9 @@ import java.util.List;
 
 import hu.hexadecimal.quantum.graphics.BlochSphereRenderer;
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
+import hu.hexadecimal.quantum.graphics.QuantumView;
 
 public class MainActivity extends Activity {
-
-    // Used to load the 'native-lib' library on application startup.
-    /*static {
-        System.loadLibrary("native-lib");
-    }*/
 
     BlochSphereView glSurfaceView;
 
@@ -30,19 +27,17 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
+        RelativeLayout relativeLayout  = findViewById(R.id.relative);
+        QuantumView qv = new QuantumView(this);
+        relativeLayout.addView(qv);
         TextView tv = (TextView) findViewById(R.id.sample_text);
-        glSurfaceView = new BlochSphereView(this);
 
-        //tv.setText(tv.getText() + "\n---\n" + Complex.multiply(new Complex(0), new Complex(0)).toString3Decimals());
-        //tv.setText(new Complex(0).arg() + " -- " + new Complex(0).mod());
+        glSurfaceView = new BlochSphereView(this);
 
         QBit q = new QBit();
         q.prepare(true);
         tv.setText(tv.getText() + "" + q.measureZ() + "");
         q.applyOperator(LinearOperator.HADAMARD);
-        //tv.setText(tv.getText() + "\n--\n" + q.toString());
-        //tv.setText(tv.getText() + "\n--\n" + LinearOperator.HADAMARD.operateOn(q).toString());
 
         double value = 0;
 
@@ -51,14 +46,16 @@ public class MainActivity extends Activity {
             value += qs[1].measureZ() ? 1 : 0;
         }
         tv.setText(tv.getText() + "\n----\n" + value / 200);
-        List<String> gates = GateView.getPredefinedGateNames();
+        List<String> gates = LinearOperator.getPredefinedGateSymbols();
         for (String s : gates) {
             Log.d("?", s);
+            tv.setText(tv.getText() + " " + s);
         }
+        tv.setText("");
         final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
         if (configurationInfo.reqGlEsVersion >= 0x20000) {
-            displayBlochSphere(q);
+            //displayBlochSphere(q);
         } else {
             Toast.makeText(MainActivity.this, R.string.gl_version_not_supported, Toast.LENGTH_LONG).show();
             return;
