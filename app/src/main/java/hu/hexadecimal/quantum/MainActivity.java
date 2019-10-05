@@ -60,7 +60,10 @@ public class MainActivity extends Activity {
             Toast.makeText(MainActivity.this, R.string.gl_version_not_supported, Toast.LENGTH_LONG).show();
             return;
         }
-
+        qv.addGate(0, LinearOperator.HADAMARD);
+        qv.addGate(0, LinearOperator.PAULI_X);
+        qv.addGate(0, LinearOperator.S_GATE);
+        qv.addGate(2, LinearOperator.T_GATE);
     }
 
     //public native String stringFromJNI();

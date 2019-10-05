@@ -4,7 +4,7 @@ import android.util.Log;
 
 import java.util.Random;
 
-public class TwoQBitOperator {
+public class TwoQBitOperator extends GeneralOperator {
 
     private static final int MATRIX_DIM = 4;
     protected Complex[][] matrix;

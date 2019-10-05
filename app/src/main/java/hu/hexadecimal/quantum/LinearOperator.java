@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LinearOperator {
+public class LinearOperator extends GeneralOperator{
 
     protected Complex[][] matrix;
     private String name;
@@ -16,37 +16,51 @@ public class LinearOperator {
                     new LinearOperator(new Complex[][]{
                             new Complex[]{new Complex(1), new Complex(1)},
                             new Complex[]{new Complex(1), new Complex(-1)}
-                    }, "Hadamard", "ℍ"), new Complex(1 / Math.sqrt(2)));
+                    }, "Hadamard", "ℍ", 0xff2155BA), new Complex(1 / Math.sqrt(2)));
 
     public static final LinearOperator PAULI_Z =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(-1)}
-            }, "Pauli-Z", "ℤ");
+            }, "Pauli-Z", "ℤ", 0xff60BA21);
 
     public static final LinearOperator PAULI_Y =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(0), new Complex(0, -1)},
                     new Complex[]{new Complex(0, 1), new Complex(0)}
-            }, "Pauli-Y", "\uD835\uDD50");
+            }, "Pauli-Y", "\uD835\uDD50", 0xff60BA21);
 
     public static final LinearOperator PAULI_X =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(0), new Complex(1)},
                     new Complex[]{new Complex(1), new Complex(0)}
-            }, "Pauli-X", "\uD835\uDD4F");
+            }, "Pauli-X", "\uD835\uDD4F", 0xff60BA21);
 
     public static final LinearOperator T_GATE =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(1, Math.PI / 4 ,true)}
-            }, "PI/4 Phase-shift", "\uD835\uDD4B");
+            }, "PI/4 Phase-shift", "\uD835\uDD4B", 0xffBA7021);
 
     public static final LinearOperator S_GATE =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(0, 1)}
-            }, "PI/2 Phase-shift", "\uD835\uDD4A");
+            }, "PI/2 Phase-shift", "\uD835\uDD4A", 0xff21BAAB);
+
+    public LinearOperator(Complex[][] M, String name, String symbol, int color) {
+        if (M == null) {
+            throw new NullPointerException();
+        }
+        if (M.length == MATRIX_DIM && M[0].length == MATRIX_DIM && M[1].length == MATRIX_DIM) {
+            this.name = name;
+            this.symbol = symbol;
+            this.color = color;
+            matrix = M;
+        } else {
+            throw new NullPointerException("Invalid array");
+        }
+    }
 
     public LinearOperator(Complex[][] M, String name, String symbol) {
         if (M == null) {

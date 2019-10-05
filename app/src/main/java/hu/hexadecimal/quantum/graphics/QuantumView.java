@@ -12,7 +12,13 @@ import android.graphics.Region;
 import android.util.DisplayMetrics;
 import android.view.View;
 
+import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.List;
+
+import hu.hexadecimal.quantum.GeneralOperator;
 import hu.hexadecimal.quantum.LinearOperator;
+import hu.hexadecimal.quantum.QBit;
 
 public class QuantumView extends View {
 
@@ -26,11 +32,15 @@ public class QuantumView extends View {
 
     private Canvas canvas;
 
-
-
+    QBit[] qbits;
+    private List<GeneralOperator> gos;
+    private List<Integer> qid;
 
     public QuantumView(Context context) {
         super(context);
+        qbits = new QBit[6];
+        gos = new ArrayList<>();
+        qid = new ArrayList<>();
 
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
@@ -94,18 +104,23 @@ public class QuantumView extends View {
         mPaint.setColor(0xff888888);
 
         otherPaint.setStyle(Paint.Style.FILL);
-        otherPaint.setColor(0xff85FF00);
-        for (int i = 100; i < getHeight() - 2*mPadding - 100 && i <= 1100; i += 200) {
+        otherPaint.setColor(0xffBA2121);
+        for (int i = 100; i < getHeight() - 2 * mPadding - 100 && i <= 1100; i += 200) {
             canvas.drawLine(mPadding, mPadding + i, getWidth() - mPadding, mPadding + i, mPaint);
             canvas.drawRect(mPadding, mPadding + i - 50, mPadding + 100, mPadding + i + 50, otherPaint);
-            canvas.drawText("" + (i + 100) / 200, mPadding - 50, mPadding + i + 20, mTextPaint);
+            canvas.drawText("q" + (i + 100) / 200, mPadding - 90, mPadding + i + 20, mTextPaint);
             canvas.drawText("\uD835\uDFD8", mPadding + 30, mPadding + i + 22, whiteTextPaint);
+        }
+
+        int[] gatesNumber = new int[6];
+        for (int i = 0; i < gos.size(); i++)  {
+            gatesNumber[qid.get(i)]++;
+            otherPaint.setColor(gos.get(i).getColor());
+            canvas.drawRect(mPadding + gatesNumber[qid.get(i)] * 150, mPadding + 100 + (200*(qid.get(i))) - 50, mPadding + 100 + gatesNumber[qid.get(i)] * 150, mPadding + 100 + (200*qid.get(i)) + 50, otherPaint);
+            canvas.drawText(((LinearOperator)gos.get(i)).getSymbol(), mPadding + 25 + gatesNumber[qid.get(i)] * 150, mPadding + 122 + (200*(qid.get(i))), whiteTextPaint);
         }
         //canvas.drawRect(mPadding, mPadding, getWidth() - mPadding, getHeight() - mPadding, mPaint);
         //canvas.drawArc(arcLeft, arcTop, arcRight, arcBottom, 75, 45, true, mPaint);
-
-
-
 
 
         //canvas.drawPath(mPath, mPaint);
@@ -116,13 +131,14 @@ public class QuantumView extends View {
     }
 
     public void addGate(int qbit, LinearOperator l) {
-
+        qid.add(qbit);
+        gos.add(l);
+        invalidate();
     }
 
     public static float pxFromDp(final Context context, final float dp) {
         return dp * context.getResources().getDisplayMetrics().density;
     }
-
 
 
 }
