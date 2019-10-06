@@ -66,7 +66,11 @@ public class MainActivity extends Activity {
     }
 
     public void displayBlochSphere(QBit q) {
-        glSurfaceView.setQBit(q.copy());
+        QBit q2 = q.copy();
+        q2.applyOperator(LinearOperator.HADAMARD);
+        q2.applyOperator(LinearOperator.PAULI_Z);
+        q2.applyOperator(LinearOperator.T_GATE);
+        glSurfaceView.setQBit(q2);
         AlertDialog.Builder adb = new AlertDialog.Builder(this);
         adb.setTitle(R.string.bloch_sphere);
         adb.setPositiveButton("OK", new DialogInterface.OnClickListener() {
