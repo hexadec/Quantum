@@ -8,6 +8,9 @@ import android.content.pm.ConfigurationInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -63,10 +66,11 @@ public class MainActivity extends Activity {
         qv.addGate(0, LinearOperator.HADAMARD);
         qv.addGate(0, LinearOperator.PAULI_X);
         qv.addGate(0, LinearOperator.S_GATE);
+        qv.addGate(0, LinearOperator.PAULI_Z);
+        qv.addGate(0, LinearOperator.S_GATE);
         qv.addGate(2, LinearOperator.T_GATE);
+        qv.addGate(4, LinearOperator.PAULI_Y);
     }
-
-    //public native String stringFromJNI();
 
     public void displayBlochSphere(QBit q) {
 
@@ -75,5 +79,19 @@ public class MainActivity extends Activity {
         adb.setPositiveButton("OK", null);
         adb.setView(glSurfaceView);
         adb.show();
+    }
+
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.mainmenu, menu);
+        return true;
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            default:
+
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
