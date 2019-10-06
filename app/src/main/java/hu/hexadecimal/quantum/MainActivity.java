@@ -4,8 +4,8 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.ConfigurationInfo;
-import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -17,13 +17,13 @@ import android.widget.Toast;
 
 import java.util.List;
 
-import hu.hexadecimal.quantum.graphics.BlochSphereRenderer;
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
 import hu.hexadecimal.quantum.graphics.QuantumView;
 
 public class MainActivity extends Activity {
 
     BlochSphereView glSurfaceView;
+    QuantumView qv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +31,7 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         RelativeLayout relativeLayout  = findViewById(R.id.relative);
-        QuantumView qv = new QuantumView(this);
+        qv = new QuantumView(this);
         relativeLayout.addView(qv);
         TextView tv = (TextView) findViewById(R.id.sample_text);
 
@@ -55,15 +55,8 @@ public class MainActivity extends Activity {
             tv.setText(tv.getText() + " " + s);
         }
         tv.setText("");
-        final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
-        if (configurationInfo.reqGlEsVersion >= 0x20000) {
-            //displayBlochSphere(q);
-        } else {
-            Toast.makeText(MainActivity.this, R.string.gl_version_not_supported, Toast.LENGTH_LONG).show();
-            return;
-        }
-        qv.addGate(0, LinearOperator.HADAMARD);
+
+        qv.addGate(0, LinearOperator.hermitianConjugate(LinearOperator.HADAMARD));
         qv.addGate(0, LinearOperator.PAULI_X);
         qv.addGate(0, LinearOperator.S_GATE);
         qv.addGate(0, LinearOperator.PAULI_Z);
@@ -73,10 +66,16 @@ public class MainActivity extends Activity {
     }
 
     public void displayBlochSphere(QBit q) {
-
+        glSurfaceView.setQBit(q.copy());
         AlertDialog.Builder adb = new AlertDialog.Builder(this);
         adb.setTitle(R.string.bloch_sphere);
-        adb.setPositiveButton("OK", null);
+        adb.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                glSurfaceView = new BlochSphereView(MainActivity.this);
+            }
+        });
+        adb.setCancelable(false);
         adb.setView(glSurfaceView);
         adb.show();
     }
@@ -89,6 +88,9 @@ public class MainActivity extends Activity {
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.bloch:
+                displayBlochSphere(qv.qbits[0]);
+                break;
             default:
 
         }

@@ -3,12 +3,17 @@
 
     <item
         android:id="@+id/prefs"
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:showAsAction="always"
+        android:icon="@drawable/settings"
+        android:showAsAction="ifRoom"
         android:title="@string/preferences" />
     <item
+        android:id="@+id/bloch"
+        android:icon="@drawable/axis_arrow"
+        android:showAsAction="ifRoom"
+        android:title="@string/bloch_sphere" />
+    <item
         android:id="@+id/run"
-        android:icon="@android:drawable/ic_media_play"
+        android:icon="@drawable/play_pause"
         android:showAsAction="always"
         android:title="@string/run" />
 </menu>

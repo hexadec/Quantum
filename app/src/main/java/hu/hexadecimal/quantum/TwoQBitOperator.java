@@ -9,6 +9,8 @@ public class TwoQBitOperator extends GeneralOperator {
     private static final int MATRIX_DIM = 4;
     protected Complex[][] matrix;
     private String name;
+    private String symbol;
+    private String symbol2;
     private Random random;
 
     public static final TwoQBitOperator CNOT =
@@ -18,7 +20,7 @@ public class TwoQBitOperator extends GeneralOperator {
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)},
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
-                    }, "CNOT");
+                    }, "CNOT", "●", "○");
 
     public static final TwoQBitOperator SWAP =
             new TwoQBitOperator(
@@ -27,23 +29,27 @@ public class TwoQBitOperator extends GeneralOperator {
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
-                    }, "SWAP");
+                    }, "SWAP", "✖", "✖");
 
-    public TwoQBitOperator(Complex[][] M, String name) {
+    public TwoQBitOperator(Complex[][] M, String name, String symbol, String symbol2) {
         if (M == null) {
             throw new NullPointerException();
         }
-        if (M.length == MATRIX_DIM && M[0].length == MATRIX_DIM && M[1].length == MATRIX_DIM) {
-            this.name = name;
-            matrix = M;
-        } else {
-            throw new NullPointerException("Invalid array");
+        for (int i = 0; i < MATRIX_DIM; i++) {
+            if (!(i < M.length && M[i].length == MATRIX_DIM)) {
+                throw new NullPointerException("Invalid array");
+            }
         }
+        this.name = name;
+        this.symbol = symbol;
+        this.symbol2 = symbol2;
+        matrix = M;
+
         random = new Random();
     }
 
     public TwoQBitOperator(Complex[][] M) {
-        this(M, "Custom");
+        this(M, "Custom", "C1", "C2");
         random = new Random();
     }
 
@@ -53,6 +59,14 @@ public class TwoQBitOperator extends GeneralOperator {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
     }
 
     public void conjugate() {
@@ -132,7 +146,7 @@ public class TwoQBitOperator extends GeneralOperator {
                 matrix[i][j] = complex[i][j];
             }
         }
-        return new TwoQBitOperator(complex, name);
+        return new TwoQBitOperator(complex, name, symbol, symbol2);
     }
 
     public String toString() {
@@ -174,7 +188,7 @@ public class TwoQBitOperator extends GeneralOperator {
                 resultMatrix[i].add(Complex.multiply(matrix[i][j], inputMatrix[j]));
             }
         }
-        Log.i("TwoQBitOperator" ,resultMatrix[0] + "\n" + resultMatrix[1] + "\n" + resultMatrix[2] + "\n" + resultMatrix[3]);
+        Log.i("TwoQBitOperator", resultMatrix[0] + "\n" + resultMatrix[1] + "\n" + resultMatrix[2] + "\n" + resultMatrix[3]);
         double prob00 = Complex.multiply(Complex.conjugate(inputMatrix[0]), inputMatrix[0]).real;
         double prob01 = Complex.multiply(Complex.conjugate(inputMatrix[1]), inputMatrix[1]).real;
         double prob10 = Complex.multiply(Complex.conjugate(inputMatrix[2]), inputMatrix[2]).real;

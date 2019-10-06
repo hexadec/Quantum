@@ -9,12 +9,12 @@ public class QBit {
     public Complex[] matrix;
     private Random random;
 
-    QBit() {
+    public QBit() {
         prepare(false);
         random = new Random();
     }
 
-    QBit(Complex[] complex) {
+    public QBit(Complex[] complex) {
         if (complex != null && complex.length == 2) {
             matrix = complex;
             random = new Random();

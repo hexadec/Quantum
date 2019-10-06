@@ -34,13 +34,23 @@ public class QuantumView extends View {
 
     Path mPath;
 
-    QBit[] qbits;
+    public QBit[] qbits;
     private List<GeneralOperator> gos;
     private List<Integer> qid;
 
+    final int STEP = 60;
+    final int MAX_QBITS = 6;
+    final int GATE_SIZE = 18;
+    final float UNIT = pxFromDp(super.getContext(), 1);
+    final float START_Y = pxFromDp(super.getContext(), 20);
+
     public QuantumView(Context context) {
         super(context);
-        qbits = new QBit[6];
+        qbits = new QBit[MAX_QBITS];
+        for (int i = 0; i < MAX_QBITS; i++) {
+            qbits[i] = new QBit();
+            qbits[i].prepare(true);
+        }
         gos = new ArrayList<>();
         qid = new ArrayList<>();
 
@@ -67,7 +77,7 @@ public class QuantumView extends View {
         outerPaint.setStyle(Paint.Style.FILL);
         outerPaint.setColor(Color.YELLOW);
 
-        mPadding = 100;
+        mPadding = (int) pxFromDp(context, 32);
 
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
@@ -109,6 +119,12 @@ public class QuantumView extends View {
         this.setOnTouchListener(click);
     }
 
+    public boolean isAnOperator(int x, int y) {
+        if (x < mPadding || x > getWidth() - mPadding) return false;
+        if (y < mPadding || y > getHeight() - mPadding || y > START_Y + pxFromDp(super.getContext(), STEP * MAX_QBITS)) return false;
+        return true;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -119,22 +135,20 @@ public class QuantumView extends View {
 
         otherPaint.setStyle(Paint.Style.FILL);
         otherPaint.setColor(0xffBA2121);
-        final int STEP = 60;
-        final int GATE_SIZE = 18;
-        for (int i = (int) pxFromDp(super.getContext(), 20); i < getHeight() - 2 * mPadding - pxFromDp(super.getContext(), 20) && i <= pxFromDp(super.getContext(), 300); i += (int) pxFromDp(super.getContext(), STEP)) {
+        for (int i = (int) START_Y; i < getHeight() - 2 * mPadding - START_Y && i <= pxFromDp(super.getContext(), STEP * MAX_QBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
             canvas.drawLine(mPadding, mPadding + i, getWidth() - mPadding, mPadding + i, mPaint);
-            canvas.drawLine(getWidth() - mPadding - pxFromDp(super.getContext(), 4), mPadding + i - pxFromDp(super.getContext(), 4), getWidth() - mPadding, mPadding + i, mPaint);
-            canvas.drawLine(getWidth() - mPadding - pxFromDp(super.getContext(), 4), mPadding + i + pxFromDp(super.getContext(), 4), getWidth() - mPadding, mPadding + i, mPaint);
+            canvas.drawLine(getWidth() - mPadding - pxFromDp(super.getContext(), 5), mPadding + i - pxFromDp(super.getContext(), 5), getWidth() - mPadding + UNIT / 2, mPadding + i + UNIT / 2, mPaint);
+            canvas.drawLine(getWidth() - mPadding - pxFromDp(super.getContext(), 5), mPadding + i + pxFromDp(super.getContext(), 5), getWidth() - mPadding + UNIT / 2, mPadding + i - UNIT / 2, mPaint);
             canvas.drawRect(mPadding,
                     mPadding + i - pxFromDp(super.getContext(), GATE_SIZE),
                     mPadding + pxFromDp(super.getContext(), GATE_SIZE * 2),
                     mPadding + i + pxFromDp(super.getContext(), GATE_SIZE),
                     otherPaint);
-            canvas.drawText("q" + Math.round((i + pxFromDp(super.getContext(), 20)) / pxFromDp(super.getContext(), STEP)), mPadding - pxFromDp(super.getContext(), 30), mPadding + i + pxFromDp(super.getContext(), 6), mTextPaint);
+            canvas.drawText("q" + Math.round((i + START_Y) / pxFromDp(super.getContext(), STEP)), mPadding - pxFromDp(super.getContext(), 30), mPadding + i + pxFromDp(super.getContext(), 6), mTextPaint);
             canvas.drawText("\uD835\uDFD8", mPadding + pxFromDp(super.getContext(), 10f), mPadding + i + pxFromDp(super.getContext(), 9f), whiteTextPaint);
         }
 
-        int[] gatesNumber = new int[6];
+        int[] gatesNumber = new int[MAX_QBITS];
         for (int i = 0; i < gos.size(); i++) {
             gatesNumber[qid.get(i)]++;
             otherPaint.setColor(gos.get(i).getColor());

@@ -4,8 +4,8 @@ import java.text.DecimalFormat;
 
 public class Complex {
 
-    protected double real = 0;
-    protected double imaginary = 0;
+    public double real = 0;
+    public double imaginary = 0;
 
     public Complex(double realPart) {
         real = realPart;

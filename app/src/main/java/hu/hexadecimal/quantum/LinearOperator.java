@@ -137,6 +137,7 @@ public class LinearOperator extends GeneralOperator{
     public void hermitianConjugate() {
         transpose();
         conjugate();
+        symbol += "†";
     }
 
     public static LinearOperator hermitianConjugate(LinearOperator linearOperator) {
@@ -180,7 +181,7 @@ public class LinearOperator extends GeneralOperator{
         return new LinearOperator(new Complex[][]{
                 new Complex[]{matrix[0][0], matrix[1][0]},
                 new Complex[]{matrix[0][1], matrix[1][1]}
-        }, name, symbol);
+        }, name, symbol, color);
     }
 
     public String toString() {
