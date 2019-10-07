@@ -94,10 +94,10 @@ public class BlochSphereView extends View {
         //canvas.drawArc(arcLeft, arcTop, arcRight, arcBottom, 75, 45, true, mPaint);
         QBit qbh = LinearOperator.HADAMARD.operateOn(qb);
         float ProbZ = (float) Complex.multiply(qb.matrix[1], Complex.conjugate(qb.matrix[1])).real;
-        float ProbX = (float) Complex.multiply(qbh.matrix[1], Complex.conjugate(qbh.matrix[1])).real;
+        float ProbX = (float) Complex.multiply(qbh.matrix[0], Complex.conjugate(qbh.matrix[0])).real;
         qbh = LinearOperator.transpose(LinearOperator.S_GATE).operateOn(qb);
         qbh.applyOperator(LinearOperator.HADAMARD);
-        float ProbY = (float) Complex.multiply(qbh.matrix[0], Complex.conjugate(qbh.matrix[0])).real;
+        float ProbY = (float) Complex.multiply(qbh.matrix[1], Complex.conjugate(qbh.matrix[1])).real;
 
         //canvas.drawPath(mPath, mPaint);
         canvas.drawCircle(getWidth() / 2, getHeight() / 4, getWidth() / 3, mPaint);

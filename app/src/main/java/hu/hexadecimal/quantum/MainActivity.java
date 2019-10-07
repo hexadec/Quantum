@@ -56,9 +56,9 @@ public class MainActivity extends Activity {
         }
         tv.setText("");
 
-        qv.addGate(0, LinearOperator.hermitianConjugate(LinearOperator.HADAMARD));
+        qv.addGate(0, LinearOperator.HADAMARD);
         qv.addGate(0, LinearOperator.PAULI_X);
-        qv.addGate(0, LinearOperator.S_GATE);
+        qv.addGate(0, LinearOperator.T_GATE);
         qv.addGate(0, LinearOperator.PAULI_Z);
         qv.addGate(0, LinearOperator.S_GATE);
         qv.addGate(2, LinearOperator.T_GATE);
@@ -68,8 +68,10 @@ public class MainActivity extends Activity {
     public void displayBlochSphere(QBit q) {
         QBit q2 = q.copy();
         q2.applyOperator(LinearOperator.HADAMARD);
-        q2.applyOperator(LinearOperator.PAULI_Z);
+        q2.applyOperator(LinearOperator.PAULI_X);
         q2.applyOperator(LinearOperator.T_GATE);
+        q2.applyOperator(LinearOperator.PAULI_Z);
+        q2.applyOperator(LinearOperator.S_GATE);
         glSurfaceView.setQBit(q2);
         AlertDialog.Builder adb = new AlertDialog.Builder(this);
         adb.setTitle(R.string.bloch_sphere);
