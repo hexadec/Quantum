@@ -9,18 +9,15 @@ import android.graphics.Path;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.Region;
 import android.graphics.Typeface;
 import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
-import java.util.AbstractList;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 
-import hu.hexadecimal.quantum.GeneralOperator;
+import hu.hexadecimal.quantum.VisualOperator;
 import hu.hexadecimal.quantum.LinearOperator;
 import hu.hexadecimal.quantum.QBit;
 
@@ -35,8 +32,8 @@ public class QuantumView extends View {
     Path mPath;
 
     public QBit[] qbits;
-    private List<GeneralOperator> gos;
-    private List<Integer> qid;
+    private LinkedList<VisualOperator> gos;
+    private LinkedList<Integer> qid;
 
     final int STEP = 60;
     final int MAX_QBITS = 6;
@@ -51,8 +48,8 @@ public class QuantumView extends View {
             qbits[i] = new QBit();
             qbits[i].prepare(true);
         }
-        gos = new ArrayList<>();
-        qid = new ArrayList<>();
+        gos = new LinkedList<>();
+        qid = new LinkedList<>();
 
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
@@ -145,7 +142,7 @@ public class QuantumView extends View {
                     mPadding + i + pxFromDp(super.getContext(), GATE_SIZE),
                     otherPaint);
             canvas.drawText("q" + Math.round((i + START_Y) / pxFromDp(super.getContext(), STEP)), mPadding - pxFromDp(super.getContext(), 30), mPadding + i + pxFromDp(super.getContext(), 6), mTextPaint);
-            canvas.drawText("\uD835\uDFD8", mPadding + pxFromDp(super.getContext(), 10f), mPadding + i + pxFromDp(super.getContext(), 9f), whiteTextPaint);
+            canvas.drawText("⎥0⟩", mPadding + pxFromDp(super.getContext(), 2f), mPadding + i + pxFromDp(super.getContext(), 8f), whiteTextPaint);
         }
 
         int[] gatesNumber = new int[MAX_QBITS];
@@ -157,8 +154,8 @@ public class QuantumView extends View {
                     ((int)(mPadding + pxFromDp(super.getContext(), 2) + (pxFromDp(super.getContext(), STEP) * (qid.get(i))))),
                     ((int)(mPadding + pxFromDp(super.getContext(), 2) + pxFromDp(super.getContext(), GATE_SIZE * 2) + gatesNumber[qid.get(i)] * pxFromDp(super.getContext(), GATE_SIZE * 3))),
                     ((int)(mPadding + (int) pxFromDp(super.getContext(), 20) + (pxFromDp(super.getContext(), STEP) * qid.get(i)) + pxFromDp(super.getContext(), GATE_SIZE))));
-
             String symbol = ((LinearOperator) gos.get(i)).getSymbol();
+            gos.get(i).setRect(areaRect);
             RectF bounds = new RectF(areaRect);
             bounds.right = whiteTextPaint.measureText(symbol, 0, symbol.length());
             bounds.bottom = whiteTextPaint.descent() - whiteTextPaint.ascent();
@@ -184,6 +181,17 @@ public class QuantumView extends View {
         qid.add(qbit);
         gos.add(l);
         invalidate();
+    }
+
+    public boolean canAddGate(int qbit) {
+        return true;
+    }
+
+    public boolean canAddMultiQBitGate(int[] qbits) {
+        for (int q : qbits) {
+            if (!canAddGate(q)) return false;
+        }
+        return true;
     }
 
     public static float pxFromDp(final Context context, final float dp) {

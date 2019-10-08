@@ -1,11 +1,8 @@
 package hu.hexadecimal.quantum;
 
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.pm.ConfigurationInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -13,7 +10,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -45,7 +41,7 @@ public class MainActivity extends Activity {
         double value = 0;
 
         for (int i = 0; i < 200; i++) {
-            QBit[] qs = TwoQBitOperator.CNOT.operateOn(q, q);
+            QBit[] qs = MultiqBitOperator.CNOT.operateOn(q, q);
             value += qs[1].measureZ() ? 1 : 0;
         }
         tv.setText(tv.getText() + "\n----\n" + value / 200);

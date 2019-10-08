@@ -4,7 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LinearOperator extends GeneralOperator{
+public class LinearOperator extends VisualOperator {
 
     protected Complex[][] matrix;
     private String name;
