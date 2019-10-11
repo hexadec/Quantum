@@ -17,9 +17,9 @@ import android.widget.Toast;
 
 import java.util.LinkedList;
 
+import hu.hexadecimal.quantum.Qubit;
 import hu.hexadecimal.quantum.VisualOperator;
 import hu.hexadecimal.quantum.LinearOperator;
-import hu.hexadecimal.quantum.QBit;
 
 public class QuantumView extends View {
 
@@ -31,7 +31,7 @@ public class QuantumView extends View {
 
     Path mPath;
 
-    public QBit[] qbits;
+    public Qubit[] qbits;
     private LinkedList<VisualOperator> gos;
     private LinkedList<Integer> qid;
 
@@ -43,9 +43,9 @@ public class QuantumView extends View {
 
     public QuantumView(Context context) {
         super(context);
-        qbits = new QBit[MAX_QBITS];
+        qbits = new Qubit[MAX_QBITS];
         for (int i = 0; i < MAX_QBITS; i++) {
-            qbits[i] = new QBit();
+            qbits[i] = new Qubit();
             qbits[i].prepare(true);
         }
         gos = new LinkedList<>();

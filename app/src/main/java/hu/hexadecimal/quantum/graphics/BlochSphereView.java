@@ -1,31 +1,21 @@
 package hu.hexadecimal.quantum.graphics;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.Point;
-import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.util.DisplayMetrics;
 import android.view.View;
 
 import hu.hexadecimal.quantum.Complex;
 import hu.hexadecimal.quantum.LinearOperator;
-import hu.hexadecimal.quantum.QBit;
+import hu.hexadecimal.quantum.Qubit;
 
 public class BlochSphereView extends View {
 
     Paint mPaint, otherPaint, textPaint;
     int mPadding;
 
-    final int STEP = 60;
-    final int GATE_SIZE = 18;
-    final float UNIT = pxFromDp(super.getContext(), 1);
-    final float START_Y = pxFromDp(super.getContext(), 20);
-
-    QBit qb;
+    Qubit qb;
 
     public BlochSphereView(Context context) {
         super(context);
@@ -50,16 +40,16 @@ public class BlochSphereView extends View {
         mPadding = (int) pxFromDp(context, 32);
     }
 
-    public void setQBit(QBit qb) {
+    public void setQBit(Qubit qb) {
         this.qb = qb;
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (qb == null) qb = new QBit();
+        if (qb == null) qb = new Qubit();
 
-        QBit qbh = LinearOperator.HADAMARD.operateOn(qb);
+        Qubit qbh = LinearOperator.HADAMARD.operateOn(qb);
         float ProbZ = (float) Complex.multiply(qb.matrix[1], Complex.conjugate(qb.matrix[1])).real;
         float ProbX = (float) Complex.multiply(qbh.matrix[0], Complex.conjugate(qbh.matrix[0])).real;
         qbh = LinearOperator.transpose(LinearOperator.S_GATE).operateOn(qb);

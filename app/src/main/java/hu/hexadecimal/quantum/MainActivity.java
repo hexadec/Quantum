@@ -4,14 +4,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import java.util.List;
 
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
 import hu.hexadecimal.quantum.graphics.QuantumView;
@@ -33,24 +30,17 @@ public class MainActivity extends Activity {
 
         glSurfaceView = new BlochSphereView(this);
 
-        QBit q = new QBit();
-        q.prepare(true);
-        tv.setText(tv.getText() + "" + q.measureZ() + "");
+        Qubit q = new Qubit();
+        Qubit c = new Qubit();
         q.applyOperator(LinearOperator.HADAMARD);
 
         double value = 0;
 
-        for (int i = 0; i < 200; i++) {
-            QBit[] qs = MultiqBitOperator.CNOT.operateOn(q, q);
+        for (int i = 0; i < 10000; i++) {
+            Qubit[] qs = MultiQubitOperator.CNOT.operateOn(new Qubit[]{q, c});
             value += qs[1].measureZ() ? 1 : 0;
         }
-        tv.setText(tv.getText() + "\n----\n" + value / 200);
-        List<String> gates = LinearOperator.getPredefinedGateSymbols();
-        for (String s : gates) {
-            Log.d("?", s);
-            tv.setText(tv.getText() + " " + s);
-        }
-        tv.setText("");
+        tv.setText("" + value / 10000);
 
         qv.addGate(0, LinearOperator.HADAMARD);
         qv.addGate(0, LinearOperator.PAULI_X);
@@ -61,8 +51,8 @@ public class MainActivity extends Activity {
         qv.addGate(4, LinearOperator.PAULI_Y);
     }
 
-    public void displayBlochSphere(QBit q) {
-        QBit q2 = q.copy();
+    public void displayBlochSphere(Qubit q) {
+        Qubit q2 = q.copy();
         q2.applyOperator(LinearOperator.HADAMARD);
         q2.applyOperator(LinearOperator.PAULI_X);
         q2.applyOperator(LinearOperator.T_GATE);

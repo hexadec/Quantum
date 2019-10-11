@@ -4,16 +4,17 @@ import android.util.Log;
 
 import java.util.Random;
 
-public class MultiqBitOperator extends VisualOperator {
+public class MultiQubitOperator extends VisualOperator {
 
-    private int MATRIX_DIM = 4;
+    public final int MATRIX_DIM;
+    public final int NQBITS;
     protected Complex[][] matrix;
     private String name;
     private String[] symbols;
     private Random random;
 
-    public static final MultiqBitOperator CNOT =
-            new MultiqBitOperator(4,
+    public static final MultiQubitOperator CNOT =
+            new MultiQubitOperator(4,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
@@ -21,8 +22,8 @@ public class MultiqBitOperator extends VisualOperator {
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
                     }, "CNOT", new String[]{"●", "○"});
 
-    public static final MultiqBitOperator SWAP =
-            new MultiqBitOperator(4,
+    public static final MultiQubitOperator SWAP =
+            new MultiQubitOperator(4,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
@@ -30,22 +31,30 @@ public class MultiqBitOperator extends VisualOperator {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
                     }, "SWAP", new String[]{"✖", "✖"});
 
-    public MultiqBitOperator(int MATRIX_DIM, Complex[][] M, String name, String[] symbols) {
+    public MultiQubitOperator(int MATRIX_DIM, Complex[][] M, String name, String[] symbols) {
         if (M == null) {
             throw new NullPointerException();
         }
         this.MATRIX_DIM = MATRIX_DIM;
-        if (MATRIX_DIM != 4 && MATRIX_DIM != 8 && MATRIX_DIM != 16) {
-            throw new NullPointerException("Invalid dimension");
+        switch (MATRIX_DIM) {
+            case 4:
+                NQBITS = 2;
+                break;
+            case 8:
+                NQBITS = 3;
+                break;
+            case 16:
+                NQBITS = 4;
+                break;
+            default:
+                throw new NullPointerException("Invalid dimension");
         }
         for (int i = 0; i < MATRIX_DIM; i++) {
             if (!(i < M.length && M[i].length == MATRIX_DIM)) {
                 throw new NullPointerException("Invalid array");
             }
         }
-        if (!((symbols.length == 2 && MATRIX_DIM == 4) ||
-                (symbols.length == 3 && MATRIX_DIM == 8) ||
-                (symbols.length == 4 && MATRIX_DIM == 16))) {
+        if (symbols.length != NQBITS) {
             throw new NullPointerException("Invalid symbol");
         }
         this.name = name;
@@ -55,8 +64,8 @@ public class MultiqBitOperator extends VisualOperator {
         random = new Random();
     }
 
-    public MultiqBitOperator(int MATRIX_DIM, Complex[][] M) {
-        this(MATRIX_DIM, M, "Custom", MultiqBitOperator.generateSymbols(MATRIX_DIM));
+    public MultiQubitOperator(int MATRIX_DIM, Complex[][] M) {
+        this(MATRIX_DIM, M, "Custom", MultiQubitOperator.generateSymbols(MATRIX_DIM));
         random = new Random();
     }
 
@@ -89,8 +98,8 @@ public class MultiqBitOperator extends VisualOperator {
         }
     }
 
-    public static MultiqBitOperator conjugate(MultiqBitOperator multiqBitOperator) {
-        MultiqBitOperator l = multiqBitOperator.copy();
+    public static MultiQubitOperator conjugate(MultiQubitOperator multiQubitOperator) {
+        MultiQubitOperator l = multiQubitOperator.copy();
         for (Complex[] ca : l.matrix) {
             for (Complex z : ca) {
                 z.conjugate();
@@ -109,8 +118,8 @@ public class MultiqBitOperator extends VisualOperator {
         matrix = tmp;
     }
 
-    public static MultiqBitOperator transpose(MultiqBitOperator multiqBitOperator) {
-        MultiqBitOperator t = multiqBitOperator.copy();
+    public static MultiQubitOperator transpose(MultiQubitOperator multiQubitOperator) {
+        MultiQubitOperator t = multiQubitOperator.copy();
         t.transpose();
         return t;
     }
@@ -120,14 +129,14 @@ public class MultiqBitOperator extends VisualOperator {
         conjugate();
     }
 
-    public static MultiqBitOperator hermitianConjugate(MultiqBitOperator multiqBitOperator) {
-        MultiqBitOperator t = multiqBitOperator.copy();
+    public static MultiQubitOperator hermitianConjugate(MultiQubitOperator multiQubitOperator) {
+        MultiQubitOperator t = multiQubitOperator.copy();
         t.hermitianConjugate();
         return t;
     }
 
     public boolean isHermitian() {
-        MultiqBitOperator t = copy();
+        MultiQubitOperator t = copy();
         t.hermitianConjugate();
         return equals(t);
     }
@@ -140,13 +149,13 @@ public class MultiqBitOperator extends VisualOperator {
         }
     }
 
-    public static MultiqBitOperator multiply(MultiqBitOperator t, Complex complex) {
-        MultiqBitOperator multiqBitOperator = t.copy();
-        multiqBitOperator.multiply(complex);
-        return multiqBitOperator;
+    public static MultiQubitOperator multiply(MultiQubitOperator t, Complex complex) {
+        MultiQubitOperator multiQubitOperator = t.copy();
+        multiQubitOperator.multiply(complex);
+        return multiQubitOperator;
     }
 
-    public MultiqBitOperator copy() {
+    public MultiQubitOperator copy() {
         Complex[][] complex = new Complex[MATRIX_DIM][MATRIX_DIM];
         for (int i = 0; i < MATRIX_DIM; i++) {
             complex[i] = new Complex[MATRIX_DIM];
@@ -154,7 +163,7 @@ public class MultiqBitOperator extends VisualOperator {
                 matrix[i][j] = complex[i][j];
             }
         }
-        return new MultiqBitOperator(MATRIX_DIM, complex, name, symbols);
+        return new MultiQubitOperator(MATRIX_DIM, complex, name, symbols);
     }
 
     public String toString() {
@@ -169,11 +178,11 @@ public class MultiqBitOperator extends VisualOperator {
         return sb.toString();
     }
 
-    public boolean equals(MultiqBitOperator multiqBitOperator) {
-        Complex[][] m = multiqBitOperator.matrix;
+    public boolean equals(MultiQubitOperator multiQubitOperator) {
+        Complex[][] m = multiQubitOperator.matrix;
         for (int i = 0; i < MATRIX_DIM; i++) {
             for (int j = 0; j < MATRIX_DIM; j++) {
-                if (!matrix[i][j].equalsExact(multiqBitOperator.matrix[i][j])) {
+                if (!matrix[i][j].equalsExact(multiQubitOperator.matrix[i][j])) {
                     return false;
                 }
             }
@@ -181,45 +190,56 @@ public class MultiqBitOperator extends VisualOperator {
         return true;
     }
 
-    public QBit[] operateOn(final QBit first, final QBit second) {
-        QBit q = new QBit();
-        q.zeroVector();
+    public Qubit[] operateOn(final Qubit[] qs) {
+        if (qs.length != NQBITS) {
+            Log.e("MultiQubitOperator", "NO RESULT");
+            return null;
+        }
         Complex[] inputMatrix = new Complex[MATRIX_DIM];
-        Complex[] resultMatrix = new Complex[]{
-                new Complex(0), new Complex(0),
-                new Complex(0), new Complex(0)};
+        Complex[] resultMatrix = new Complex[MATRIX_DIM];
         for (int i = 0; i < MATRIX_DIM; i++) {
-            inputMatrix[i] = Complex.multiply(first.matrix[i / 2], second.matrix[i % 2]);
+            resultMatrix[i] = new Complex(0);
+            for (int k = 0; k < NQBITS; k++) {
+                if (k == 0) {
+                    inputMatrix[i] = Complex.multiply(qs[NQBITS - 2].matrix[(i >> 1) % 2], qs[NQBITS - 1].matrix[i % 2]);
+                    k += 2;
+                    continue;
+                }
+                inputMatrix[i] = Complex.multiply(inputMatrix[i], qs[NQBITS - k - 1].matrix[(i >> k) % 2]);
+            }
         }
         for (int i = 0; i < MATRIX_DIM; i++) {
             for (int j = 0; j < MATRIX_DIM; j++) {
                 resultMatrix[i].add(Complex.multiply(matrix[i][j], inputMatrix[j]));
             }
         }
-        Log.i("MultiqBitOperator", resultMatrix[0] + "\n" + resultMatrix[1] + "\n" + resultMatrix[2] + "\n" + resultMatrix[3]);
-        double prob00 = Complex.multiply(Complex.conjugate(inputMatrix[0]), inputMatrix[0]).real;
-        double prob01 = Complex.multiply(Complex.conjugate(inputMatrix[1]), inputMatrix[1]).real;
-        double prob10 = Complex.multiply(Complex.conjugate(inputMatrix[2]), inputMatrix[2]).real;
-        double prob11 = Complex.multiply(Complex.conjugate(inputMatrix[3]), inputMatrix[3]).real;
-        if (prob00 + prob01 > random.nextDouble()) {
-            QBit result0 = new QBit();
-            QBit result1 = new QBit();
-            if (prob01 > random.nextDouble()) {
-                result1.prepare(true);
+        //Log.i("MultiQubitOperator", resultMatrix[0] + "\n" + resultMatrix[1] + "\n" + resultMatrix[2] + "\n" + resultMatrix[3]);
+        double[] probs = new double[MATRIX_DIM];
+        double subtrahend = 0;
+        for (int i = 0; i < MATRIX_DIM; i++) {
+            probs[i] = Complex.multiply(Complex.conjugate(resultMatrix[i]), resultMatrix[i]).real;
+            //Log.i("MultiQubitOperator", "Probs[" + i + "]:" + probs[i]);
+            double prob = random.nextDouble();
+            if (probs[i] > (prob - subtrahend < 0 ? 0 : prob - subtrahend)) {
+                //Log.i("MultiQubitOperator", "CASE: " + i);
+                Qubit[] result = new Qubit[NQBITS];
+                for (int j = 0; j < NQBITS; j++) {
+                    result[j] = new Qubit();
+                    if ((i >> j) == 1) result[j].prepare(true);
+                }
+                return result;
+            } else {
+                subtrahend += probs[i];
+                if (i == MATRIX_DIM - 2) {
+                    subtrahend += 1;
+                }
             }
-            return new QBit[]{result0, result1};
-        } else {
-            QBit result0 = new QBit();
-            QBit result1 = new QBit();
-            result0.prepare(true);
-            if (prob11 < random.nextDouble()) {
-                result1.prepare(true);
-            }
-            return new QBit[]{result0, result1};
         }
+        Log.e("MultiQubitOperator", "NO RESULT");
+        return null;
     }
 
-    private static final String[] generateSymbols(int DIM) {
+    public static String[] generateSymbols(int DIM) {
         String[] sym = new String[DIM];
         for (int i = 0; i < DIM; i++)
             sym[i] = "C" + i;

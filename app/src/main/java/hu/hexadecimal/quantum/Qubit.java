@@ -4,17 +4,17 @@ import android.util.Log;
 
 import java.util.Random;
 
-public class QBit {
+public class Qubit {
 
     public Complex[] matrix;
     private Random random;
 
-    public QBit() {
+    public Qubit() {
         prepare(false);
         random = new Random();
     }
 
-    public QBit(Complex[] complex) {
+    public Qubit(Complex[] complex) {
         if (complex != null && complex.length == 2) {
             matrix = complex;
             random = new Random();
@@ -37,8 +37,8 @@ public class QBit {
         if (prob0 + prob1 < 0.999 || prob0 + prob1 > 1.001) {
             Log.e("QBIT Error", "Too HIGH/low probability sum:\t" + (prob0 + prob1));
         }
-        Log.i("QBit Info", "Prob0: " + prob0 + "  Prob1: " + prob1);
-        Log.i("QBit Info", "Matrix[0]: " + matrix[0].toString3Decimals() + "    Matrix[1]: " + matrix[1].toString3Decimals());
+        //Log.i("Qubit Info", "Prob0: " + prob0 + "  Prob1: " + prob1);
+        //Log.i("Qubit Info", "Matrix[0]: " + matrix[0].toString3Decimals() + "    Matrix[1]: " + matrix[1].toString3Decimals());
         boolean value = random.nextDouble() > prob0;
         prepare(value);
         return value;
@@ -56,10 +56,10 @@ public class QBit {
         return matrix[0].toStringModArg() + "\n" + matrix[1].toStringModArg();
     }
 
-    public QBit copy() {
+    public Qubit copy() {
         Complex[] matrix2 = new Complex[2];
         matrix2[0] = matrix[0];
         matrix2[1] = matrix[1];
-        return new QBit(matrix2);
+        return new Qubit(matrix2);
     }
 }

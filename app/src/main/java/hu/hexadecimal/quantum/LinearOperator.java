@@ -196,8 +196,8 @@ public class LinearOperator extends VisualOperator {
         return sb.toString();
     }
 
-    public QBit operateOn(final QBit qbit) {
-        QBit q = qbit.copy();
+    public Qubit operateOn(final Qubit qbit) {
+        Qubit q = qbit.copy();
         q.matrix[0] = Complex.multiply(matrix[0][0], qbit.matrix[0]);
         q.matrix[0].add(Complex.multiply(matrix[0][1], qbit.matrix[1]));
         q.matrix[1] = Complex.multiply(matrix[1][0], qbit.matrix[0]);
