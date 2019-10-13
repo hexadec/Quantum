@@ -11,9 +11,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.util.DisplayMetrics;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Toast;
 
 import java.util.LinkedList;
 
@@ -31,22 +29,21 @@ public class QuantumView extends View {
 
     Path mPath;
 
-    public Qubit[] qbits;
+    public LinkedList<Qubit> qbits;
     private LinkedList<VisualOperator> gos;
     private LinkedList<Integer> qid;
 
-    final int STEP = 60;
-    final int MAX_QBITS = 6;
-    final int GATE_SIZE = 18;
-    final float UNIT = pxFromDp(super.getContext(), 1);
-    final float START_Y = pxFromDp(super.getContext(), 20);
+    public final int STEP = 60;
+    public final int MAX_QBITS = 6;
+    public final int GATE_SIZE = 18;
+    public final float UNIT = pxFromDp(super.getContext(), 1);
+    public final float START_Y = pxFromDp(super.getContext(), 20);
 
     public QuantumView(Context context) {
         super(context);
-        qbits = new Qubit[MAX_QBITS];
+        qbits = new LinkedList<>();
         for (int i = 0; i < MAX_QBITS; i++) {
-            qbits[i] = new Qubit();
-            qbits[i].prepare(true);
+            qbits.add(new Qubit());
         }
         gos = new LinkedList<>();
         qid = new LinkedList<>();
@@ -102,18 +99,6 @@ public class QuantumView extends View {
 
         mRectF = new RectF(screenWidth / 4, screenHeight / 3, screenWidth / 6, screenHeight / 2);
 
-
-        OnTouchListener click = new OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() != MotionEvent.ACTION_DOWN) return false;
-                float x = event.getX();
-                float y = event.getY();
-                Toast.makeText(QuantumView.super.getContext(), "x: " + x + " y: " + y, Toast.LENGTH_SHORT).show();
-                return true;
-            }
-        };
-        this.setOnTouchListener(click);
     }
 
     public boolean isAnOperator(int x, int y) {
@@ -144,7 +129,6 @@ public class QuantumView extends View {
             canvas.drawText("q" + Math.round((i + START_Y) / pxFromDp(super.getContext(), STEP)), mPadding - pxFromDp(super.getContext(), 30), mPadding + i + pxFromDp(super.getContext(), 6), mTextPaint);
             canvas.drawText("⎥0⟩", mPadding + pxFromDp(super.getContext(), 2f), mPadding + i + pxFromDp(super.getContext(), 8f), whiteTextPaint);
         }
-
         int[] gatesNumber = new int[MAX_QBITS];
         for (int i = 0; i < gos.size(); i++) {
             gatesNumber[qid.get(i)]++;
@@ -155,7 +139,7 @@ public class QuantumView extends View {
                     ((int)(mPadding + pxFromDp(super.getContext(), 2) + pxFromDp(super.getContext(), GATE_SIZE * 2) + gatesNumber[qid.get(i)] * pxFromDp(super.getContext(), GATE_SIZE * 3))),
                     ((int)(mPadding + (int) pxFromDp(super.getContext(), 20) + (pxFromDp(super.getContext(), STEP) * qid.get(i)) + pxFromDp(super.getContext(), GATE_SIZE))));
             String symbol = ((LinearOperator) gos.get(i)).getSymbol();
-            gos.get(i).setRect(areaRect);
+            gos.get(i).addRect(areaRect);
             RectF bounds = new RectF(areaRect);
             bounds.right = whiteTextPaint.measureText(symbol, 0, symbol.length());
             bounds.bottom = whiteTextPaint.descent() - whiteTextPaint.ascent();
@@ -192,6 +176,12 @@ public class QuantumView extends View {
             if (!canAddGate(q)) return false;
         }
         return true;
+    }
+
+    public int getDisplayedQubits() {
+        int count = 0;
+        for (int i = (int) START_Y; i < getHeight() - 2 * mPadding - START_Y && i <= pxFromDp(super.getContext(), STEP * MAX_QBITS); i += (int) pxFromDp(super.getContext(), STEP)) {count++;}
+        return count;
     }
 
     public static float pxFromDp(final Context context, final float dp) {

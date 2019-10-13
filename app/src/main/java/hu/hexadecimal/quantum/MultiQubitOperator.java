@@ -2,11 +2,13 @@ package hu.hexadecimal.quantum;
 
 import android.util.Log;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class MultiQubitOperator extends VisualOperator {
 
-    public final int MATRIX_DIM;
     public final int NQBITS;
     protected Complex[][] matrix;
     private String name;
@@ -32,10 +34,10 @@ public class MultiQubitOperator extends VisualOperator {
                     }, "SWAP", new String[]{"✖", "✖"});
 
     public MultiQubitOperator(int MATRIX_DIM, Complex[][] M, String name, String[] symbols) {
+        super(MATRIX_DIM);
         if (M == null) {
             throw new NullPointerException();
         }
-        this.MATRIX_DIM = MATRIX_DIM;
         switch (MATRIX_DIM) {
             case 4:
                 NQBITS = 2;
@@ -67,6 +69,12 @@ public class MultiQubitOperator extends VisualOperator {
     public MultiQubitOperator(int MATRIX_DIM, Complex[][] M) {
         this(MATRIX_DIM, M, "Custom", MultiQubitOperator.generateSymbols(MATRIX_DIM));
         random = new Random();
+    }
+
+    private MultiQubitOperator() {
+        super(4);
+        name = "";
+        NQBITS = 2;
     }
 
     public String getName() {
@@ -244,5 +252,24 @@ public class MultiQubitOperator extends VisualOperator {
         for (int i = 0; i < DIM; i++)
             sym[i] = "C" + i;
         return sym;
+    }
+
+    public static List<String> getPredefinedGateNames() {
+        List<String> list = new ArrayList<>();
+        MultiQubitOperator multiQubitOperator = new MultiQubitOperator();
+        try {
+            Field[] fields = multiQubitOperator.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+                        && field.get(multiQubitOperator) instanceof MultiQubitOperator) {
+                    list.add(((MultiQubitOperator)field.get(multiQubitOperator)).getName());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return list;
     }
 }

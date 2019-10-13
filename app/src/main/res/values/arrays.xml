@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="shots">
+        <item>Pick a single outcome</item>
+        <item>100</item>
+        <item>500</item>
+        <item>1K</item>
+        <item>5K</item>
+        <item>10K</item>
+        <item>100K</item>
+    </string-array>
+    <string-array name="shots_values">
+        <item>1</item>
+        <item>100</item>
+        <item>500</item>
+        <item>1000</item>
+        <item>5000</item>
+        <item>10000</item>
+        <item>100000</item>
+    </string-array>
+    <string-array name="threads">
+        <item>Single thread (not recommended)</item>
+        <item>4 threads</item>
+        <item>8 threads</item>
+        <item>16 threads</item>
+        <item>64 threads</item>
+    </string-array>
+    <string-array name="threads_values">
+        <item>1</item>
+        <item>4</item>
+        <item>8</item>
+        <item>16</item>
+        <item>64</item>
+    </string-array>
+</resources>

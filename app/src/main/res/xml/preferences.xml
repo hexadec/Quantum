@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/execution_settings">
+        <ListPreference
+            android:defaultValue="1000"
+            android:entries="@array/shots"
+            android:entryValues="@array/shots_values"
+            android:key="shots"
+            android:summary="%s"
+            android:title="@string/shots"
+            android:icon="@drawable/counter"/>
+
+        <ListPreference
+            android:defaultValue="8"
+            android:entries="@array/threads"
+            android:entryValues="@array/threads_values"
+            android:key="threads"
+            android:summary="%s"
+            android:title="@string/threads"
+            android:icon="@drawable/arrow_decision"/>
+    </PreferenceCategory>
+</PreferenceScreen>

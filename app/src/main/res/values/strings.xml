@@ -3,5 +3,14 @@
     <string name="bloch_sphere">Bloch sphere</string>
     <string name="gl_version_not_supported">This version of OpenGL ES is not supported! ((Your device is too old))</string>
     <string name="run">Run</string>
+    <string name="cancel">Cancel</string>
     <string name="preferences">Preferences</string>
+    <string name="execution_settings">Execution settings</string>
+    <string name="shots">Shots</string>
+    <string name="threads">Threads</string>
+    <string name="select_gate_type">Select gate type</string>
+    <string name="select_gate">Select gate</string>
+    <string name="single_gate">Single Qubit</string>
+    <string name="multi_gate">Multi Qubit</string>
+    <string name="operate_on">Operate on</string>
 </resources>

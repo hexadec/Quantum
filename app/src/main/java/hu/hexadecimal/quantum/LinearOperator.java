@@ -9,7 +9,7 @@ public class LinearOperator extends VisualOperator {
     protected Complex[][] matrix;
     private String name;
     private String symbol;
-    private static final int MATRIX_DIM = 2;
+    public static final int MATRIX_DIM = 2;
 
     public static final LinearOperator HADAMARD =
             LinearOperator.multiply(
@@ -39,7 +39,7 @@ public class LinearOperator extends VisualOperator {
     public static final LinearOperator T_GATE =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
-                    new Complex[]{new Complex(0), new Complex(1, Math.PI / 4 ,true)}
+                    new Complex[]{new Complex(0), new Complex(1, Math.PI / 4, true)}
             }, "PI/4 Phase-shift", "\uD835\uDD4B", 0xffBA7021);
 
     public static final LinearOperator S_GATE =
@@ -48,7 +48,20 @@ public class LinearOperator extends VisualOperator {
                     new Complex[]{new Complex(0), new Complex(0, 1)}
             }, "PI/2 Phase-shift", "\uD835\uDD4A", 0xff21BAAB);
 
+    public static final LinearOperator PI6_GATE =
+            new LinearOperator(new Complex[][]{
+                    new Complex[]{new Complex(1), new Complex(0)},
+                    new Complex[]{new Complex(0), new Complex(1, Math.PI / 6, true)}
+            }, "PI/6 Phase-shift", "\u03C06", 0xffDCE117);
+
+    public static final LinearOperator SQRT_NOT =
+            LinearOperator.multiply(new LinearOperator(new Complex[][]{
+                    new Complex[]{new Complex(1, 1), new Complex(1, -1)},
+                    new Complex[]{new Complex(1, -1), new Complex(1, 1)}
+            }, "√NOT", "√\uD835\uDD4F", 0xff2155BA), new Complex(0.5));
+
     public LinearOperator(Complex[][] M, String name, String symbol, int color) {
+        super(MATRIX_DIM);
         if (M == null) {
             throw new NullPointerException();
         }
@@ -63,6 +76,7 @@ public class LinearOperator extends VisualOperator {
     }
 
     public LinearOperator(Complex[][] M, String name, String symbol) {
+        super(MATRIX_DIM);
         if (M == null) {
             throw new NullPointerException();
         }
@@ -83,6 +97,7 @@ public class LinearOperator extends VisualOperator {
      * Avoid using this constructor whenever possible
      */
     protected LinearOperator() {
+        super(MATRIX_DIM);
         matrix = null;
         name = "Empty";
     }
@@ -214,7 +229,7 @@ public class LinearOperator extends VisualOperator {
                 field.setAccessible(true);
                 if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
                         && field.get(linearOperator) instanceof LinearOperator) {
-                    list.add(((LinearOperator)field.get(linearOperator)).getName());
+                    list.add(((LinearOperator) field.get(linearOperator)).getName());
                 }
             }
         } catch (Exception e) {
@@ -224,7 +239,27 @@ public class LinearOperator extends VisualOperator {
         return list;
     }
 
-    static List<String> getPredefinedGateSymbols() {
+    public static LinearOperator findGateByName(String name) {
+        LinearOperator linearOperator = new LinearOperator();
+        try {
+            Field[] fields = linearOperator.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+                        && field.get(linearOperator) instanceof LinearOperator) {
+                    if (((LinearOperator) field.get(linearOperator)).getName().equals(name)) {
+                        return ((LinearOperator) field.get(linearOperator));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return null;
+    }
+
+    public static List<String> getPredefinedGateSymbols() {
         List<String> list = new ArrayList<>();
         LinearOperator linearOperator = new LinearOperator();
         try {
@@ -233,7 +268,7 @@ public class LinearOperator extends VisualOperator {
                 field.setAccessible(true);
                 if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
                         && field.get(linearOperator) instanceof LinearOperator) {
-                    list.add(((LinearOperator)field.get(linearOperator)).getSymbol());
+                    list.add(((LinearOperator) field.get(linearOperator)).getSymbol());
                 }
             }
         } catch (Exception e) {
