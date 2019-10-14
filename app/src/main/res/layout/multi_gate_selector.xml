@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Spinner
+        android:id="@+id/mgate_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
+        android:id="@+id/mtextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/mgate_spinner"
+        android:text="@string/select_order_of_qubits"
+        android:textSize="18dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="30dp"/>
+
+    <Spinner
+        android:id="@+id/mqubit1_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/mtextView"
+        android:layout_marginTop="45dp"/>
+
+    <Spinner
+        android:id="@+id/mqubit2_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/mqubit1_spinner"
+        android:layout_marginTop="30dp"/>
+
+    <Spinner
+        android:id="@+id/mqubit3_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/mqubit2_spinner"
+        android:layout_marginTop="30dp"
+        android:visibility="gone"/>
+    <Spinner
+        android:id="@+id/mqubit4_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/mqubit3_spinner"
+        android:visibility="gone"
+        android:layout_marginTop="30dp"/>
+
+    <Button
+        android:id="@+id/mcancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel"
+        android:layout_alignTop="@id/mqubit4_spinner"
+        android:layout_alignParentLeft="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="40dp"/>
+
+    <Button
+        android:id="@+id/mok"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="OK"
+        android:layout_alignTop="@id/mqubit4_spinner"
+        android:layout_alignLeft="@id/mcancel"
+        android:layout_marginLeft="120dp"
+        android:layout_marginTop="40dp"/>
+
+</RelativeLayout>

@@ -13,4 +13,5 @@
     <string name="single_gate">Single Qubit</string>
     <string name="multi_gate">Multi Qubit</string>
     <string name="operate_on">Operate on</string>
+    <string name="select_order_of_qubits">Select the order of qubits for the chosen operator</string>
 </resources>

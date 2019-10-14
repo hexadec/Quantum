@@ -33,6 +33,32 @@ public class MultiQubitOperator extends VisualOperator {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
                     }, "SWAP", new String[]{"✖", "✖"});
 
+    public static final MultiQubitOperator TOFFOLI =
+            new MultiQubitOperator(8,
+                    new Complex[][]{
+                            {new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
+                    }, "Toffoli", new String[]{"●", "●", "○"});
+
+    public static final MultiQubitOperator FREDKIN =
+            new MultiQubitOperator(8,
+                    new Complex[][]{
+                            {new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
+                    }, "Toffoli", new String[]{"●", "✖", "✖"});
+
     public MultiQubitOperator(int MATRIX_DIM, Complex[][] M, String name, String[] symbols) {
         super(MATRIX_DIM);
         if (M == null) {
@@ -263,7 +289,7 @@ public class MultiQubitOperator extends VisualOperator {
                 field.setAccessible(true);
                 if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
                         && field.get(multiQubitOperator) instanceof MultiQubitOperator) {
-                    list.add(((MultiQubitOperator)field.get(multiQubitOperator)).getName());
+                    list.add(((MultiQubitOperator) field.get(multiQubitOperator)).getName());
                 }
             }
         } catch (Exception e) {
@@ -271,5 +297,25 @@ public class MultiQubitOperator extends VisualOperator {
             return null;
         }
         return list;
+    }
+
+    public static MultiQubitOperator findGateByName(String name) {
+        MultiQubitOperator multiQubitOperator = new MultiQubitOperator();
+        try {
+            Field[] fields = multiQubitOperator.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+                        && field.get(multiQubitOperator) instanceof MultiQubitOperator) {
+                    if (((MultiQubitOperator) field.get(multiQubitOperator)).getName().equals(name)) {
+                        return ((MultiQubitOperator) field.get(multiQubitOperator));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return null;
     }
 }

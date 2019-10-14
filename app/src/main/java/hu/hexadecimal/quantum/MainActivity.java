@@ -94,7 +94,6 @@ public class MainActivity extends Activity {
         adb.show();
     }
 
-
     public void showAddGateDialog() {
         AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
         adb.setTitle(R.string.select_gate_type)
