@@ -60,6 +60,12 @@ public class LinearOperator extends VisualOperator {
                     new Complex[]{new Complex(1, -1), new Complex(1, 1)}
             }, "√NOT", "√\uD835\uDD4F", 0xff2155BA), new Complex(0.5));
 
+    public static final LinearOperator ID =
+            new LinearOperator(new Complex[][]{
+                    new Complex[]{new Complex(1), new Complex(0)},
+                    new Complex[]{new Complex(0), new Complex(1)}
+            }, "Identity", "\uD835\uDD40", 0xff666666);
+
     public LinearOperator(Complex[][] M, String name, String symbol, int color) {
         super(MATRIX_DIM);
         if (M == null) {

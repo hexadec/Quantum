@@ -33,6 +33,15 @@ public class MultiQubitOperator extends VisualOperator {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
                     }, "SWAP", new String[]{"✖", "✖"}, 0xffE19417);
 
+    public static final MultiQubitOperator ID2 =
+            new MultiQubitOperator(4,
+                    new Complex[][]{
+                            {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
+                    }, "2-qubit identity", new String[]{"\uD835\uDD40", "\uD835\uDD40"}, 0xff666666);
+
     public static final MultiQubitOperator TOFFOLI =
             new MultiQubitOperator(8,
                     new Complex[][]{
@@ -57,7 +66,20 @@ public class MultiQubitOperator extends VisualOperator {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
-                    }, "Toffoli", new String[]{"●", "✖", "✖"}, 0xff17DCE1);
+                    }, "Fredkin", new String[]{"●", "✖", "✖"}, 0xff17DCE1);
+
+    public static final MultiQubitOperator ID3 =
+            new MultiQubitOperator(8,
+                    new Complex[][]{
+                            {new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
+                    }, "3-qubit identity", new String[]{"\uD835\uDD40", "\uD835\uDD40", "\uD835\uDD40"}, 0xff17DCE1);
 
     public MultiQubitOperator(int MATRIX_DIM, Complex[][] M, String name, String[] symbols, int color) {
         super(MATRIX_DIM);
