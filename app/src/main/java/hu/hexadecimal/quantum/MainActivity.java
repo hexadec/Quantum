@@ -71,9 +71,8 @@ public class MainActivity extends Activity {
         qv.addGate(0, LinearOperator.HADAMARD);
         qv.addGate(0, LinearOperator.PAULI_X);
         qv.addGate(0, LinearOperator.T_GATE);
-        qv.addGate(0, LinearOperator.PAULI_Z);
-        qv.addGate(0, LinearOperator.S_GATE);
-        qv.addGate(2, LinearOperator.T_GATE);
+        qv.addMultiQubitGate(new int[]{0,1},MultiQubitOperator.CNOT);
+        qv.addMultiQubitGate(new int[]{0,1},MultiQubitOperator.SWAP);
         qv.addGate(4, LinearOperator.PAULI_Y);
     }
 

@@ -11,10 +11,14 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.stream.IntStream;
 
+import hu.hexadecimal.quantum.MultiQubitOperator;
 import hu.hexadecimal.quantum.Qubit;
 import hu.hexadecimal.quantum.VisualOperator;
 import hu.hexadecimal.quantum.LinearOperator;
@@ -31,13 +35,13 @@ public class QuantumView extends View {
 
     public LinkedList<Qubit> qbits;
     private LinkedList<VisualOperator> gos;
-    private LinkedList<Integer> qid;
 
     public final int STEP = 60;
     public final int MAX_QBITS = 6;
     public final int GATE_SIZE = 18;
     public final float UNIT = pxFromDp(super.getContext(), 1);
     public final float START_Y = pxFromDp(super.getContext(), 20);
+
 
     public QuantumView(Context context) {
         super(context);
@@ -46,7 +50,6 @@ public class QuantumView extends View {
             qbits.add(new Qubit());
         }
         gos = new LinkedList<>();
-        qid = new LinkedList<>();
 
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
@@ -103,7 +106,8 @@ public class QuantumView extends View {
 
     public boolean isAnOperator(int x, int y) {
         if (x < mPadding || x > getWidth() - mPadding) return false;
-        if (y < mPadding || y > getHeight() - mPadding || y > START_Y + pxFromDp(super.getContext(), STEP * MAX_QBITS)) return false;
+        if (y < mPadding || y > getHeight() - mPadding || y > START_Y + pxFromDp(super.getContext(), STEP * MAX_QBITS))
+            return false;
         return true;
     }
 
@@ -131,24 +135,44 @@ public class QuantumView extends View {
         }
         int[] gatesNumber = new int[MAX_QBITS];
         for (int i = 0; i < gos.size(); i++) {
-            gatesNumber[qid.get(i)]++;
-            otherPaint.setColor(gos.get(i).getColor());
+            for (int j = 0; j < gos.get(i).getQubitIDs().length; j++) {
+                gatesNumber[gos.get(i).getQubitIDs()[j]]++;
+                otherPaint.setColor(gos.get(i).getColor());
 
-            Rect areaRect = new Rect((int) (mPadding + pxFromDp(super.getContext(), 2) + gatesNumber[qid.get(i)] * pxFromDp(super.getContext(), GATE_SIZE * 3)),
-                    ((int)(mPadding + pxFromDp(super.getContext(), 2) + (pxFromDp(super.getContext(), STEP) * (qid.get(i))))),
-                    ((int)(mPadding + pxFromDp(super.getContext(), 2) + pxFromDp(super.getContext(), GATE_SIZE * 2) + gatesNumber[qid.get(i)] * pxFromDp(super.getContext(), GATE_SIZE * 3))),
-                    ((int)(mPadding + (int) pxFromDp(super.getContext(), 20) + (pxFromDp(super.getContext(), STEP) * qid.get(i)) + pxFromDp(super.getContext(), GATE_SIZE))));
-            String symbol = ((LinearOperator) gos.get(i)).getSymbol();
-            gos.get(i).addRect(areaRect);
-            RectF bounds = new RectF(areaRect);
-            bounds.right = whiteTextPaint.measureText(symbol, 0, symbol.length());
-            bounds.bottom = whiteTextPaint.descent() - whiteTextPaint.ascent();
-            bounds.left += (areaRect.width() - bounds.right) / 2.0f;
-            bounds.top += (areaRect.height() - bounds.bottom) / 2.0f;
+                Rect areaRect = new Rect((int) (mPadding + pxFromDp(super.getContext(), 2) + gatesNumber[gos.get(i).getQubitIDs()[j]] * pxFromDp(super.getContext(), GATE_SIZE * 3)),
+                        ((int) (mPadding + pxFromDp(super.getContext(), 2) + (pxFromDp(super.getContext(), STEP) * (gos.get(i).getQubitIDs()[j])))),
+                        ((int) (mPadding + pxFromDp(super.getContext(), 2) + pxFromDp(super.getContext(), GATE_SIZE * 2) + gatesNumber[gos.get(i).getQubitIDs()[j]] * pxFromDp(super.getContext(), GATE_SIZE * 3))),
+                        ((int) (mPadding + (int) pxFromDp(super.getContext(), 20) + (pxFromDp(super.getContext(), STEP) * gos.get(i).getQubitIDs()[j]) + pxFromDp(super.getContext(), GATE_SIZE))));
+                String symbol = "C";
+                if (gos.get(i) instanceof LinearOperator) {
+                    symbol = ((LinearOperator) gos.get(i)).getSymbol();
+                } else {
+                    symbol = ((MultiQubitOperator)gos.get(i)).getSymbols()[j];
+                }
+                gos.get(i).addRect(areaRect);
+                RectF bounds = new RectF(areaRect);
+                bounds.right = whiteTextPaint.measureText(symbol, 0, symbol.length());
+                bounds.bottom = whiteTextPaint.descent() - whiteTextPaint.ascent();
+                bounds.left += (areaRect.width() - bounds.right) / 2.0f;
+                bounds.top += (areaRect.height() - bounds.bottom) / 2.0f;
 
-            canvas.drawRect(areaRect, otherPaint);
+                canvas.drawRect(areaRect, otherPaint);
+                if (gos.get(i) instanceof MultiQubitOperator && j != 0) {
+                    mPaint.setColor(gos.get(i).getColor());
+                    float center1x = (areaRect.left + areaRect.right) / 2;
+                    float center1y = (areaRect.top + areaRect.bottom) / 2;
+                    Rect a = gos.get(i).getRect().get(j-1);
+                    float center2x = (a.left + a.right) / 2;
+                    float center2y = (a.top + a.bottom) / 2;
+                    if (center1x < center2x) center2x -= pxFromDp(super.getContext(), GATE_SIZE / 2);
+                    else center2x += pxFromDp(super.getContext(), GATE_SIZE / 2);
+                    if (center1y < center2y) center2y -= pxFromDp(super.getContext(), GATE_SIZE / 2);
+                    else center2y += pxFromDp(super.getContext(), GATE_SIZE / 2);
+                    canvas.drawLine(center1x, center1y, center2x, center2y, mPaint);
+                }
 
-            canvas.drawText(symbol, bounds.left, bounds.top - whiteTextPaint.ascent(), whiteTextPaint);
+                canvas.drawText(symbol, bounds.left, bounds.top - whiteTextPaint.ascent(), whiteTextPaint);
+            }
         }
         //canvas.drawRect(mPadding, mPadding, getWidth() - mPadding, getHeight() - mPadding, mPaint);
         //canvas.drawArc(arcLeft, arcTop, arcRight, arcBottom, 75, 45, true, mPaint);
@@ -162,12 +186,33 @@ public class QuantumView extends View {
     }
 
     public void addGate(int qbit, LinearOperator l) {
-        qid.add(qbit);
+        l.setQubitIDs(new int[]{qbit});
         gos.add(l);
         invalidate();
     }
 
+    public void addMultiQubitGate(int[] qubits, MultiQubitOperator m) {
+        m.setQubitIDs(qubits);
+        gos.add(m);
+        invalidate();
+    }
+
     public boolean canAddGate(int qbit) {
+        if (qbit < 0 || qbit > getDisplayedQubits()) {
+            return false;
+        }
+        int gateNumber = 0;
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        ((Activity) (getContext())).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int width = displayMetrics.widthPixels;
+        for (int i = 0; i <= gos.size(); i++) {
+            try {
+                if (IntStream.of(gos.get(i).getQubitIDs()).noneMatch(x -> x == qbit)) continue;
+            } catch (IndexOutOfBoundsException e) {}
+            gateNumber++;
+            if (mPadding + pxFromDp(super.getContext(), 2) + pxFromDp(super.getContext(), GATE_SIZE * 2) + gateNumber * pxFromDp(super.getContext(), GATE_SIZE * 3) > width)
+                return false;
+        }
         return true;
     }
 
@@ -180,7 +225,9 @@ public class QuantumView extends View {
 
     public int getDisplayedQubits() {
         int count = 0;
-        for (int i = (int) START_Y; i < getHeight() - 2 * mPadding - START_Y && i <= pxFromDp(super.getContext(), STEP * MAX_QBITS); i += (int) pxFromDp(super.getContext(), STEP)) {count++;}
+        for (int i = (int) START_Y; i < getHeight() - 2 * mPadding - START_Y && i <= pxFromDp(super.getContext(), STEP * MAX_QBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
+            count++;
+        }
         return count;
     }
 

@@ -22,7 +22,7 @@ public class MultiQubitOperator extends VisualOperator {
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)},
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
-                    }, "CNOT", new String[]{"●", "○"});
+                    }, "CNOT", new String[]{"●", "○"}, 0xffE19417);
 
     public static final MultiQubitOperator SWAP =
             new MultiQubitOperator(4,
@@ -31,7 +31,7 @@ public class MultiQubitOperator extends VisualOperator {
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
-                    }, "SWAP", new String[]{"✖", "✖"});
+                    }, "SWAP", new String[]{"✖", "✖"}, 0xffE19417);
 
     public static final MultiQubitOperator TOFFOLI =
             new MultiQubitOperator(8,
@@ -44,7 +44,7 @@ public class MultiQubitOperator extends VisualOperator {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
-                    }, "Toffoli", new String[]{"●", "●", "○"});
+                    }, "Toffoli", new String[]{"●", "●", "○"}, 0xff17DCE1);
 
     public static final MultiQubitOperator FREDKIN =
             new MultiQubitOperator(8,
@@ -57,13 +57,14 @@ public class MultiQubitOperator extends VisualOperator {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
-                    }, "Toffoli", new String[]{"●", "✖", "✖"});
+                    }, "Toffoli", new String[]{"●", "✖", "✖"}, 0xff17DCE1);
 
-    public MultiQubitOperator(int MATRIX_DIM, Complex[][] M, String name, String[] symbols) {
+    public MultiQubitOperator(int MATRIX_DIM, Complex[][] M, String name, String[] symbols, int color) {
         super(MATRIX_DIM);
         if (M == null) {
             throw new NullPointerException();
         }
+        this.color = color;
         switch (MATRIX_DIM) {
             case 4:
                 NQBITS = 2;
@@ -93,7 +94,7 @@ public class MultiQubitOperator extends VisualOperator {
     }
 
     public MultiQubitOperator(int MATRIX_DIM, Complex[][] M) {
-        this(MATRIX_DIM, M, "Custom", MultiQubitOperator.generateSymbols(MATRIX_DIM));
+        this(MATRIX_DIM, M, "Custom", MultiQubitOperator.generateSymbols(MATRIX_DIM), 0xff000000);
         random = new Random();
     }
 
@@ -197,7 +198,7 @@ public class MultiQubitOperator extends VisualOperator {
                 matrix[i][j] = complex[i][j];
             }
         }
-        return new MultiQubitOperator(MATRIX_DIM, complex, name, symbols);
+        return new MultiQubitOperator(MATRIX_DIM, complex, name, symbols, color);
     }
 
     public String toString() {
