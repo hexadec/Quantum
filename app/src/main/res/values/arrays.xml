@@ -2,21 +2,21 @@
 <resources>
     <string-array name="shots">
         <item>Pick a single outcome</item>
-        <item>100</item>
-        <item>500</item>
+        <item>128</item>
+        <item>512</item>
         <item>1K</item>
-        <item>5K</item>
-        <item>10K</item>
-        <item>100K</item>
+        <item>4K</item>
+        <item>16K</item>
+        <item>131K</item>
     </string-array>
     <string-array name="shots_values">
         <item>1</item>
-        <item>100</item>
-        <item>500</item>
-        <item>1000</item>
-        <item>5000</item>
-        <item>10000</item>
-        <item>100000</item>
+        <item>128</item>
+        <item>512</item>
+        <item>1024</item>
+        <item>4096</item>
+        <item>16384</item>
+        <item>131072</item>
     </string-array>
     <string-array name="threads">
         <item>Single thread (not recommended)</item>

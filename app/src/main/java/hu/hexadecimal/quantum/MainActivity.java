@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,11 +42,11 @@ public class MainActivity extends Activity {
         RelativeLayout relativeLayout = findViewById(R.id.relative);
         qv = new QuantumView(this);
         relativeLayout.addView(qv);
-        TextView tv = (TextView) findViewById(R.id.sample_text);
+        //TextView tv = (TextView) findViewById(R.id.sample_text);
 
         glSurfaceView = new BlochSphereView(this);
 
-        Qubit q = new Qubit();
+        /*Qubit q = new Qubit();
         Qubit c = new Qubit();
         q.applyOperator(LinearOperator.HADAMARD);
 
@@ -50,11 +54,11 @@ public class MainActivity extends Activity {
 
         for (int i = 0; i < 10000; i++) {
             q.prepare(false);
-            q.applyOperator(LinearOperator.SQRT_NOT);
+            q.applyOperator(LinearOperator.HADAMARD);
             //Qubit[] qs = MultiQubitOperator.CNOT.operateOn(new Qubit[]{q, c});
-            value += q.measureZ() ? 1 : 0;
+            //value += qs[0].measureZ() ? 1 : 0;
         }
-        tv.setText("" + value / 10000);
+        tv.setText("" + value / 10000);*/
 
         View.OnTouchListener click = new View.OnTouchListener() {
             @Override
@@ -70,13 +74,6 @@ public class MainActivity extends Activity {
             }
         };
         qv.setOnTouchListener(click);
-
-        qv.addGate(0, LinearOperator.HADAMARD);
-        qv.addGate(2, LinearOperator.PAULI_X);
-        qv.addGate(2, LinearOperator.T_GATE);
-        qv.addMultiQubitGate(new int[]{0, 1}, MultiQubitOperator.CNOT);
-        qv.addMultiQubitGate(new int[]{3, 1, 0}, MultiQubitOperator.FREDKIN);
-        qv.addGate(4, LinearOperator.PAULI_Y);
     }
 
     public void displayBlochSphere(Qubit q) {
@@ -256,6 +253,26 @@ public class MainActivity extends Activity {
                 break;
             case R.id.bloch:
                 displayBlochSphere(qv.qbits.get(0));
+                break;
+            case R.id.run:
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+                int shots = Integer.valueOf(pref.getString("shots", "1024"));
+                int threads = Integer.valueOf(pref.getString("threads", "8"));
+                ExperimentRunner experimentRunner = new ExperimentRunner(qv.getOperators());
+                float[] probs = experimentRunner.runExperiment(shots, threads);
+                AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
+                adb.setCancelable(false);
+                adb.setPositiveButton("OK", null);
+                adb.setTitle(R.string.results);
+                ScrollView scrollView = new ScrollView(this);
+                TextView textView = new TextView(this);
+                textView.setTypeface(Typeface.MONOSPACE);
+                for (int i = 0; i < probs.length; i++) {
+                    textView.setText(textView.getText() + "\n" + String.format("%" + qv.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + probs[i]);
+                }
+                scrollView.addView(textView);
+                adb.setView(scrollView);
+                adb.show();
                 break;
             default:
 

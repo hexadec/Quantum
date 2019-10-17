@@ -217,7 +217,7 @@ public class MultiQubitOperator extends VisualOperator {
         for (int i = 0; i < MATRIX_DIM; i++) {
             complex[i] = new Complex[MATRIX_DIM];
             for (int j = 0; j < MATRIX_DIM; j++) {
-                matrix[i][j] = complex[i][j];
+                complex[i][j] = matrix[i][j];
             }
         }
         return new MultiQubitOperator(MATRIX_DIM, complex, name, symbols, color);
@@ -267,6 +267,7 @@ public class MultiQubitOperator extends VisualOperator {
         }
         for (int i = 0; i < MATRIX_DIM; i++) {
             for (int j = 0; j < MATRIX_DIM; j++) {
+                //Log.e("-", matrix[i][j].toString3Decimals() + "-" + inputMatrix[j] + "-" + i + "." + j);
                 resultMatrix[i].add(Complex.multiply(matrix[i][j], inputMatrix[j]));
             }
         }
@@ -278,11 +279,11 @@ public class MultiQubitOperator extends VisualOperator {
             //Log.i("MultiQubitOperator", "Probs[" + i + "]:" + probs[i]);
             double prob = random.nextDouble();
             if (probs[i] > (prob - subtrahend < 0 ? 0 : prob - subtrahend)) {
-                //Log.i("MultiQubitOperator", "CASE: " + i);
                 Qubit[] result = new Qubit[NQBITS];
                 for (int j = 0; j < NQBITS; j++) {
                     result[j] = new Qubit();
-                    if ((i >> j) == 1) result[j].prepare(true);
+                    //Log.i("MultiQubitOperator", "CASE: " + i + " j: " + j + "-" + (i >> j));
+                    if ((i >> j) % 2 == 1) result[j].prepare(true);
                 }
                 return result;
             } else {

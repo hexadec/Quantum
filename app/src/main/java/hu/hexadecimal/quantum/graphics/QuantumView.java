@@ -11,10 +11,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -37,9 +35,9 @@ public class QuantumView extends View {
     public LinkedList<Qubit> qbits;
     private LinkedList<VisualOperator> gos;
 
-    public final int STEP = 60;
-    public final int MAX_QBITS = 6;
-    public final int GATE_SIZE = 18;
+    public static final int STEP = 60;
+    public static final int MAX_QUBITS = 6;
+    public static final int GATE_SIZE = 18;
     public final float UNIT = pxFromDp(super.getContext(), 1);
     public final float START_Y = pxFromDp(super.getContext(), 20);
 
@@ -47,7 +45,7 @@ public class QuantumView extends View {
     public QuantumView(Context context) {
         super(context);
         qbits = new LinkedList<>();
-        for (int i = 0; i < MAX_QBITS; i++) {
+        for (int i = 0; i < MAX_QUBITS; i++) {
             qbits.add(new Qubit());
         }
         gos = new LinkedList<>();
@@ -107,7 +105,7 @@ public class QuantumView extends View {
 
     public boolean isAnOperator(int x, int y) {
         if (x < mPadding || x > getWidth() - mPadding) return false;
-        if (y < mPadding || y > getHeight() - mPadding || y > START_Y + pxFromDp(super.getContext(), STEP * MAX_QBITS))
+        if (y < mPadding || y > getHeight() - mPadding || y > START_Y + pxFromDp(super.getContext(), STEP * MAX_QUBITS))
             return false;
         return true;
     }
@@ -122,7 +120,7 @@ public class QuantumView extends View {
 
         otherPaint.setStyle(Paint.Style.FILL);
         otherPaint.setColor(0xffBA2121);
-        for (int i = (int) START_Y; i < getHeight() - 2 * mPadding - START_Y && i <= pxFromDp(super.getContext(), STEP * MAX_QBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
+        for (int i = (int) START_Y; i < getHeight() - 2 * mPadding - START_Y && i <= pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
             canvas.drawLine(mPadding, mPadding + i, getWidth() - mPadding, mPadding + i, mPaint);
             canvas.drawLine(getWidth() - mPadding - pxFromDp(super.getContext(), 5), mPadding + i - pxFromDp(super.getContext(), 5), getWidth() - mPadding + UNIT / 2, mPadding + i + UNIT / 2, mPaint);
             canvas.drawLine(getWidth() - mPadding - pxFromDp(super.getContext(), 5), mPadding + i + pxFromDp(super.getContext(), 5), getWidth() - mPadding + UNIT / 2, mPadding + i - UNIT / 2, mPaint);
@@ -134,7 +132,7 @@ public class QuantumView extends View {
             canvas.drawText("q" + Math.round((i + START_Y) / pxFromDp(super.getContext(), STEP)), mPadding - pxFromDp(super.getContext(), 30), mPadding + i + pxFromDp(super.getContext(), 6), mTextPaint);
             canvas.drawText("⎥0⟩", mPadding + pxFromDp(super.getContext(), 2f), mPadding + i + pxFromDp(super.getContext(), 8f), whiteTextPaint);
         }
-        int[] gatesNumber = new int[MAX_QBITS];
+        int[] gatesNumber = new int[MAX_QUBITS];
         for (int i = 0; i < gos.size(); i++) {
             VisualOperator v = gos.get(i);
             v.resetRect();
@@ -243,10 +241,14 @@ public class QuantumView extends View {
 
     public int getDisplayedQubits() {
         int count = 0;
-        for (int i = (int) START_Y; i < getHeight() - 2 * mPadding - START_Y && i <= pxFromDp(super.getContext(), STEP * MAX_QBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
+        for (int i = (int) START_Y; i < getHeight() - 2 * mPadding - START_Y && i <= pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
             count++;
         }
         return count;
+    }
+
+    public LinkedList<VisualOperator> getOperators() {
+        return gos;
     }
 
     public static float pxFromDp(final Context context, final float dp) {
