@@ -259,7 +259,8 @@ public class MultiQubitOperator extends VisualOperator {
             for (int k = 0; k < NQBITS; k++) {
                 if (k == 0) {
                     inputMatrix[i] = Complex.multiply(qs[NQBITS - 2].matrix[(i >> 1) % 2], qs[NQBITS - 1].matrix[i % 2]);
-                    k += 2;
+                    //Log.e("--", "" + inputMatrix[i].toString3Decimals() + ": " + i);
+                    k += 1;
                     continue;
                 }
                 inputMatrix[i] = Complex.multiply(inputMatrix[i], qs[NQBITS - k - 1].matrix[(i >> k) % 2]);
@@ -270,6 +271,7 @@ public class MultiQubitOperator extends VisualOperator {
                 //Log.e("-", matrix[i][j].toString3Decimals() + "-" + inputMatrix[j] + "-" + i + "." + j);
                 resultMatrix[i].add(Complex.multiply(matrix[i][j], inputMatrix[j]));
             }
+            //Log.e("+", resultMatrix[i] + "---" + i);
         }
         //Log.i("MultiQubitOperator", resultMatrix[0] + "\n" + resultMatrix[1] + "\n" + resultMatrix[2] + "\n" + resultMatrix[3]);
         double[] probs = new double[MATRIX_DIM];
@@ -278,18 +280,18 @@ public class MultiQubitOperator extends VisualOperator {
             probs[i] = Complex.multiply(Complex.conjugate(resultMatrix[i]), resultMatrix[i]).real;
             //Log.i("MultiQubitOperator", "Probs[" + i + "]:" + probs[i]);
             double prob = random.nextDouble();
-            if (probs[i] > (prob - subtrahend < 0 ? 0 : prob - subtrahend)) {
+            if (probs[i] > prob * (1 - subtrahend)) {
                 Qubit[] result = new Qubit[NQBITS];
                 for (int j = 0; j < NQBITS; j++) {
                     result[j] = new Qubit();
                     //Log.i("MultiQubitOperator", "CASE: " + i + " j: " + j + "-" + (i >> j));
-                    if ((i >> j) % 2 == 1) result[j].prepare(true);
+                    if ((i >> (NQBITS - j - 1)) % 2 == 1) result[j].prepare(true);
                 }
                 return result;
             } else {
                 subtrahend += probs[i];
                 if (i == MATRIX_DIM - 2) {
-                    subtrahend += 1;
+                    subtrahend = 2;
                 }
             }
         }
