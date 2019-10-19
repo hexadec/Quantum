@@ -1,5 +1,6 @@
 package hu.hexadecimal.quantum;
 
+import android.os.Handler;
 import android.util.Log;
 
 import java.util.LinkedList;
@@ -8,15 +9,33 @@ import hu.hexadecimal.quantum.graphics.QuantumView;
 
 public class ExperimentRunner {
     private final LinkedList<VisualOperator> v;
+    private int status;
+    boolean finished = false;
 
     public ExperimentRunner(LinkedList<VisualOperator> visualOperators) {
         v = visualOperators;
     }
 
-    public float[] runExperiment(int shots, int threads) {
+    public float[] runExperiment(int shots, int threads, Handler handler) {
         int timestorun = shots / threads == 0 ? 1 : shots / threads;
         Thread[] t = new Thread[threads];
+        status = 0;
+        finished = false;
         int[] sprobs = new int[(int) Math.pow(2, QuantumView.MAX_QUBITS)];
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (status < shots && !finished) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    handler.sendEmptyMessage(status);
+                }
+            }
+        }).start();
+        Log.e("-", "-");
         for (int i = 0; i < threads; i++) {
             t[i] = new Thread(new Runnable() {
                 @Override
@@ -47,10 +66,11 @@ public class ExperimentRunner {
                             cprob += qubits[k].measureZ() ? 1 << k : 0;
                         }
                         sprobs[cprob]++;
+                        status++;
                     }
                 }
             });
-            t[i].run();
+            t[i].start();
         }
         Log.i("ExperimentRunner", "threads: " + t.length);
         for (int i = 0; i < threads; i++) {
@@ -68,6 +88,7 @@ public class ExperimentRunner {
                 nprobs[o] /= threads;
             }
         }
+        finished = true;
         return nprobs;
     }
 }

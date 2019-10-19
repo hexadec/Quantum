@@ -2,11 +2,14 @@ package hu.hexadecimal.quantum;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
@@ -33,6 +36,7 @@ public class MainActivity extends Activity {
 
     BlochSphereView glSurfaceView;
     QuantumView qv;
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -255,24 +259,47 @@ public class MainActivity extends Activity {
                 displayBlochSphere(qv.qbits.get(0));
                 break;
             case R.id.run:
-                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-                int shots = Integer.valueOf(pref.getString("shots", "1024"));
-                int threads = Integer.valueOf(pref.getString("threads", "8"));
-                ExperimentRunner experimentRunner = new ExperimentRunner(qv.getOperators());
-                float[] probs = experimentRunner.runExperiment(shots, threads);
-                AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
-                adb.setCancelable(false);
-                adb.setPositiveButton("OK", null);
-                adb.setTitle(R.string.results);
-                ScrollView scrollView = new ScrollView(this);
-                TextView textView = new TextView(this);
-                textView.setTypeface(Typeface.MONOSPACE);
-                for (int i = 0; i < probs.length; i++) {
-                    textView.setText(textView.getText() + "\n" + String.format("%" + qv.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + probs[i]);
-                }
-                scrollView.addView(textView);
-                adb.setView(scrollView);
-                adb.show();
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                final int shots = Integer.valueOf(pref.getString("shots", "1024"));
+                final int threads = Integer.valueOf(pref.getString("threads", "8"));
+                final Handler handler = new Handler(new Handler.Callback() {
+                    @Override
+                    public boolean handleMessage(Message message) {
+                        try {
+                            progressDialog.setMessage(MainActivity.this.getString(R.string.wait) + "\n" + message.what + "/" + shots);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        return true;
+                    }
+                });
+                progressDialog = ProgressDialog.show(
+                        MainActivity.this, "", MainActivity.this.getString(R.string.wait), true);
+                new Thread() {
+                    public void run() {
+                        ExperimentRunner experimentRunner = new ExperimentRunner(qv.getOperators());
+                        float[] probs = experimentRunner.runExperiment(shots, threads, handler);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
+                                adb.setCancelable(false);
+                                adb.setPositiveButton("OK", null);
+                                adb.setTitle(R.string.results);
+                                ScrollView scrollView = new ScrollView(MainActivity.this);
+                                TextView textView = new TextView(MainActivity.this);
+                                textView.setTypeface(Typeface.MONOSPACE);
+                                for (int i = 0; i < probs.length; i++) {
+                                    textView.setText(textView.getText() + "\n" + String.format("%" + qv.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + probs[i]);
+                                }
+                                scrollView.addView(textView);
+                                adb.setView(scrollView);
+                                adb.show();
+                                progressDialog.cancel();
+                            }
+                        });
+                    }
+                }.start();
                 break;
             default:
 

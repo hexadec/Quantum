@@ -15,4 +15,5 @@
     <string name="operate_on">Operate on</string>
     <string name="select_order_of_qubits">Select the order of qubits for the chosen operator</string>
     <string name="results">Results</string>
+    <string name="wait">Executing experiment, please wait...</string>
 </resources>

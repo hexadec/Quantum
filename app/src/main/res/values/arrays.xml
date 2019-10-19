@@ -8,6 +8,7 @@
         <item>4K</item>
         <item>16K</item>
         <item>131K</item>
+        <item>524K</item>
     </string-array>
     <string-array name="shots_values">
         <item>1</item>
@@ -17,6 +18,7 @@
         <item>4096</item>
         <item>16384</item>
         <item>131072</item>
+        <item>524288</item>
     </string-array>
     <string-array name="threads">
         <item>Single thread (not recommended)</item>
