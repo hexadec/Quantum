@@ -27,6 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
@@ -46,23 +47,8 @@ public class MainActivity extends Activity {
         RelativeLayout relativeLayout = findViewById(R.id.relative);
         qv = new QuantumView(this);
         relativeLayout.addView(qv);
-        //TextView tv = (TextView) findViewById(R.id.sample_text);
 
         glSurfaceView = new BlochSphereView(this);
-
-        /*Qubit q = new Qubit();
-        Qubit c = new Qubit();
-        q.applyOperator(LinearOperator.HADAMARD);
-
-        double value = 0;
-
-        for (int i = 0; i < 10000; i++) {
-            q.prepare(false);
-            q.applyOperator(LinearOperator.HADAMARD);
-            //Qubit[] qs = MultiQubitOperator.CNOT.operateOn(new Qubit[]{q, c});
-            //value += qs[0].measureZ() ? 1 : 0;
-        }
-        tv.setText("" + value / 10000);*/
 
         View.OnTouchListener click = new View.OnTouchListener() {
             @Override
@@ -80,9 +66,13 @@ public class MainActivity extends Activity {
         qv.setOnTouchListener(click);
     }
 
-    public void displayBlochSphere(Qubit q) {
-        Qubit q2 = q.copy();
-        q2.applyOperator(LinearOperator.SQRT_NOT);
+    public void displayBlochSphere() {
+        Qubit q2 = new Qubit();
+        for (VisualOperator v : qv.getOperators()) {
+            if (v instanceof LinearOperator) {
+                q2.applyOperator((LinearOperator) v);
+            }
+        }
         glSurfaceView.setQBit(q2);
         AlertDialog.Builder adb = new AlertDialog.Builder(this);
         adb.setTitle(R.string.bloch_sphere);
@@ -103,7 +93,7 @@ public class MainActivity extends Activity {
                 .setPositiveButton(R.string.single_gate, null)
                 .setNegativeButton(R.string.multi_gate, null)
                 .setNeutralButton(R.string.cancel, null)
-                .setCancelable(false);
+                .setCancelable(true);
 
         final AlertDialog d = adb.create();
 
@@ -255,8 +245,11 @@ public class MainActivity extends Activity {
                 Intent intent = new Intent(MainActivity.this, PreferenceActivity.class);
                 startActivity(intent);
                 break;
+            case R.id.undo:
+                qv.removeLastGate();
+                break;
             case R.id.bloch:
-                displayBlochSphere(qv.qbits.get(0));
+                displayBlochSphere();
                 break;
             case R.id.run:
                 SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);

@@ -2,12 +2,13 @@ package hu.hexadecimal.quantum;
 
 import android.util.Log;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class MultiQubitOperator extends VisualOperator {
+public class MultiQubitOperator extends VisualOperator implements Serializable {
 
     public final int NQBITS;
     protected Complex[][] matrix;
@@ -15,7 +16,7 @@ public class MultiQubitOperator extends VisualOperator {
     private String[] symbols;
     private Random random;
 
-    public static final MultiQubitOperator CNOT =
+    public static final transient MultiQubitOperator CNOT =
             new MultiQubitOperator(4,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
@@ -24,7 +25,25 @@ public class MultiQubitOperator extends VisualOperator {
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
                     }, "CNOT", new String[]{"●", "○"}, 0xffE19417);
 
-    public static final MultiQubitOperator SWAP =
+    public static final transient MultiQubitOperator CY =
+            new MultiQubitOperator(4,
+                    new Complex[][]{
+                            {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0, -1)},
+                            {new Complex(0), new Complex(0), new Complex(0, 1), new Complex(0)}
+                    }, "CY", new String[]{"●", "Y"}, 0xffE19417);
+
+    public static final transient MultiQubitOperator CZ =
+            new MultiQubitOperator(4,
+                    new Complex[][]{
+                            {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(-1)}
+                    }, "CZ", new String[]{"●", "Z"}, 0xffE19417);
+
+    public static final transient MultiQubitOperator SWAP =
             new MultiQubitOperator(4,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
@@ -33,16 +52,16 @@ public class MultiQubitOperator extends VisualOperator {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
                     }, "SWAP", new String[]{"✖", "✖"}, 0xffE19417);
 
-    public static final MultiQubitOperator ID2 =
+    public static final transient MultiQubitOperator ID2 =
             new MultiQubitOperator(4,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
-                    }, "2-qubit identity", new String[]{"\uD835\uDD40", "\uD835\uDD40"}, 0xff666666);
+                    }, "2-qb identity", new String[]{"I", "I"}, 0xff666666);
 
-    public static final MultiQubitOperator TOFFOLI =
+    public static final transient MultiQubitOperator TOFFOLI =
             new MultiQubitOperator(8,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
@@ -55,7 +74,7 @@ public class MultiQubitOperator extends VisualOperator {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
                     }, "Toffoli", new String[]{"●", "●", "○"}, 0xff17DCE1);
 
-    public static final MultiQubitOperator FREDKIN =
+    public static final transient MultiQubitOperator FREDKIN =
             new MultiQubitOperator(8,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
@@ -68,7 +87,7 @@ public class MultiQubitOperator extends VisualOperator {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
                     }, "Fredkin", new String[]{"●", "✖", "✖"}, 0xff17DCE1);
 
-    public static final MultiQubitOperator ID3 =
+    public static final transient MultiQubitOperator ID3 =
             new MultiQubitOperator(8,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
@@ -79,7 +98,7 @@ public class MultiQubitOperator extends VisualOperator {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
-                    }, "3-qubit identity", new String[]{"\uD835\uDD40", "\uD835\uDD40", "\uD835\uDD40"}, 0xff17DCE1);
+                    }, "3-qb identity", new String[]{"I", "I", "I"}, 0xff17DCE1);
 
     public MultiQubitOperator(int MATRIX_DIM, Complex[][] M, String name, String[] symbols, int color) {
         super(MATRIX_DIM);

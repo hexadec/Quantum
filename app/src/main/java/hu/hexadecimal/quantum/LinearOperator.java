@@ -1,70 +1,71 @@
 package hu.hexadecimal.quantum;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LinearOperator extends VisualOperator {
+public class LinearOperator extends VisualOperator implements Serializable {
 
     protected Complex[][] matrix;
     private String name;
     private String symbol;
     public static final int MATRIX_DIM = 2;
 
-    public static final LinearOperator HADAMARD =
+    public static final transient LinearOperator HADAMARD =
             LinearOperator.multiply(
                     new LinearOperator(new Complex[][]{
                             new Complex[]{new Complex(1), new Complex(1)},
                             new Complex[]{new Complex(1), new Complex(-1)}
-                    }, "Hadamard", "ℍ", 0xff2155BA), new Complex(1 / Math.sqrt(2)));
+                    }, "Hadamard", "H", 0xff2155BA), new Complex(1 / Math.sqrt(2)));
 
-    public static final LinearOperator PAULI_Z =
+    public static final transient LinearOperator PAULI_Z =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(-1)}
-            }, "Pauli-Z", "ℤ", 0xff60BA21);
+            }, "Pauli-Z", "Z", 0xff60BA21);
 
-    public static final LinearOperator PAULI_Y =
+    public static final transient LinearOperator PAULI_Y =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(0), new Complex(0, -1)},
                     new Complex[]{new Complex(0, 1), new Complex(0)}
-            }, "Pauli-Y", "\uD835\uDD50", 0xff60BA21);
+            }, "Pauli-Y", "Y", 0xff60BA21);
 
-    public static final LinearOperator PAULI_X =
+    public static final transient LinearOperator PAULI_X =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(0), new Complex(1)},
                     new Complex[]{new Complex(1), new Complex(0)}
-            }, "Pauli-X", "\uD835\uDD4F", 0xff60BA21);
+            }, "Pauli-X", "X", 0xff60BA21);
 
-    public static final LinearOperator T_GATE =
+    public static final transient LinearOperator T_GATE =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(1, Math.PI / 4, true)}
-            }, "PI/4 Phase-shift", "\uD835\uDD4B", 0xffBA7021);
+            }, "PI/4 Phase-shift", "T", 0xffBA7021);
 
-    public static final LinearOperator S_GATE =
+    public static final transient LinearOperator S_GATE =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(0, 1)}
-            }, "PI/2 Phase-shift", "\uD835\uDD4A", 0xff21BAAB);
+            }, "PI/2 Phase-shift", "S", 0xff21BAAB);
 
-    public static final LinearOperator PI6_GATE =
+    public static final transient LinearOperator PI6_GATE =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(1, Math.PI / 6, true)}
             }, "PI/6 Phase-shift", "\u03C06", 0xffDCE117);
 
-    public static final LinearOperator SQRT_NOT =
+    public static final transient LinearOperator SQRT_NOT =
             LinearOperator.multiply(new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(1, 1), new Complex(1, -1)},
                     new Complex[]{new Complex(1, -1), new Complex(1, 1)}
-            }, "√NOT", "√\uD835\uDD4F", 0xff2155BA), new Complex(0.5));
+            }, "√NOT", "√X", 0xff2155BA), new Complex(0.5));
 
-    public static final LinearOperator ID =
+    public static final transient LinearOperator ID =
             new LinearOperator(new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(1)}
-            }, "Identity", "\uD835\uDD40", 0xff666666);
+            }, "Identity", "I", 0xff666666);
 
     public LinearOperator(Complex[][] M, String name, String symbol, int color) {
         super(MATRIX_DIM);

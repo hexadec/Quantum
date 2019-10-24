@@ -9,11 +9,15 @@
     <item
         android:id="@+id/bloch"
         android:icon="@drawable/axis_arrow"
-        android:showAsAction="ifRoom"
+        android:showAsAction="always"
         android:title="@string/bloch_sphere" />
     <item
         android:id="@+id/run"
         android:icon="@drawable/play_pause"
         android:showAsAction="always"
         android:title="@string/run" />
+    <item
+        android:id="@+id/undo"
+        android:showAsAction="never"
+        android:title="@string/undo_add_gate" />
 </menu>

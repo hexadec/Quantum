@@ -4,20 +4,14 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "hu.hexadecimal.quantum"
-        minSdkVersion 24
+        minSdkVersion 21
         targetSdkVersion 28
-        versionCode 5
-        versionName "cherrychocolate-alpha.5"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        externalNativeBuild {
-            cmake {
-                cppFlags "-std=c++14 -fexceptions"
-            }
-        }
+        versionCode 7
+        versionName "cherrychocolate-alpha.7"
     }
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
@@ -31,6 +25,7 @@ android {
     }
     /*externalNativeBuild {
         cmake {
+            cppFlags "-std=c++14 -fexceptions"
             path "CMakeLists.txt"
         }
     }*/

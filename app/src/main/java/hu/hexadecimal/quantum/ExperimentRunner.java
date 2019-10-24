@@ -35,7 +35,6 @@ public class ExperimentRunner {
                 }
             }
         }).start();
-        Log.e("-", "-");
         for (int i = 0; i < threads; i++) {
             t[i] = new Thread(new Runnable() {
                 @Override
@@ -53,7 +52,6 @@ public class ExperimentRunner {
                                 Qubit[] subqubits = new Qubit[quids.length];
                                 for (int n = 0; n < subqubits.length; n++) {
                                     subqubits[n] = qubits[quids[n]];
-                                    //Log.e("-", n + "-" + quids[n] + "-" + subqubits[n].toString());
                                 }
                                 Qubit[] resultqubits = ((MultiQubitOperator) v.get(m)).operateOn(subqubits);
                                 for (int n = 0; n < subqubits.length; n++) {
