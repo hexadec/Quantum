@@ -17,11 +17,16 @@ public class ExperimentRunner {
     }
 
     public float[] runExperiment(int shots, int threads, Handler handler) {
+        if (threads < 1 || threads > 1000) {
+            threads = 4;
+        }
+        if (shots == 1 && threads > 1)
+            threads = 1;
         int timestorun = shots / threads == 0 ? 1 : shots / threads;
         Thread[] t = new Thread[threads];
         status = 0;
         finished = false;
-        int[] sprobs = new int[(int) Math.pow(2, QuantumView.MAX_QUBITS)];
+        int[][] sprobs = new int[(int) Math.pow(2, QuantumView.MAX_QUBITS)][threads];
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -36,6 +41,7 @@ public class ExperimentRunner {
             }
         }).start();
         for (int i = 0; i < threads; i++) {
+            final int t_id = i;
             t[i] = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -63,7 +69,7 @@ public class ExperimentRunner {
                         for (int k = 0; k < qubits.length; k++) {
                             cprob += qubits[k].measureZ() ? 1 << k : 0;
                         }
-                        sprobs[cprob]++;
+                        sprobs[cprob][t_id]++;
                         status++;
                     }
                 }
@@ -81,7 +87,10 @@ public class ExperimentRunner {
         }
         float[] nprobs = new float[sprobs.length];
         for (int o = 0; o < sprobs.length; o++) {
-            nprobs[o] = sprobs[o] / (float) shots;
+            for (int j = 1; j < threads; j++) {
+                sprobs[o][0] += sprobs[o][j];
+            }
+            nprobs[o] = sprobs[o][0] / (float) shots;
             if (shots == 1) {
                 nprobs[o] /= threads;
             }

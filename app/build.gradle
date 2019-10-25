@@ -6,8 +6,8 @@ android {
         applicationId "hu.hexadecimal.quantum"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 7
-        versionName "cherrychocolate-alpha.7"
+        versionCode 8
+        versionName "cherrychocolate-alpha.8"
     }
     buildTypes {
         release {

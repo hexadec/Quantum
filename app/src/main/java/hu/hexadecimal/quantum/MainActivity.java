@@ -27,7 +27,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
@@ -70,7 +70,11 @@ public class MainActivity extends Activity {
         Qubit q2 = new Qubit();
         for (VisualOperator v : qv.getOperators()) {
             if (v instanceof LinearOperator) {
-                q2.applyOperator((LinearOperator) v);
+                for (int q : v.getQubitIDs())
+                    if (q == 0) {
+                        q2.applyOperator((LinearOperator) v);
+                        break;
+                    }
             }
         }
         glSurfaceView.setQBit(q2);
@@ -115,10 +119,12 @@ public class MainActivity extends Activity {
                         for (int i = 0; i < qv.getDisplayedQubits(); i++) {
                             qs.add("q" + (i + 1));
                         }
+                        List<String> gates = LinearOperator.getPredefinedGateNames();
+                        Collections.sort(gates);
                         ArrayAdapter<String> adapter =
                                 new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, qs);
                         ArrayAdapter<String> gadapter =
-                                new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, LinearOperator.getPredefinedGateNames());
+                                new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, gates);
 
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -157,10 +163,12 @@ public class MainActivity extends Activity {
                         for (int i = 0; i < qv.getDisplayedQubits(); i++) {
                             qs.add("q" + (i + 1));
                         }
+                        List<String> gates = MultiQubitOperator.getPredefinedGateNames();
+                        Collections.sort(gates);
                         ArrayAdapter<String> adapter =
                                 new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, qs);
                         ArrayAdapter<String> gadapter =
-                                new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, MultiQubitOperator.getPredefinedGateNames());
+                                new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, gates);
 
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

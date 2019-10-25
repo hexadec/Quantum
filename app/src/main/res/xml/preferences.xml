@@ -6,18 +6,24 @@
             android:defaultValue="1024"
             android:entries="@array/shots"
             android:entryValues="@array/shots_values"
+            android:icon="@drawable/counter"
             android:key="shots"
             android:summary="%s"
-            android:title="@string/shots"
-            android:icon="@drawable/counter"/>
+            android:title="@string/shots" />
 
         <ListPreference
             android:defaultValue="8"
             android:entries="@array/threads"
             android:entryValues="@array/threads_values"
+            android:icon="@drawable/arrow_decision"
             android:key="threads"
             android:summary="%s"
-            android:title="@string/threads"
-            android:icon="@drawable/arrow_decision"/>
+            android:title="@string/threads" />
+
+        <Preference
+            android:enabled="false"
+            android:summary="@string/settings_help_long"
+            android:title="@string/settings_help" />
+
     </PreferenceCategory>
 </PreferenceScreen>

@@ -17,4 +17,8 @@
     <string name="results">Results</string>
     <string name="wait">Executing experiment, please wait...</string>
     <string name="undo_add_gate">Undo \&quot;Add gate\&quot;</string>
+    <string name="settings_help">Help</string>
+    <string name="settings_help_long">
+    Shots: select how many times to run the experiment. It is a good idea to increase this
+    value as you start using more qubits.\nThreads: usually it is enough to use as many threads as CPU cores your device has, however, a little more won\'t deteriorate performance.</string>
 </resources>
