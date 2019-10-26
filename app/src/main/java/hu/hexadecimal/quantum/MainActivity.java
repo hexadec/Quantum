@@ -30,10 +30,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import androidx.appcompat.app.AppCompatActivity;
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
 import hu.hexadecimal.quantum.graphics.QuantumView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     BlochSphereView glSurfaceView;
     QuantumView qv;
@@ -255,6 +256,9 @@ public class MainActivity extends Activity {
                 break;
             case R.id.undo:
                 qv.removeLastGate();
+                break;
+            case R.id.matrix:
+                startActivity(new Intent(MainActivity.this, MatrixEditorActivity.class));
                 break;
             case R.id.bloch:
                 displayBlochSphere();

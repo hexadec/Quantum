@@ -284,4 +284,12 @@ public class LinearOperator extends VisualOperator implements Serializable {
         }
         return list;
     }
+
+    public Complex determinant() {
+        return Complex.sub(Complex.multiply(matrix[0][0], matrix[1][1]), Complex.multiply(matrix[0][1], matrix[1][0]));
+    }
+
+    public boolean isSpecial() {
+        return determinant().mod() < 1.0001 && determinant().mod() > 0.9999;
+    }
 }

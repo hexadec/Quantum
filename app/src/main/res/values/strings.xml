@@ -21,4 +21,11 @@
     <string name="settings_help_long">
     Shots: select how many times to run the experiment. It is a good idea to increase this
     value as you start using more qubits.\nThreads: usually it is enough to use as many threads as CPU cores your device has, however, a little more won\'t deteriorate performance.</string>
+    <string name="matrix_editor">Matrix editor</string>
+    <string name="matrix_editor_detailed">Create and edit custom gates</string>
+    <string name="gate_name">Gate name</string>
+    <string name="symbols_hint">Symbols, eg: S,X,D</string>
+    <string name="matrix">Matrix</string>
+    <string name="choose_qubit_number">Number of qubits 1&#8211;4</string>
+    <string name="add_gate">Add gate</string>
 </resources>
