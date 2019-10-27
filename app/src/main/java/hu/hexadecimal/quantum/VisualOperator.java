@@ -3,17 +3,20 @@ package hu.hexadecimal.quantum;
 import android.graphics.Rect;
 import androidx.annotation.NonNull;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class VisualOperator {
+public class VisualOperator implements Serializable {
 
-    protected int color = 0xff000000;
-    protected List<Rect> rectangle;
-    public final int MATRIX_DIM;
-    private int[] qubit_ids;
+    public static final long serialVersionUID = 1L;
+    public int color = 0xff000000;
+    public String name;
+    public List<Rect> rectangle;
+    public int MATRIX_DIM;
+    public int[] qubit_ids;
 
-    VisualOperator(int DIM) {
+    public VisualOperator(int DIM) {
         int nqubits = 1;
         switch (DIM) {
             case 4:
@@ -72,5 +75,13 @@ public class VisualOperator {
 
     public int[] getQubitIDs() {
         return qubit_ids;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

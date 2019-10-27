@@ -7,9 +7,9 @@ import java.util.List;
 
 public class LinearOperator extends VisualOperator implements Serializable {
 
-    protected Complex[][] matrix;
-    private String name;
-    private String symbol;
+    public static final long serialVersionUID = 1L;
+    public Complex[][] matrix;
+    public String symbol;
     public static final int MATRIX_DIM = 2;
 
     public static final transient LinearOperator HADAMARD =
@@ -103,22 +103,14 @@ public class LinearOperator extends VisualOperator implements Serializable {
     /**
      * Avoid using this constructor whenever possible
      */
-    protected LinearOperator() {
+    public LinearOperator() {
         super(MATRIX_DIM);
         matrix = null;
         name = "Empty";
     }
 
-    public String getName() {
-        return name;
-    }
-
     public String getSymbol() {
         return symbol;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public void setSymbol(String symbol) {

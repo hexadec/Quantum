@@ -10,11 +10,11 @@ import java.util.Random;
 
 public class MultiQubitOperator extends VisualOperator implements Serializable {
 
-    public final int NQBITS;
-    protected Complex[][] matrix;
-    private String name;
-    private String[] symbols;
-    private Random random;
+    public static final long serialVersionUID = 1L;
+    public int NQBITS;
+    public Complex[][] matrix;
+    public String[] symbols;
+    public Random random;
 
     public static final transient MultiQubitOperator CNOT =
             new MultiQubitOperator(4,
@@ -139,18 +139,10 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
         random = new Random();
     }
 
-    private MultiQubitOperator() {
+    public MultiQubitOperator() {
         super(4);
         name = "";
         NQBITS = 2;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String[] getSymbols() {
@@ -362,5 +354,52 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
             return null;
         }
         return null;
+    }
+
+    public Complex determinant() {
+        return getDeterminant(matrix, MATRIX_DIM, MATRIX_DIM);
+    }
+
+    public boolean isSpecial() {
+        Complex det = determinant();
+        return det.mod() < 1.0001 && det.mod() > 0.9999;
+    }
+
+    private static void getCofactor(Complex mat[][], Complex temp[][], int p, int q, int n)
+    {
+        int i = 0, j = 0;
+        for (int row = 0; row < n; row++)
+        {
+            for (int col = 0; col < n; col++)
+            {
+                if (row != p && col != q)
+                {
+                    temp[i][j++] = mat[row][col];
+                    if (j == n - 1)
+                    {
+                        j = 0;
+                        i++;
+                    }
+                }
+            }
+        }
+    }
+
+    private Complex getDeterminant(Complex matrix[][], int DIM, int DIM2)
+    {
+        Complex D = new Complex(0);
+        if (DIM == 1)
+            return matrix[0][0];
+        Complex temp[][] = new Complex[DIM2][DIM2];
+        int sign = 1;
+        for (int f = 0; f < DIM; f++)
+        {
+
+            getCofactor(matrix, temp, 0, f, DIM);
+            D.add(Complex.multiply(Complex.multiply(new Complex(sign), matrix[0][f]), getDeterminant(temp, DIM - 1, DIM2)));
+            sign = -sign;
+        }
+
+        return D;
     }
 }

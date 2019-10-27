@@ -1,9 +1,11 @@
 package hu.hexadecimal.quantum;
 
+import java.io.Serializable;
 import java.text.DecimalFormat;
 
-public class Complex {
+public class Complex implements Serializable {
 
+    public static final long serialVersionUID = 1L;
     public double real = 0;
     public double imaginary = 0;
 
@@ -222,5 +224,27 @@ public class Complex {
     public boolean equals(Object complex) {
         if (!(complex instanceof Complex)) return false;
         else return equalsExact((Complex) complex);
+    }
+
+    public static Complex fromString(String string) throws IllegalArgumentException {
+        try {
+            double real = 0;
+            double imaginary = 0;
+            if (string.matches("(.)+([-])(.)*i")) {
+                real = Double.valueOf(string.substring(0, string.lastIndexOf("-")));
+                imaginary = Double.valueOf(string.substring(string.lastIndexOf("-")).replace("i", string.substring(string.lastIndexOf("-")).length() == 1 ? "1" : ""));
+            } else if (string.matches("(.)+([+])(.)*i")) {
+                real = Double.valueOf(string.substring(0, string.lastIndexOf("+")));
+                imaginary = Double.valueOf(string.substring(string.lastIndexOf("+")).replace("i", string.substring(string.lastIndexOf("+")).length() == 1 ? "1" : ""));
+            } else if (string.matches("([-])(.)*i") || string.matches("\\d*\\.?\\d*i")) {
+                imaginary = Double.valueOf(string.replace("i", string.length() == 1 ? "1" : ""));
+            } else if (string.matches("-\\d+(\\.)?\\d*") || string.matches("\\d+(\\.)?\\d*")) {
+                real = Double.valueOf(string);
+            }
+            return new Complex(real, imaginary);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new IllegalArgumentException(e.getMessage());
+        }
     }
 }

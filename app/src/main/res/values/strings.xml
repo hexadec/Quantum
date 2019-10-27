@@ -15,7 +15,7 @@
     <string name="operate_on">Operate on</string>
     <string name="select_order_of_qubits">Select the order of qubits for the chosen operator</string>
     <string name="results">Results</string>
-    <string name="wait">Executing experiment, please wait...</string>
+    <string name="wait">Executing experiment, please wait&#8230;</string>
     <string name="undo_add_gate">Undo \&quot;Add gate\&quot;</string>
     <string name="settings_help">Help</string>
     <string name="settings_help_long">
@@ -28,4 +28,11 @@
     <string name="matrix">Matrix</string>
     <string name="choose_qubit_number">Number of qubits 1&#8211;4</string>
     <string name="add_gate">Add gate</string>
+    <string name="choose_save_location">Please select where to save the files. You can change it later in the settings</string>
+    <string name="select">Select</string>
+    <string name="invalid_dim">Invalid matrix dimension, use 2^n*2^n</string>
+    <string name="invalid_symbols">Use as many symbols as qubits separated by commas</string>
+    <string name="invalid_name">Enter a valid unused name</string>
+    <string name="invalid_complex">Invalid complex number: try the format x±yi</string>
+    <string name="invalid_matrix">The matrix has to be member of the group SL(n) </string>
 </resources>

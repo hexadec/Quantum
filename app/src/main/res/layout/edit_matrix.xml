@@ -1,25 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <EditText
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="66dp"
-        android:layout_marginStart="66dp"
-        android:ems="10"
-        android:gravity="center|bottom"
-        android:hint="@string/gate_name"
-        android:inputType="text"
-        android:singleLine="true"
+        android:layout_marginEnd="50dp"
+        android:layout_marginStart="50dp"
         app:layout_constraintBottom_toTopOf="@+id/symbols"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/qbitsBar" />
+        app:layout_constraintTop_toBottomOf="@+id/qbitsBar" >
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/name0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="center|bottom"
+            android:hint="@string/gate_name"
+            android:inputType="text"
+            android:singleLine="true"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <SeekBar
         android:id="@+id/qbitsBar"
@@ -45,53 +52,79 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/symbols"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="1dp"
-        android:layout_marginEnd="66dp"
-        android:layout_marginStart="66dp"
-        android:ems="10"
-        android:gravity="center|bottom"
-        android:hint="@string/symbols_hint"
-        android:singleLine="true"
-        android:inputType="text"
+        android:layout_marginEnd="50dp"
+        android:layout_marginStart="50dp"
         app:layout_constraintBottom_toTopOf="@+id/colorBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/name" />
+        app:layout_constraintTop_toBottomOf="@+id/name">
 
-    <SeekBar
-        android:id="@+id/colorBar"
-        android:layout_width="200dp"
-        android:layout_height="40dp"
-        android:layout_marginBottom="4dp"
-        android:layout_marginEnd="66dp"
-        android:layout_marginStart="66dp"
-        android:layout_marginTop="4dp"
-        android:max="0xffffff"
-        android:progress="0x777777"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/symbols0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:gravity="center|bottom"
+            android:hint="@string/symbols_hint"
+            android:singleLine="true"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <View
+        android:id="@+id/color_stuff"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginEnd="51dp"
+        android:layout_marginStart="51dp"
+        android:layout_marginTop="5dp"
         app:layout_constraintBottom_toTopOf="@+id/editText3"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/symbols" />
 
-    <EditText
+    <SeekBar
+        android:id="@+id/colorBar"
+        android:layout_width="0dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginEnd="50dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="4dp"
+        android:max="0xffffff"
+        android:progress="0x777777"
+        android:background="@drawable/white_frame"
+        app:layout_constraintBottom_toTopOf="@+id/editText3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/symbols" />
+
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/editText3"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="66dp"
-        android:layout_marginStart="66dp"
+        android:layout_marginEnd="50dp"
+        android:layout_marginStart="50dp"
         android:layout_marginTop="4dp"
-        android:ems="10"
-        android:hint="@string/matrix"
-        android:inputType="textMultiLine"
-        android:maxLines="16"
-        android:digits="0123456789.,-+i\n"
-        android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/colorBar" />
+        app:layout_constraintTop_toBottomOf="@+id/colorBar">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editText30"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="@string/matrix"
+            android:inputType="textMultiLine"
+            android:maxLines="16"
+            android:digits="0123456789.,-+i\n"
+            android:gravity="center"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
