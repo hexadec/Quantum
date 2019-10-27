@@ -140,6 +140,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                                 String[][] strMatrix = new String[(int) Math.pow(2, qs)][(int) Math.pow(2, qs)];
                                 if (symbols.length != qs) {
                                     showErr(1);
+                                    return;
                                 }
                                 if (tempm.length != (int) Math.pow(2, qs)) {
                                     showErr(0);
@@ -168,13 +169,15 @@ public class MatrixEditorActivity extends AppCompatActivity {
                                 VisualOperator v;
                                 if (qs == 1) {
                                     v = new LinearOperator(cmatrix, name, symbols[0], color);
-                                    if (!((LinearOperator)v).isSpecial()) {
+                                    if (!((LinearOperator) v).isSpecial() || !((LinearOperator) v).isUnitary()) {
+                                        Log.e("Mtr", ((LinearOperator) v).inverse().toString() + "\n----\n" + LinearOperator.hermitianConjugate((LinearOperator)v).toString());
                                         showErr(4);
                                         return;
                                     }
+
                                 } else {
                                     v = new MultiQubitOperator((int) Math.pow(2, qs), cmatrix, name, symbols, color);
-                                    if (!((MultiQubitOperator)v).isSpecial()) {
+                                    if (!((MultiQubitOperator) v).isSpecial() || !((MultiQubitOperator) v).isUnitary()) {
                                         showErr(4);
                                         return;
                                     }

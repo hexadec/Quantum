@@ -155,11 +155,16 @@ public class Complex implements Serializable {
      */
     public String toString3Decimals() {
         StringBuilder sb = new StringBuilder();
-        sb.append(real < 0 ? " " : " +");
-        sb.append(new DecimalFormat("0.000").format(real));
-        sb.append(imaginary < 0 ? " - " : " + ");
-        sb.append(new DecimalFormat("0.000").format(Math.abs(imaginary)));
-        sb.append('i');
+        if (Math.abs(real) >= 0.0005)
+            sb.append(new DecimalFormat("0.0##").format(real));
+        if (Math.abs(imaginary) >= 0.0005) {
+            sb.append(imaginary < 0 ? "-" : "+");
+            sb.append(new DecimalFormat("0.0##").format(Math.abs(imaginary)));
+            sb.append('i');
+        }
+        if (sb.length() < 1) {
+            sb.append('0');
+        }
         return sb.toString();
     }
 
@@ -236,7 +241,9 @@ public class Complex implements Serializable {
             } else if (string.matches("(.)+([+])(.)*i")) {
                 real = Double.valueOf(string.substring(0, string.lastIndexOf("+")));
                 imaginary = Double.valueOf(string.substring(string.lastIndexOf("+")).replace("i", string.substring(string.lastIndexOf("+")).length() == 1 ? "1" : ""));
-            } else if (string.matches("([-])(.)*i") || string.matches("\\d*\\.?\\d*i")) {
+            } else if (string.matches("([-])(.)*i")){
+                imaginary = Double.valueOf(string.replace("i", string.length() == 2 ? "1" : ""));
+            } else if (string.matches("\\d*\\.?\\d*i")) {
                 imaginary = Double.valueOf(string.replace("i", string.length() == 1 ? "1" : ""));
             } else if (string.matches("-\\d+(\\.)?\\d*") || string.matches("\\d+(\\.)?\\d*")) {
                 real = Double.valueOf(string);
@@ -246,5 +253,17 @@ public class Complex implements Serializable {
             e.printStackTrace();
             throw new IllegalArgumentException(e.getMessage());
         }
+    }
+
+    public Complex copy() {
+        return new Complex(real, imaginary);
+    }
+
+    public static Complex copy(Complex c) {
+        return new Complex(c.real, c.imaginary);
+    }
+
+    public boolean isZero() {
+        return Math.abs(real) < 0.0001 && Math.abs(imaginary) < 0.0001;
     }
 }

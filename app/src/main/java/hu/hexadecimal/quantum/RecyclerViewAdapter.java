@@ -35,6 +35,18 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         VisualOperator operator = operators.get(position);
         holder.gateName.setText(operator.getName());
         holder.color.setBackgroundColor(operator.getColor());
+        if (operator instanceof LinearOperator) {
+            holder.gateSymbols.setText(((LinearOperator)operator).getSymbol());
+            holder.gateMatrix.setText(((LinearOperator)operator).toString());
+        } else if (operator instanceof MultiQubitOperator) {
+            StringBuilder symbol = new StringBuilder();
+            for (String s : ((MultiQubitOperator)operator).getSymbols()) {
+                symbol.append("  ");
+                symbol.append(s);
+            }
+            holder.gateSymbols.setText(symbol.toString());
+            holder.gateMatrix.setText(((MultiQubitOperator)operator).toString());
+        }
     }
 
     // total number of rows
@@ -47,13 +59,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView gateName;
-        TextView gateDetails;
+        TextView gateSymbols;
+        TextView gateMatrix;
         View color;
 
         ViewHolder(View itemView) {
             super(itemView);
             gateName = itemView.findViewById(R.id.gate_name_disp);
-            gateDetails = itemView.findViewById(R.id.gate_details_disp);
+            gateSymbols = itemView.findViewById(R.id.gate_symbols_disp);
+            gateMatrix = itemView.findViewById(R.id.gate_matrix_disp);
             color = itemView.findViewById(R.id.imageView);
             itemView.setOnClickListener(this);
         }

@@ -239,8 +239,9 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
         for (Complex[] c : matrix) {
             for (Complex z : c) {
                 sb.append(z.toString3Decimals());
-                sb.append('\t');
+                sb.append(", ");
             }
+            sb.deleteCharAt(sb.length() - 2);
             sb.append('\n');
         }
         return sb.toString();
@@ -251,6 +252,18 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
         for (int i = 0; i < MATRIX_DIM; i++) {
             for (int j = 0; j < MATRIX_DIM; j++) {
                 if (!matrix[i][j].equalsExact(multiQubitOperator.matrix[i][j])) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean equals3Decimals(MultiQubitOperator multiQubitOperator) {
+        Complex[][] m = multiQubitOperator.matrix;
+        for (int i = 0; i < MATRIX_DIM; i++) {
+            for (int j = 0; j < MATRIX_DIM; j++) {
+                if (!matrix[i][j].equals3Decimals(multiQubitOperator.matrix[i][j])) {
                     return false;
                 }
             }
@@ -365,18 +378,25 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
         return det.mod() < 1.0001 && det.mod() > 0.9999;
     }
 
-    private static void getCofactor(Complex mat[][], Complex temp[][], int p, int q, int n)
-    {
+    public MultiQubitOperator inverse() {
+        MultiQubitOperator mcopy = copy();
+        Complex[][] invm = LinearOperator.invert(mcopy.matrix);
+        mcopy.matrix = invm;
+        mcopy.transpose();
+        return mcopy;
+    }
+
+    public boolean isUnitary() {
+        return inverse().equals3Decimals(hermitianConjugate(this));
+    }
+
+    private static void getCofactor(Complex mat[][], Complex temp[][], int p, int q, int n) {
         int i = 0, j = 0;
-        for (int row = 0; row < n; row++)
-        {
-            for (int col = 0; col < n; col++)
-            {
-                if (row != p && col != q)
-                {
+        for (int row = 0; row < n; row++) {
+            for (int col = 0; col < n; col++) {
+                if (row != p && col != q) {
                     temp[i][j++] = mat[row][col];
-                    if (j == n - 1)
-                    {
+                    if (j == n - 1) {
                         j = 0;
                         i++;
                     }
@@ -385,15 +405,13 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
         }
     }
 
-    private Complex getDeterminant(Complex matrix[][], int DIM, int DIM2)
-    {
+    private Complex getDeterminant(Complex matrix[][], int DIM, int DIM2) {
         Complex D = new Complex(0);
         if (DIM == 1)
             return matrix[0][0];
         Complex temp[][] = new Complex[DIM2][DIM2];
         int sign = 1;
-        for (int f = 0; f < DIM; f++)
-        {
+        for (int f = 0; f < DIM; f++) {
 
             getCofactor(matrix, temp, 0, f, DIM);
             D.add(Complex.multiply(Complex.multiply(new Complex(sign), matrix[0][f]), getDeterminant(temp, DIM - 1, DIM2)));
