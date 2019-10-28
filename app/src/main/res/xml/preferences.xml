@@ -21,6 +21,12 @@
             android:title="@string/threads" />
 
         <Preference
+            android:key="save_loc"
+            android:enabled="true"
+            android:icon="@drawable/folder_home"
+            android:title="@string/save_location" />
+
+        <Preference
             android:enabled="false"
             android:summary="@string/settings_help_long"
             android:title="@string/settings_help" />

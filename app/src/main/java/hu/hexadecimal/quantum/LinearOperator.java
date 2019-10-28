@@ -206,8 +206,8 @@ public class LinearOperator extends VisualOperator implements Serializable {
 
     public LinearOperator copy() {
         return new LinearOperator(new Complex[][]{
-                new Complex[]{matrix[0][0], matrix[1][0]},
-                new Complex[]{matrix[0][1], matrix[1][1]}
+                new Complex[]{matrix[0][0].copy(), matrix[1][0].copy()},
+                new Complex[]{matrix[0][1].copy(), matrix[1][1].copy()}
         }, name, symbol, color);
     }
 
@@ -301,103 +301,78 @@ public class LinearOperator extends VisualOperator implements Serializable {
 
     public LinearOperator inverse() {
         LinearOperator lcopy = copy();
-        Complex[][] invm = invert(copy().matrix);
+        Complex[][] invm = LinearOperator.invert(copy().matrix);
         lcopy.matrix = invm;
         lcopy.transpose();
         return lcopy;
     }
 
     public boolean isUnitary() {
-        return inverse().equals3Decimals(hermitianConjugate(this));
+        return inverse().equals3Decimals(LinearOperator.hermitianConjugate(this));
     }
 
-    public static Complex[][] invert(Complex a[][])
-    {
+    public static Complex[][] invert(Complex a[][]) {
         int n = a.length;
         Complex x[][] = new Complex[n][n];
         Complex b[][] = new Complex[n][n];
         int index[] = new int[n];
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
             for (int j = 0; j < n; j++) {
                 b[i][j] = new Complex(i == j ? 1 : 0);
             }
-
-        // Transform the matrix into an upper triangle
         gaussian(a, index);
-
-        // Update the matrix b[i][j] with the ratios stored
-        for (int i=0; i<n-1; ++i)
-            for (int j=i+1; j<n; ++j)
-                for (int k=0; k<n; ++k)
+        for (int i = 0; i < n - 1; ++i)
+            for (int j = i + 1; j < n; ++j)
+                for (int k = 0; k < n; ++k)
                     b[index[j]][k] = Complex.sub(b[index[j]][k], Complex.multiply(a[index[j]][i], b[index[i]][k]));
 
-        // Perform backward substitutions
-        for (int i=0; i<n; ++i)
-        {
-            x[n-1][i] = Complex.divide(b[index[n-1]][i], a[index[n-1]][n-1]);
-            for (int j=n-2; j>=0; --j)
-            {
+        for (int i = 0; i < n; ++i) {
+            x[n - 1][i] = Complex.divide(b[index[n - 1]][i], a[index[n - 1]][n - 1]);
+            for (int j = n - 2; j >= 0; --j) {
                 x[j][i] = b[index[j]][i];
-                for (int k=j+1; k<n; ++k)
-                {
+                for (int k = j + 1; k < n; ++k) {
                     x[j][i] = Complex.sub(x[j][i], Complex.multiply(a[index[j]][k], x[k][i]));
                 }
-                x[j][i] = Complex.divide( x[j][i], a[index[j]][j]);
+                x[j][i] = Complex.divide(x[j][i], a[index[j]][j]);
             }
         }
         return x;
     }
 
-    public static void gaussian(Complex a[][], int index[])
-    {
+    public static void gaussian(Complex a[][], int index[]) {
         int n = index.length;
         Complex c[] = new Complex[n];
 
-        // Initialize the index
-        for (int i=0; i<n; ++i)
+        for (int i = 0; i < n; ++i)
             index[i] = i;
 
-        // Find the rescaling factors, one from each row
-        for (int i=0; i<n; ++i)
-        {
+        for (int i = 0; i < n; ++i) {
             Complex c1 = new Complex(0);
-            for (int j=0; j<n; ++j)
-            {
+            for (int j = 0; j < n; ++j) {
                 Complex c0 = new Complex(a[i][j].mod());
                 if (c0.mod() > c1.mod()) c1 = c0;
             }
             c[i] = c1;
         }
-
-        // Search the pivoting element from each column
         int k = 0;
-        for (int j=0; j<n-1; ++j)
-        {
+        for (int j = 0; j < n - 1; ++j) {
             Complex pi1 = new Complex(0);
-            for (int i=j; i<n; ++i)
-            {
+            for (int i = j; i < n; ++i) {
                 Complex pi0 = new Complex(a[index[i]][j].mod());
                 pi0 = Complex.divide(pi0, c[index[i]]);
-                if (pi0.mod() > pi1.mod())
-                {
+                if (pi0.mod() > pi1.mod()) {
                     pi1 = pi0;
                     k = i;
                 }
             }
 
-            // Interchange rows according to the pivoting order
             int itmp = index[j];
             index[j] = index[k];
             index[k] = itmp;
-            for (int i=j+1; i<n; ++i)
-            {
+            for (int i = j + 1; i < n; ++i) {
                 Complex pj = Complex.divide(a[index[i]][j], a[index[j]][j]);
-
-                // Record pivoting ratios below the diagonal
                 a[index[i]][j] = pj;
-
-                // Modify other elements accordingly
-                for (int l=j+1; l<n; ++l)
+                for (int l = j + 1; l < n; ++l)
                     a[index[i]][l] = Complex.sub(a[index[i]][l], Complex.multiply(pj, a[index[j]][l]));
             }
         }

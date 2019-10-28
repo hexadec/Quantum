@@ -228,7 +228,7 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
         for (int i = 0; i < MATRIX_DIM; i++) {
             complex[i] = new Complex[MATRIX_DIM];
             for (int j = 0; j < MATRIX_DIM; j++) {
-                complex[i][j] = matrix[i][j];
+                complex[i][j] = matrix[i][j].copy();
             }
         }
         return new MultiQubitOperator(MATRIX_DIM, complex, name, symbols, color);
@@ -283,7 +283,6 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
             for (int k = 0; k < NQBITS; k++) {
                 if (k == 0) {
                     inputMatrix[i] = Complex.multiply(qs[NQBITS - 2].matrix[(i >> 1) % 2], qs[NQBITS - 1].matrix[i % 2]);
-                    //Log.e("--", "" + inputMatrix[i].toString3Decimals() + ": " + i);
                     k += 1;
                     continue;
                 }
@@ -292,23 +291,18 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
         }
         for (int i = 0; i < MATRIX_DIM; i++) {
             for (int j = 0; j < MATRIX_DIM; j++) {
-                //Log.e("-", matrix[i][j].toString3Decimals() + "-" + inputMatrix[j] + "-" + i + "." + j);
                 resultMatrix[i].add(Complex.multiply(matrix[i][j], inputMatrix[j]));
             }
-            //Log.e("+", resultMatrix[i] + "---" + i);
         }
-        //Log.i("MultiQubitOperator", resultMatrix[0] + "\n" + resultMatrix[1] + "\n" + resultMatrix[2] + "\n" + resultMatrix[3]);
         double[] probs = new double[MATRIX_DIM];
         double subtrahend = 0;
         for (int i = 0; i < MATRIX_DIM; i++) {
             probs[i] = Complex.multiply(Complex.conjugate(resultMatrix[i]), resultMatrix[i]).real;
-            //Log.i("MultiQubitOperator", "Probs[" + i + "]:" + probs[i]);
             double prob = random.nextDouble();
             if (probs[i] > prob * (1 - subtrahend)) {
                 Qubit[] result = new Qubit[NQBITS];
                 for (int j = 0; j < NQBITS; j++) {
                     result[j] = new Qubit();
-                    //Log.i("MultiQubitOperator", "CASE: " + i + " j: " + j + "-" + (i >> j));
                     if ((i >> (NQBITS - j - 1)) % 2 == 1) result[j].prepare(true);
                 }
                 return result;
@@ -324,8 +318,22 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
     }
 
     public static String[] generateSymbols(int DIM) {
-        String[] sym = new String[DIM];
-        for (int i = 0; i < DIM; i++)
+        int NQBITS = 0;
+        switch (DIM) {
+            case 4:
+                NQBITS = 2;
+                break;
+            case 8:
+                NQBITS = 3;
+                break;
+            case 16:
+                NQBITS = 4;
+                break;
+            default:
+                throw new NullPointerException("Invalid dimension");
+        }
+        String[] sym = new String[NQBITS];
+        for (int i = 0; i < NQBITS; i++)
             sym[i] = "C" + i;
         return sym;
     }
@@ -412,7 +420,6 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
         Complex temp[][] = new Complex[DIM2][DIM2];
         int sign = 1;
         for (int f = 0; f < DIM; f++) {
-
             getCofactor(matrix, temp, 0, f, DIM);
             D.add(Complex.multiply(Complex.multiply(new Complex(sign), matrix[0][f]), getDeterminant(temp, DIM - 1, DIM2)));
             sign = -sign;

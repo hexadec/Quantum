@@ -29,10 +29,18 @@
     <string name="choose_qubit_number">Number of qubits 1&#8211;4</string>
     <string name="add_gate">Add gate</string>
     <string name="choose_save_location">Please select where to save the files. You can change it later in the settings</string>
+    <string name="save_location">Output folder</string>
+    <string name="no_folder_selected">No folder selected</string>
     <string name="select">Select</string>
     <string name="invalid_dim">Invalid matrix dimension, use 2^n*2^n</string>
     <string name="invalid_symbols">Use as many symbols as qubits separated by commas</string>
     <string name="invalid_name">Enter a valid unused name</string>
     <string name="invalid_complex">Invalid complex number: try the format x±yi</string>
     <string name="invalid_matrix">The matrix has to be member of the group SU(n) </string>
+    <string name="check_matrix">Check matrix</string>
+    <string name="determinant">Determinant</string>
+    <string name="unitary">Unitary</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="delete_gate_question">Delete selected gate?</string>
 </resources>
