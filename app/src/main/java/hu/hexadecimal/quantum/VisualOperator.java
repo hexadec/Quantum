@@ -10,6 +10,7 @@ import java.util.List;
 public class VisualOperator implements Serializable {
 
     public static final long serialVersionUID = 1L;
+    public static final String FILE_EXTENSION = ".vqg";
     public int color = 0xff000000;
     public String name;
     public List<Rect> rectangle;

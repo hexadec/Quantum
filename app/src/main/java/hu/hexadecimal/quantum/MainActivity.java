@@ -1,12 +1,12 @@
 package hu.hexadecimal.quantum;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -26,11 +26,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ObjectInputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.documentfile.provider.DocumentFile;
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
 import hu.hexadecimal.quantum.graphics.QuantumView;
 
@@ -58,9 +63,9 @@ public class MainActivity extends AppCompatActivity {
                 float x = event.getX();
                 float y = event.getY();
                 VisualOperator vop = qv.whichGate(x, y);
-                String opn = vop == null ? null : vop instanceof LinearOperator ? ((LinearOperator) vop).getName() : ((MultiQubitOperator) vop).getName();
+                String opn = vop == null ? null : vop.getName();
                 Toast.makeText(MainActivity.this, "x: " + x + " y: " + y + " OP: " + opn, Toast.LENGTH_SHORT).show();
-                showAddGateDialog();
+                showAddGateDialog(x, y);
                 return true;
             }
         };
@@ -92,11 +97,16 @@ public class MainActivity extends AppCompatActivity {
         adb.show();
     }
 
-    public void showAddGateDialog() {
+    public void showAddGateDialog(float posx, float posy) {
         AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
-        adb.setTitle(R.string.select_gate_type)
-                .setPositiveButton(R.string.single_gate, null)
-                .setNegativeButton(R.string.multi_gate, null)
+        adb.setTitle(R.string.select_action)
+                .setNegativeButton(R.string.delete_gate, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        qv.deleteGateAt(posx, posy);
+                    }
+                })
+                .setPositiveButton(R.string.add_gate, null)
                 .setNeutralButton(R.string.cancel, null)
                 .setCancelable(true);
 
@@ -105,32 +115,165 @@ public class MainActivity extends AppCompatActivity {
         d.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
             public void onShow(DialogInterface dialog) {
-                final Button single = d.getButton(AlertDialog.BUTTON_POSITIVE);
-                final Button multi = d.getButton(AlertDialog.BUTTON_NEGATIVE);
-                single.setOnClickListener(new View.OnClickListener() {
+                final Button multi = d.getButton(AlertDialog.BUTTON_POSITIVE);
+                d.getButton(DialogInterface.BUTTON_NEGATIVE).setEnabled(qv.whichGate(posx, posy) != null);
+                multi.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        d.setTitle(getString(R.string.select_gate));
-                        single.setText("OK");
-                        multi.setEnabled(false);
-                        final View view = MainActivity.this.getLayoutInflater().inflate(R.layout.single_gate_selector, null);
-                        final Spinner sp = view.findViewById(R.id.gate_spinner);
-                        final Spinner qsp = view.findViewById(R.id.qubit_spinner);
+                        LinkedList<MultiQubitOperator> operators = new LinkedList<>();
+                        LinkedList<String> operatorNames = new LinkedList<>();
+                        try {
+                            Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
+                            DocumentFile pickedDir = DocumentFile.fromTreeUri(MainActivity.this, uri);
+                            if (!pickedDir.exists()) {
+                                getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                pickedDir = null;
+                            }
+
+                            for (DocumentFile file : pickedDir.listFiles()) {
+                                try {
+                                    if (file.getName().endsWith(VisualOperator.FILE_EXTENSION)) {
+                                        MultiQubitOperator m = (MultiQubitOperator) new ObjectInputStream(getContentResolver().openInputStream(file.getUri())).readObject();
+                                        operators.add(m);
+                                        operatorNames.add(m.getName());
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        } catch (Exception e) {
+                            Log.e("QubitAdder", "Some error has happened :(");
+                            e.printStackTrace();
+                        }
+                        final View view = MainActivity.this.getLayoutInflater().inflate(R.layout.gate_selector, null);
+                        final Spinner gateType = view.findViewById(R.id.type_spinner);
+                        final Spinner filter = view.findViewById(R.id.filter_spinner);
+                        final Spinner gateName = view.findViewById(R.id.gate_name_spinner);
+                        final Spinner[] qX = new Spinner[]{
+                                view.findViewById(R.id.order_first),
+                                view.findViewById(R.id.order_second),
+                                view.findViewById(R.id.order_third),
+                                view.findViewById(R.id.order_fourth)};
                         List<String> qs = new ArrayList<>();
                         for (int i = 0; i < qv.getDisplayedQubits(); i++) {
                             qs.add("q" + (i + 1));
                         }
-                        List<String> gates = LinearOperator.getPredefinedGateNames();
-                        Collections.sort(gates);
+                        if (operators.size() == 0) {
+                            gateType.setEnabled(false);
+                        }
                         ArrayAdapter<String> adapter =
                                 new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, qs);
-                        ArrayAdapter<String> gadapter =
-                                new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, gates);
-
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        qX[0].setAdapter(adapter);
+                        qX[1].setAdapter(adapter);
+                        qX[2].setAdapter(adapter);
+                        qX[3].setAdapter(adapter);
+                        final LinkedList<String> mGates = MultiQubitOperator.getPredefinedGateNames();
+                        Collections.sort(mGates);
+                        ArrayAdapter<String> gadapter =
+                                new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
+
                         gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        qsp.setAdapter(adapter);
-                        sp.setAdapter(gadapter);
+                        gateName.setAdapter(gadapter);
+                        gateType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                if (i == 0) {
+                                    filter.setEnabled(true);
+                                    if (filter.getSelectedItemPosition() == 0) {
+                                        ArrayAdapter<String> gadapter =
+                                                new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
+
+                                        gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                        gateName.setAdapter(gadapter);
+                                    } else {
+                                        LinkedList<String> mGates = MultiQubitOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
+                                        Collections.sort(mGates);
+                                        ArrayAdapter<String> gadapter =
+                                                new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
+
+                                        gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                        gateName.setAdapter(gadapter);
+                                    }
+                                } else {
+                                    filter.setEnabled(false);
+                                    filter.setSelection(0);
+                                    ArrayAdapter<String> gadapter =
+                                            new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, operatorNames);
+                                    gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                    gateName.setAdapter(gadapter);
+                                }
+                            }
+
+                            @Override
+                            public void onNothingSelected(AdapterView<?> adapterView) {
+                            }
+                        });
+                        filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                if (gateType.getSelectedItemPosition() == 0) {
+                                    if (i == 0) {
+                                        ArrayAdapter<String> gadapter =
+                                                new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
+
+                                        gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                        gateName.setAdapter(gadapter);
+                                    } else {
+                                        LinkedList<String> mGates = MultiQubitOperator.getPredefinedGateNames(i == 1);
+                                        Collections.sort(mGates);
+                                        ArrayAdapter<String> gadapter =
+                                                new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
+
+                                        gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                        gateName.setAdapter(gadapter);
+                                    }
+                                } else {
+
+                                }
+                            }
+
+                            @Override
+                            public void onNothingSelected(AdapterView<?> adapterView) {
+
+                            }
+                        });
+                        gateName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                LinkedList<String> gates = MultiQubitOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
+                                Collections.sort(gates);
+                                ArrayAdapter<String> adapter =
+                                        new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, filter.getSelectedItemPosition() == 0 ? mGates : gates);
+
+                                int qbits = gateType.getSelectedItemPosition() == 0 ? MultiQubitOperator.findGateByName(adapter.getItem(i)).NQBITS : operators.get(i).NQBITS;
+                                switch (qbits) {
+                                    case 1:
+                                        qX[0].setVisibility(View.VISIBLE);
+                                    case 2:
+                                        qX[1].setVisibility(View.VISIBLE);
+                                    case 3:
+                                        qX[2].setVisibility(View.VISIBLE);
+                                    case 4:
+                                        qX[3].setVisibility(View.VISIBLE);
+                                    default:
+                                }
+                                switch (qbits) {
+                                    case 1:
+                                        qX[1].setVisibility(View.GONE);
+                                    case 2:
+                                        qX[2].setVisibility(View.GONE);
+                                    case 3:
+                                        qX[3].setVisibility(View.GONE);
+                                    default:
+                                }
+                            }
+
+                            @Override
+                            public void onNothingSelected(AdapterView<?> adapterView) {
+                            }
+                        });
                         view.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
@@ -140,87 +283,17 @@ public class MainActivity extends AppCompatActivity {
                         view.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                qv.addGate(qsp.getSelectedItemPosition(), LinearOperator.findGateByName((String) sp.getSelectedItem()));
-                                d.cancel();
-                            }
-                        });
-                        d.setContentView(view);
-                    }
-                });
-                multi.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        d.setTitle(getString(R.string.select_gate));
-                        multi.setText("OK");
-                        single.setEnabled(false);
-                        final View view = MainActivity.this.getLayoutInflater().inflate(R.layout.multi_gate_selector, null);
-                        final Spinner sp = view.findViewById(R.id.mgate_spinner);
-                        final Spinner[] q1 = new Spinner[]{
-                                view.findViewById(R.id.mqubit1_spinner),
-                                view.findViewById(R.id.mqubit2_spinner),
-                                view.findViewById(R.id.mqubit3_spinner),
-                                view.findViewById(R.id.mqubit4_spinner)};
-                        List<String> qs = new ArrayList<>();
-                        for (int i = 0; i < qv.getDisplayedQubits(); i++) {
-                            qs.add("q" + (i + 1));
-                        }
-                        List<String> gates = MultiQubitOperator.getPredefinedGateNames();
-                        Collections.sort(gates);
-                        ArrayAdapter<String> adapter =
-                                new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, qs);
-                        ArrayAdapter<String> gadapter =
-                                new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, gates);
+                                LinkedList<String> gates = MultiQubitOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
+                                Collections.sort(gates);
+                                ArrayAdapter<String> adapter =
+                                        new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, filter.getSelectedItemPosition() == 0 ? mGates : gates);
 
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        q1[0].setAdapter(adapter);
-                        q1[1].setAdapter(adapter);
-                        q1[2].setAdapter(adapter);
-                        q1[3].setAdapter(adapter);
-                        sp.setAdapter(gadapter);
-                        sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                int qbits = MultiQubitOperator.findGateByName(gadapter.getItem(i)).NQBITS;
-                                switch (qbits) {
-                                    case 1:
-                                        q1[0].setVisibility(View.VISIBLE);
-                                    case 2:
-                                        q1[1].setVisibility(View.VISIBLE);
-                                    case 3:
-                                        q1[2].setVisibility(View.VISIBLE);
-                                    case 4:
-                                        q1[3].setVisibility(View.VISIBLE);
-                                    default:
-                                }
-                                switch (qbits) {
-                                    case 1:
-                                        q1[1].setVisibility(View.GONE);
-                                    case 2:
-                                        q1[2].setVisibility(View.GONE);
-                                    case 3:
-                                        q1[3].setVisibility(View.GONE);
-                                    default:
-                                }
-                            }
-
-                            @Override
-                            public void onNothingSelected(AdapterView<?> adapterView) {
-                            }
-                        });
-                        view.findViewById(R.id.mcancel).setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                d.cancel();
-                            }
-                        });
-                        view.findViewById(R.id.mok).setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                int qbits = MultiQubitOperator.findGateByName((String) sp.getSelectedItem()).NQBITS;
+                                int qbits = gateType.getSelectedItemPosition() == 0
+                                        ? MultiQubitOperator.findGateByName(adapter.getItem(gateName.getSelectedItemPosition())).NQBITS
+                                        : operators.get(gateName.getSelectedItemPosition()).NQBITS;
                                 int[] qids = new int[qbits];
                                 for (int i = 0; i < qbits; i++) {
-                                    qids[i] = q1[i].getSelectedItemPosition();
+                                    qids[i] = qX[i].getSelectedItemPosition();
                                 }
                                 for (int i = 0; i < qbits; i++) {
                                     for (int j = i + 1; j < qbits; j++) {
@@ -230,7 +303,9 @@ public class MainActivity extends AppCompatActivity {
                                         }
                                     }
                                 }
-                                qv.addMultiQubitGate(qids, MultiQubitOperator.findGateByName((String) sp.getSelectedItem()));
+                                qv.addGate(qids, gateType.getSelectedItemPosition() == 0
+                                        ? MultiQubitOperator.findGateByName((String) gateName.getSelectedItem())
+                                        : operators.get(gateName.getSelectedItemPosition()));
                                 d.cancel();
                             }
                         });
@@ -283,14 +358,17 @@ public class MainActivity extends AppCompatActivity {
                 new Thread() {
                     public void run() {
                         ExperimentRunner experimentRunner = new ExperimentRunner(qv.getOperators());
+                        long startTime = System.currentTimeMillis();
                         float[] probs = experimentRunner.runExperiment(shots, threads, handler);
+                        long time = System.currentTimeMillis() - startTime;
+                        String t = new SimpleDateFormat("s's' SSS 'ms'").format(new Date(time));
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
                                 adb.setCancelable(false);
                                 adb.setPositiveButton("OK", null);
-                                adb.setTitle(R.string.results);
+                                adb.setTitle(getString(R.string.results) + ": \t" + t);
                                 ScrollView scrollView = new ScrollView(MainActivity.this);
                                 TextView textView = new TextView(MainActivity.this);
                                 textView.setTypeface(Typeface.MONOSPACE);

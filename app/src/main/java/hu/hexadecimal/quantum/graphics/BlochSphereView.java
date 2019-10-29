@@ -8,6 +8,7 @@ import android.view.View;
 
 import hu.hexadecimal.quantum.Complex;
 import hu.hexadecimal.quantum.LinearOperator;
+import hu.hexadecimal.quantum.MultiQubitOperator;
 import hu.hexadecimal.quantum.Qubit;
 
 public class BlochSphereView extends View {
@@ -47,11 +48,11 @@ public class BlochSphereView extends View {
         super.onDraw(canvas);
         if (qb == null) qb = new Qubit();
 
-        Qubit qbh = LinearOperator.HADAMARD.operateOn(qb);
+        Qubit qbh = MultiQubitOperator.HADAMARD.operateOn(new Qubit[]{qb})[0];
         float ProbZ = (float) Complex.multiply(qb.matrix[1], Complex.conjugate(qb.matrix[1])).real;
         float ProbX = (float) Complex.multiply(qbh.matrix[0], Complex.conjugate(qbh.matrix[0])).real;
-        qbh = LinearOperator.transpose(LinearOperator.S_GATE).operateOn(qb);
-        qbh.applyOperator(LinearOperator.HADAMARD);
+        qbh = MultiQubitOperator.transpose(MultiQubitOperator.S_GATE).operateOn(new Qubit[]{qb})[0];
+        qbh = MultiQubitOperator.HADAMARD.operateOn(new Qubit[]{qbh})[0];
         float ProbY = (float) Complex.multiply(qbh.matrix[1], Complex.conjugate(qbh.matrix[1])).real;
 
         int xpos = getWidth();

@@ -8,7 +8,8 @@
         <item>4K</item>
         <item>16K</item>
         <item>131K</item>
-        <item>524K</item>
+        <item>524K (only if you really need it)</item>
+        <item>4M (not recommended)</item>
     </string-array>
     <string-array name="shots_values">
         <item>1</item>
@@ -19,6 +20,7 @@
         <item>16384</item>
         <item>131072</item>
         <item>524288</item>
+        <item>4194304</item>
     </string-array>
     <string-array name="threads">
         <item>Single thread (not recommended)</item>
@@ -33,5 +35,14 @@
         <item>8</item>
         <item>16</item>
         <item>64</item>
+    </string-array>
+    <string-array name="gate_types">
+        <item>Predefined gates</item>
+        <item>User defined gates</item>
+    </string-array>
+    <string-array name="filter_gates">
+        <item>All gates</item>
+        <item>Single qubit gates only</item>
+        <item>Multi qubit gates only</item>
     </string-array>
 </resources>

@@ -48,18 +48,17 @@ public class MatrixEditorActivity extends AppCompatActivity {
         try {
             Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
             pickedDir = DocumentFile.fromTreeUri(this, uri);
+            if (!pickedDir.exists()) {
+                getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                pickedDir = null;
+            }
 
             for (DocumentFile file : pickedDir.listFiles()) {
                 try {
-                    Log.e("DF", file.getName());
-                    if (file.getName().endsWith(".sqg")) {
-                        LinearOperator l = (LinearOperator) new ObjectInputStream(getContentResolver().openInputStream(file.getUri())).readObject();
-                        operators.add(l);
-                        Log.e("DF", file.getName());
-                    } else if (file.getName().endsWith(".mqg")) {
+                    if (file.getName().endsWith(VisualOperator.FILE_EXTENSION)) {
                         MultiQubitOperator m = (MultiQubitOperator) new ObjectInputStream(getContentResolver().openInputStream(file.getUri())).readObject();
                         operators.add(m);
-                        Log.e("DF", file.getName());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -209,23 +208,13 @@ public class MatrixEditorActivity extends AppCompatActivity {
                                     showErr(3);
                                     return;
                                 }
-                                VisualOperator v;
-                                if (qs == 1) {
-                                    v = new LinearOperator(cmatrix, name, symbols[0], color);
-                                    if (!((LinearOperator) v).isSpecial() || !((LinearOperator) v).isUnitary()) {
-                                        showErr(4);
-                                        return;
-                                    }
-
-                                } else {
-                                    v = new MultiQubitOperator(DIM, cmatrix, name, symbols, color);
-                                    if (!((MultiQubitOperator) v).isSpecial() || !((MultiQubitOperator) v).isUnitary()) {
-                                        showErr(4);
-                                        return;
-                                    }
+                                MultiQubitOperator v = new MultiQubitOperator(DIM, cmatrix, name, symbols, color);
+                                if (!(v.isSpecial() || !v.isUnitary())) {
+                                    showErr(4);
+                                    return;
                                 }
                                 try {
-                                    DocumentFile newFile = pickedDir.createFile("application/octet-stream", name + (v instanceof LinearOperator ? ".sqg" : ".mqg"));
+                                    DocumentFile newFile = pickedDir.createFile("application/octet-stream", name + VisualOperator.FILE_EXTENSION);
                                     OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
                                     ObjectOutputStream out2 = new ObjectOutputStream(out);
                                     out2.writeObject(v);
@@ -295,9 +284,9 @@ public class MatrixEditorActivity extends AppCompatActivity {
                                     return;
                                 }
                                 VisualOperator vo;
+                                ((TextInputLayout) v.findViewById(R.id.editText3)).setErrorEnabled(true);
                                 if (qs == 1) {
                                     vo = new LinearOperator(cmatrix);
-                                    ((TextInputLayout) v.findViewById(R.id.editText3)).setErrorEnabled(true);
                                     ((TextInputLayout) v.findViewById(R.id.editText3))
                                             .setErrorTextColor(ColorStateList.valueOf(!((LinearOperator) vo).isSpecial() || !((LinearOperator) vo).isUnitary() ? Color.RED : Color.GREEN));
 

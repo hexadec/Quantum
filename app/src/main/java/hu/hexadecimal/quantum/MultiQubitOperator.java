@@ -4,8 +4,7 @@ import android.util.Log;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Random;
 
 public class MultiQubitOperator extends VisualOperator implements Serializable {
@@ -100,6 +99,61 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
                     }, "3-qb identity", new String[]{"I", "I", "I"}, 0xff17DCE1);
 
+    public static final transient MultiQubitOperator HADAMARD =
+            MultiQubitOperator.multiply(
+                    new MultiQubitOperator(2, new Complex[][]{
+                            new Complex[]{new Complex(1), new Complex(1)},
+                            new Complex[]{new Complex(1), new Complex(-1)}
+                    }, "Hadamard", new String[]{"H"}, 0xff2155BA), new Complex(1 / Math.sqrt(2)));
+
+    public static final transient MultiQubitOperator PAULI_Z =
+            new MultiQubitOperator(2, new Complex[][]{
+                    new Complex[]{new Complex(1), new Complex(0)},
+                    new Complex[]{new Complex(0), new Complex(-1)}
+            }, "Pauli-Z", new String[]{"Z"}, 0xff60BA21);
+
+    public static final transient MultiQubitOperator PAULI_Y =
+            new MultiQubitOperator(2, new Complex[][]{
+                    new Complex[]{new Complex(0), new Complex(0, -1)},
+                    new Complex[]{new Complex(0, 1), new Complex(0)}
+            }, "Pauli-Y", new String[]{"Y"}, 0xff60BA21);
+
+    public static final transient MultiQubitOperator PAULI_X =
+            new MultiQubitOperator(2, new Complex[][]{
+                    new Complex[]{new Complex(0), new Complex(1)},
+                    new Complex[]{new Complex(1), new Complex(0)}
+            }, "Pauli-X", new String[]{"X"}, 0xff60BA21);
+
+    public static final transient MultiQubitOperator T_GATE =
+            new MultiQubitOperator(2, new Complex[][]{
+                    new Complex[]{new Complex(1), new Complex(0)},
+                    new Complex[]{new Complex(0), new Complex(1, Math.PI / 4, true)}
+            }, "PI/4 Phase-shift", new String[]{"T"}, 0xffBA7021);
+
+    public static final transient MultiQubitOperator S_GATE =
+            new MultiQubitOperator(2, new Complex[][]{
+                    new Complex[]{new Complex(1), new Complex(0)},
+                    new Complex[]{new Complex(0), new Complex(0, 1)}
+            }, "PI/2 Phase-shift", new String[]{"S"}, 0xff21BAAB);
+
+    public static final transient MultiQubitOperator PI6_GATE =
+            new MultiQubitOperator(2, new Complex[][]{
+                    new Complex[]{new Complex(1), new Complex(0)},
+                    new Complex[]{new Complex(0), new Complex(1, Math.PI / 6, true)}
+            }, "PI/6 Phase-shift", new String[]{"\u03C06"}, 0xffDCE117);
+
+    public static final transient MultiQubitOperator SQRT_NOT =
+            MultiQubitOperator.multiply(new MultiQubitOperator(2, new Complex[][]{
+                    new Complex[]{new Complex(1, 1), new Complex(1, -1)},
+                    new Complex[]{new Complex(1, -1), new Complex(1, 1)}
+            }, "√NOT", new String[]{"√X"}, 0xff2155BA), new Complex(0.5));
+
+    public static final transient MultiQubitOperator ID =
+            new MultiQubitOperator(2, new Complex[][]{
+                    new Complex[]{new Complex(1), new Complex(0)},
+                    new Complex[]{new Complex(0), new Complex(1)}
+            }, "Identity", new String[]{"I"}, 0xff666666);
+
     public MultiQubitOperator(int MATRIX_DIM, Complex[][] M, String name, String[] symbols, int color) {
         super(MATRIX_DIM);
         if (M == null) {
@@ -107,6 +161,9 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
         }
         this.color = color;
         switch (MATRIX_DIM) {
+            case 2:
+                NQBITS = 1;
+                break;
             case 4:
                 NQBITS = 2;
                 break;
@@ -276,6 +333,14 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
             Log.e("MultiQubitOperator", "NO RESULT");
             return null;
         }
+        if (NQBITS == 1) {
+            Qubit q = qs[0].copy();
+            q.matrix[0] = Complex.multiply(matrix[0][0], qs[0].matrix[0]);
+            q.matrix[0].add(Complex.multiply(matrix[0][1], qs[0].matrix[1]));
+            q.matrix[1] = Complex.multiply(matrix[1][0], qs[0].matrix[0]);
+            q.matrix[1].add(Complex.multiply(matrix[1][1], qs[0].matrix[1]));
+            return new Qubit[]{q};
+        }
         Complex[] inputMatrix = new Complex[MATRIX_DIM];
         Complex[] resultMatrix = new Complex[MATRIX_DIM];
         for (int i = 0; i < MATRIX_DIM; i++) {
@@ -320,6 +385,9 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
     public static String[] generateSymbols(int DIM) {
         int NQBITS = 0;
         switch (DIM) {
+            case 2:
+                NQBITS = 1;
+                break;
             case 4:
                 NQBITS = 2;
                 break;
@@ -338,8 +406,8 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
         return sym;
     }
 
-    public static List<String> getPredefinedGateNames() {
-        List<String> list = new ArrayList<>();
+    public static LinkedList<String> getPredefinedGateNames() {
+        LinkedList<String> list = new LinkedList<>();
         MultiQubitOperator multiQubitOperator = new MultiQubitOperator();
         try {
             Field[] fields = multiQubitOperator.getClass().getDeclaredFields();
@@ -348,6 +416,27 @@ public class MultiQubitOperator extends VisualOperator implements Serializable {
                 if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
                         && field.get(multiQubitOperator) instanceof MultiQubitOperator) {
                     list.add(((MultiQubitOperator) field.get(multiQubitOperator)).getName());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return list;
+    }
+
+    public static LinkedList<String> getPredefinedGateNames(boolean singleOnly) {
+        LinkedList<String> list = new LinkedList<>();
+        MultiQubitOperator multiQubitOperator = new MultiQubitOperator();
+        try {
+            Field[] fields = multiQubitOperator.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+                        && field.get(multiQubitOperator) instanceof MultiQubitOperator) {
+                    if (!((MultiQubitOperator) field.get(multiQubitOperator)).isMultiQubit() == singleOnly) {
+                        list.add(((MultiQubitOperator) field.get(multiQubitOperator)).getName());
+                    }
                 }
             }
         } catch (Exception e) {

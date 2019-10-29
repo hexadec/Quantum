@@ -43,4 +43,8 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="delete_gate_question">Delete selected gate?</string>
+    <string name="gate_type">Gate source</string>
+    <string name="filter">Filter</string>
+    <string name="select_action">Select action</string>
+    <string name="delete_gate">Delete gate</string>
 </resources>

@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -95,9 +94,7 @@ public class QuantumView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        //canvas.drawRoundRect(mRectF, 10, 10, otherPaint);
-        //canvas.clipRect(mRectF, Region.Op.DIFFERENCE);
-        //canvas.drawPaint(outerPaint);
+
         mPaint.setColor(0xff888888);
 
         otherPaint.setStyle(Paint.Style.FILL);
@@ -162,14 +159,6 @@ public class QuantumView extends View {
                 canvas.drawText(symbol, bounds.left, bounds.top - whiteTextPaint.ascent(), whiteTextPaint);
             }
         }
-        //canvas.drawRect(mPadding, mPadding, getWidth() - mPadding, getHeight() - mPadding, mPaint);
-        //canvas.drawArc(arcLeft, arcTop, arcRight, arcBottom, 75, 45, true, mPaint);
-
-
-        //canvas.drawPath(mPath, mPaint);
-        //canvas.drawCircle(getWidth() / 2, getHeight() / 2, arcLeft, otherPaint);
-
-        //canvas.drawText("Canvas basics", (float) (getWidth() * 0.3), (float) (getHeight() * 0.8), mTextPaint);
 
     }
 
@@ -186,14 +175,22 @@ public class QuantumView extends View {
         return null;
     }
 
-    public void addGate(int qbit, LinearOperator l) {
-        LinearOperator ml = l.copy();
-        ml.setQubitIDs(new int[]{qbit});
-        gos.addLast(ml);
-        invalidate();
+    public boolean deleteGateAt(float posx, float posy) {
+        for (int i = 0; i < gos.size(); i++) {
+            List<Rect> rects = gos.get(i).getRect();
+            for (int j = 0; j < rects.size(); j++) {
+                if (posx <= rects.get(j).right && posx >= rects.get(j).left
+                        && posy <= rects.get(j).bottom && posy >= rects.get(j).top) {
+                    gos.remove(i);
+                    invalidate();
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
-    public void addMultiQubitGate(int[] qubits, MultiQubitOperator m) {
+    public void addGate(int[] qubits, MultiQubitOperator m) {
         MultiQubitOperator mm = m.copy();
         mm.setQubitIDs(qubits);
         gos.addLast(mm);
