@@ -57,7 +57,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
             for (DocumentFile file : pickedDir.listFiles()) {
                 try {
                     if (file.getName().endsWith(VisualOperator.FILE_EXTENSION)) {
-                        MultiQubitOperator m = (MultiQubitOperator) new ObjectInputStream(getContentResolver().openInputStream(file.getUri())).readObject();
+                        VisualOperator m = (VisualOperator) new ObjectInputStream(getContentResolver().openInputStream(file.getUri())).readObject();
                         operators.add(m);
                     }
                 } catch (Exception e) {
@@ -82,7 +82,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         try {
-                            DocumentFile gate = pickedDir.findFile(vo.getName() + (vo instanceof LinearOperator ? ".sqg" : ".mqg"));
+                            DocumentFile gate = pickedDir.findFile(vo.getName() + VisualOperator.FILE_EXTENSION);
                             Log.e("A", "" + gate.delete());
                             recreate();
                         } catch (Exception e) {
@@ -164,6 +164,12 @@ public class MatrixEditorActivity extends AppCompatActivity {
                                 } else {
                                     disableErr(2);
                                 }
+                                for (int i = 0; i < operators.size(); i++) {
+                                    if (operators.get(i).getName().equals(name)) {
+                                        showErr(2);
+                                        return;
+                                    }
+                                }
                                 if (symbolse.getText().toString().replace(" ", "").length() < 1) {
                                     showErr(1);
                                     return;
@@ -208,8 +214,8 @@ public class MatrixEditorActivity extends AppCompatActivity {
                                     showErr(3);
                                     return;
                                 }
-                                MultiQubitOperator v = new MultiQubitOperator(DIM, cmatrix, name, symbols, color);
-                                if (!(v.isSpecial() || !v.isUnitary())) {
+                                VisualOperator v = new VisualOperator(DIM, cmatrix, name, symbols, color);
+                                if (!v.isSpecial() || !v.isUnitary()) {
                                     showErr(4);
                                     return;
                                 }
@@ -283,29 +289,16 @@ public class MatrixEditorActivity extends AppCompatActivity {
                                     showErr(3);
                                     return;
                                 }
-                                VisualOperator vo;
+                                VisualOperator vo = new VisualOperator(DIM, cmatrix);
                                 ((TextInputLayout) v.findViewById(R.id.editText3)).setErrorEnabled(true);
-                                if (qs == 1) {
-                                    vo = new LinearOperator(cmatrix);
-                                    ((TextInputLayout) v.findViewById(R.id.editText3))
-                                            .setErrorTextColor(ColorStateList.valueOf(!((LinearOperator) vo).isSpecial() || !((LinearOperator) vo).isUnitary() ? Color.RED : Color.GREEN));
+                                ((TextInputLayout) v.findViewById(R.id.editText3))
+                                        .setErrorTextColor(ColorStateList.valueOf(!vo.isSpecial() || !vo.isUnitary() ? Color.RED : Color.GREEN));
+                                ((TextInputLayout) v.findViewById(R.id.editText3))
+                                        .setError(getString(R.string.determinant) + ": "
+                                                + vo.determinant().toString3Decimals() + ". "
+                                                + getString(R.string.unitary) + ": "
+                                                + (vo.isUnitary() ? getString(R.string.yes) : getString(R.string.no)));
 
-                                    ((TextInputLayout) v.findViewById(R.id.editText3))
-                                            .setError(getString(R.string.determinant) + ": "
-                                                    + ((LinearOperator) vo).determinant().toString3Decimals() + ". "
-                                                    + getString(R.string.unitary) + ": "
-                                                    + (((LinearOperator) vo).isUnitary() ? getString(R.string.yes) : getString(R.string.no)));
-                                    ((LinearOperator) vo).isUnitary();
-                                } else {
-                                    vo = new MultiQubitOperator(DIM, cmatrix);
-                                    ((TextInputLayout) v.findViewById(R.id.editText3))
-                                            .setErrorTextColor(ColorStateList.valueOf(!((MultiQubitOperator) vo).isSpecial() || !((MultiQubitOperator) vo).isUnitary() ? Color.RED : Color.GREEN));
-                                    ((TextInputLayout) v.findViewById(R.id.editText3))
-                                            .setError(getString(R.string.determinant) + ": "
-                                                    + ((MultiQubitOperator) vo).determinant().toString3Decimals() + ". "
-                                                    + getString(R.string.unitary) + ": "
-                                                    + (((MultiQubitOperator) vo).isUnitary() ? getString(R.string.yes) : getString(R.string.no)));
-                                }
                             }
                         });
                     }

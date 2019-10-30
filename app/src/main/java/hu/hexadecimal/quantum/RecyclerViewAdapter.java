@@ -35,18 +35,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         VisualOperator operator = operators.get(position);
         holder.gateName.setText(operator.getName());
         holder.color.setBackgroundColor(operator.getColor());
-        if (operator instanceof LinearOperator) {
-            holder.gateSymbols.setText(((LinearOperator)operator).getSymbol());
-            holder.gateMatrix.setText(((LinearOperator)operator).toString());
-        } else if (operator instanceof MultiQubitOperator) {
-            StringBuilder symbol = new StringBuilder();
-            for (String s : ((MultiQubitOperator)operator).getSymbols()) {
-                symbol.append("  ");
-                symbol.append(s);
-            }
-            holder.gateSymbols.setText(symbol.toString());
-            holder.gateMatrix.setText(((MultiQubitOperator)operator).toString());
+        StringBuilder symbol = new StringBuilder();
+        for (String s : ((VisualOperator) operator).getSymbols()) {
+            symbol.append("  ");
+            symbol.append(s);
         }
+        holder.gateSymbols.setText(symbol.toString());
+        holder.gateMatrix.setText(((VisualOperator) operator).toString());
+
     }
 
     // total number of rows

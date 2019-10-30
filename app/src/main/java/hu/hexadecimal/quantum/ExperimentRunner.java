@@ -51,18 +51,14 @@ public class ExperimentRunner {
                             qubits[k] = new Qubit();
                         }
                         for (int m = 0; m < v.size(); m++) {
-                            if (v.get(m) instanceof LinearOperator) {
-                                qubits[v.get(m).getQubitIDs()[0]].applyOperator((LinearOperator) v.get(m));
-                            } else {
-                                int[] quids = v.get(m).getQubitIDs();
-                                Qubit[] subqubits = new Qubit[quids.length];
-                                for (int n = 0; n < subqubits.length; n++) {
-                                    subqubits[n] = qubits[quids[n]];
-                                }
-                                Qubit[] resultqubits = ((MultiQubitOperator) v.get(m)).operateOn(subqubits);
-                                for (int n = 0; n < subqubits.length; n++) {
-                                    qubits[quids[n]] = resultqubits[n];
-                                }
+                            int[] quids = v.get(m).getQubitIDs();
+                            Qubit[] subqubits = new Qubit[quids.length];
+                            for (int n = 0; n < subqubits.length; n++) {
+                                subqubits[n] = qubits[quids[n]];
+                            }
+                            Qubit[] resultqubits = ((VisualOperator) v.get(m)).operateOn(subqubits);
+                            for (int n = 0; n < subqubits.length; n++) {
+                                qubits[quids[n]] = resultqubits[n];
                             }
                         }
                         int cprob = 0;

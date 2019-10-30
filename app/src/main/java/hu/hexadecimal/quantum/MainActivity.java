@@ -27,10 +27,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ObjectInputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -75,13 +73,11 @@ public class MainActivity extends AppCompatActivity {
     public void displayBlochSphere() {
         Qubit q2 = new Qubit();
         for (VisualOperator v : qv.getOperators()) {
-            if (v instanceof LinearOperator) {
-                for (int q : v.getQubitIDs())
-                    if (q == 0) {
-                        q2.applyOperator((LinearOperator) v);
-                        break;
-                    }
-            }
+            for (int q : v.getQubitIDs())
+                if (q == 0 && !v.isMultiQubit()) {
+                    q2 = v.operateOn(new Qubit[]{q2})[0];
+                    break;
+                }
         }
         glSurfaceView.setQBit(q2);
         AlertDialog.Builder adb = new AlertDialog.Builder(this);
@@ -120,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                 multi.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        LinkedList<MultiQubitOperator> operators = new LinkedList<>();
+                        LinkedList<VisualOperator> operators = new LinkedList<>();
                         LinkedList<String> operatorNames = new LinkedList<>();
                         try {
                             Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
@@ -134,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
                             for (DocumentFile file : pickedDir.listFiles()) {
                                 try {
                                     if (file.getName().endsWith(VisualOperator.FILE_EXTENSION)) {
-                                        MultiQubitOperator m = (MultiQubitOperator) new ObjectInputStream(getContentResolver().openInputStream(file.getUri())).readObject();
+                                        VisualOperator m = (VisualOperator) new ObjectInputStream(getContentResolver().openInputStream(file.getUri())).readObject();
                                         operators.add(m);
                                         operatorNames.add(m.getName());
                                     }
@@ -169,7 +165,7 @@ public class MainActivity extends AppCompatActivity {
                         qX[1].setAdapter(adapter);
                         qX[2].setAdapter(adapter);
                         qX[3].setAdapter(adapter);
-                        final LinkedList<String> mGates = MultiQubitOperator.getPredefinedGateNames();
+                        final LinkedList<String> mGates = VisualOperator.getPredefinedGateNames();
                         Collections.sort(mGates);
                         ArrayAdapter<String> gadapter =
                                 new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
@@ -188,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
                                         gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                         gateName.setAdapter(gadapter);
                                     } else {
-                                        LinkedList<String> mGates = MultiQubitOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
+                                        LinkedList<String> mGates = VisualOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
                                         Collections.sort(mGates);
                                         ArrayAdapter<String> gadapter =
                                                 new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
@@ -221,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                                         gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                         gateName.setAdapter(gadapter);
                                     } else {
-                                        LinkedList<String> mGates = MultiQubitOperator.getPredefinedGateNames(i == 1);
+                                        LinkedList<String> mGates = VisualOperator.getPredefinedGateNames(i == 1);
                                         Collections.sort(mGates);
                                         ArrayAdapter<String> gadapter =
                                                 new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
@@ -242,12 +238,12 @@ public class MainActivity extends AppCompatActivity {
                         gateName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                LinkedList<String> gates = MultiQubitOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
+                                LinkedList<String> gates = VisualOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
                                 Collections.sort(gates);
                                 ArrayAdapter<String> adapter =
                                         new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, filter.getSelectedItemPosition() == 0 ? mGates : gates);
 
-                                int qbits = gateType.getSelectedItemPosition() == 0 ? MultiQubitOperator.findGateByName(adapter.getItem(i)).NQBITS : operators.get(i).NQBITS;
+                                int qbits = gateType.getSelectedItemPosition() == 0 ? VisualOperator.findGateByName(adapter.getItem(i)).getQubits() : operators.get(i).getQubits();
                                 switch (qbits) {
                                     case 1:
                                         qX[0].setVisibility(View.VISIBLE);
@@ -283,14 +279,14 @@ public class MainActivity extends AppCompatActivity {
                         view.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                LinkedList<String> gates = MultiQubitOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
+                                LinkedList<String> gates = VisualOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
                                 Collections.sort(gates);
                                 ArrayAdapter<String> adapter =
-                                        new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, filter.getSelectedItemPosition() == 0 ? mGates : gates);
+                                        new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, filter.getSelectedItemPosition() == 0 ? mGates : gates);
 
                                 int qbits = gateType.getSelectedItemPosition() == 0
-                                        ? MultiQubitOperator.findGateByName(adapter.getItem(gateName.getSelectedItemPosition())).NQBITS
-                                        : operators.get(gateName.getSelectedItemPosition()).NQBITS;
+                                        ? VisualOperator.findGateByName(adapter.getItem(gateName.getSelectedItemPosition())).getQubits()
+                                        : operators.get(gateName.getSelectedItemPosition()).getQubits();
                                 int[] qids = new int[qbits];
                                 for (int i = 0; i < qbits; i++) {
                                     qids[i] = qX[i].getSelectedItemPosition();
@@ -304,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 }
                                 qv.addGate(qids, gateType.getSelectedItemPosition() == 0
-                                        ? MultiQubitOperator.findGateByName((String) gateName.getSelectedItem())
+                                        ? VisualOperator.findGateByName((String) gateName.getSelectedItem())
                                         : operators.get(gateName.getSelectedItemPosition()));
                                 d.cancel();
                             }
@@ -361,7 +357,7 @@ public class MainActivity extends AppCompatActivity {
                         long startTime = System.currentTimeMillis();
                         float[] probs = experimentRunner.runExperiment(shots, threads, handler);
                         long time = System.currentTimeMillis() - startTime;
-                        String t = new SimpleDateFormat("s's' SSS 'ms'").format(new Date(time));
+                        String t = time / 1000 + "s " + time % 1000 + "ms";
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {

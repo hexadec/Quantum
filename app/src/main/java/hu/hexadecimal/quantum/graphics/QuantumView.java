@@ -17,10 +17,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import hu.hexadecimal.quantum.MultiQubitOperator;
-import hu.hexadecimal.quantum.Qubit;
 import hu.hexadecimal.quantum.VisualOperator;
-import hu.hexadecimal.quantum.LinearOperator;
+import hu.hexadecimal.quantum.Qubit;
 
 public class QuantumView extends View {
 
@@ -131,11 +129,7 @@ public class QuantumView extends View {
                         ((int) (mPadding + pxFromDp(super.getContext(), 2) + pxFromDp(super.getContext(), GATE_SIZE * 2) + gatesNumber[qubitids[j]] * pxFromDp(super.getContext(), GATE_SIZE * 3))),
                         ((int) (mPadding + (int) pxFromDp(super.getContext(), 20) + (pxFromDp(super.getContext(), STEP) * qubitids[j]) + pxFromDp(super.getContext(), GATE_SIZE))));
                 String symbol = "C";
-                if (gos.get(i) instanceof LinearOperator) {
-                    symbol = ((LinearOperator) v).getSymbol();
-                } else {
-                    symbol = ((MultiQubitOperator) v).getSymbols()[j];
-                }
+                symbol = v.getSymbols()[j];
                 v.addRect(areaRect);
                 RectF bounds = new RectF(areaRect);
                 bounds.right = whiteTextPaint.measureText(symbol, 0, symbol.length());
@@ -144,7 +138,7 @@ public class QuantumView extends View {
                 bounds.top += (areaRect.height() - bounds.bottom) / 2.0f;
 
                 canvas.drawRect(areaRect, otherPaint);
-                if (v instanceof MultiQubitOperator && j != 0) {
+                if (j != 0) {
                     mPaint.setColor(v.getColor());
                     float center1x = (areaRect.left + areaRect.right) / 2;
                     float center1y = (areaRect.top + areaRect.bottom) / 2;
@@ -190,8 +184,8 @@ public class QuantumView extends View {
         return false;
     }
 
-    public void addGate(int[] qubits, MultiQubitOperator m) {
-        MultiQubitOperator mm = m.copy();
+    public void addGate(int[] qubits, VisualOperator m) {
+        VisualOperator mm = m.copy();
         mm.setQubitIDs(qubits);
         gos.addLast(mm);
         invalidate();
