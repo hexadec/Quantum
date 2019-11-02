@@ -10,16 +10,22 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.HorizontalScrollView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -27,10 +33,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TimeZone;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.documentfile.provider.DocumentFile;
@@ -48,26 +59,48 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        RelativeLayout relativeLayout = findViewById(R.id.relative);
+        LinearLayout relativeLayout = findViewById(R.id.linearLayout);
         qv = new QuantumView(this);
         relativeLayout.addView(qv);
+        qv.setBackgroundColor(0xffeeeeee);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        qv.setLayoutParams(new LinearLayout.LayoutParams(displayMetrics.widthPixels * 2, ViewGroup.LayoutParams.MATCH_PARENT));
 
         glSurfaceView = new BlochSphereView(this);
 
-        View.OnTouchListener click = new View.OnTouchListener() {
+        GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() != MotionEvent.ACTION_DOWN) return false;
-                float x = event.getX();
-                float y = event.getY();
-                VisualOperator vop = qv.whichGate(x, y);
-                String opn = vop == null ? null : vop.getName();
-                Toast.makeText(MainActivity.this, "x: " + x + " y: " + y + " OP: " + opn, Toast.LENGTH_SHORT).show();
+            public void onLongPress(MotionEvent e) {
+                onSingleTapUp(e);
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                return false;
+            }
+
+            @Override
+            public boolean onDown(MotionEvent event) {
+                return true;
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                float x = e.getX();
+                float y = e.getY();
                 showAddGateDialog(x, y);
                 return true;
             }
-        };
-        qv.setOnTouchListener(click);
+        });
+
+        qv.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                return gestureDetector.onTouchEvent(motionEvent);
+            }
+        });
     }
 
     public void displayBlochSphere() {
@@ -364,12 +397,53 @@ public class MainActivity extends AppCompatActivity {
                                 AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
                                 adb.setCancelable(false);
                                 adb.setPositiveButton("OK", null);
+                                adb.setNeutralButton(R.string.export_csv, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        try {
+                                            Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
+                                            DocumentFile pickedDir = DocumentFile.fromTreeUri(MainActivity.this, uri);
+                                            if (!pickedDir.exists()) {
+                                                getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                                                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                                pickedDir = null;
+                                            }
+                                            StringBuilder sb = new StringBuilder();
+                                            for (int k = 0; k < probs.length; k++) {
+                                                if (k != 0) sb.append("\r\n");
+                                                sb.append(k);
+                                                sb.append(',');
+                                                sb.append(String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(k)).replace(' ', '0'));
+                                                sb.append(',');
+                                                sb.append(probs[k]);
+                                            }
+                                            SimpleDateFormat sdf = new SimpleDateFormat("'results'_YYYY-MM-DD_HH-mm-ss'.csv'");
+                                            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                                            String filename = sdf.format(new Date());
+                                            DocumentFile newFile = pickedDir.createFile("text/csv", filename);
+                                            OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
+                                            out.write(sb.toString().getBytes());
+                                            out.close();
+                                            Toast.makeText(MainActivity.this, filename + " \n" + getString(R.string.successfully_exported), Toast.LENGTH_SHORT).show();
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                            Toast.makeText(MainActivity.this, R.string.choose_save_location_settings, Toast.LENGTH_LONG).show();
+                                        }
+                                    }
+                                });
                                 adb.setTitle(getString(R.string.results) + ": \t" + t);
                                 ScrollView scrollView = new ScrollView(MainActivity.this);
                                 TextView textView = new TextView(MainActivity.this);
                                 textView.setTypeface(Typeface.MONOSPACE);
+                                byte[] measuredQubits = qv.getMeasuredQubits();
+                                outerfor:
                                 for (int i = 0; i < probs.length; i++) {
-                                    textView.setText(textView.getText() + "\n" + String.format("%" + qv.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + probs[i]);
+                                    for (int j = 0; j < measuredQubits.length; j++) {
+                                        if (measuredQubits[j] < 1 && (i >> j) % 2 == 1) {
+                                            continue outerfor;
+                                        }
+                                    }
+                                    textView.setText(textView.getText() + "\n" + String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + probs[i]);
                                 }
                                 scrollView.addView(textView);
                                 adb.setView(scrollView);

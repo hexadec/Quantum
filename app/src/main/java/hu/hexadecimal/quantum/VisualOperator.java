@@ -34,7 +34,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)},
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
-                    }, "CNOT", new String[]{"●", "○"}, 0xffE19417);
+                    }, "CNOT", new String[]{"●", "◯"}, 0xffE19417);
 
     public static final transient VisualOperator CY =
             new VisualOperator(4,
@@ -83,7 +83,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
-                    }, "Toffoli", new String[]{"●", "●", "○"}, 0xff17DCE1);
+                    }, "Toffoli", new String[]{"●", "●", "◯"}, 0xff17DCE1);
 
     public static final transient VisualOperator FREDKIN =
             new VisualOperator(8,

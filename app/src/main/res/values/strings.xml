@@ -29,6 +29,7 @@
     <string name="choose_qubit_number">Number of qubits 1&#8211;4</string>
     <string name="add_gate">Add gate</string>
     <string name="choose_save_location">Please select where to save the files. You can change it later in the settings</string>
+    <string name="choose_save_location_settings">Please select where to save the files. Navigate into settings and select output folder</string>
     <string name="save_location">Output folder</string>
     <string name="no_folder_selected">No folder selected</string>
     <string name="select">Select</string>
@@ -47,4 +48,6 @@
     <string name="filter">Filter</string>
     <string name="select_action">Select action</string>
     <string name="delete_gate">Delete gate</string>
+    <string name="export_csv">Export to CSV</string>
+    <string name="successfully_exported">Successfully exported!</string>
 </resources>

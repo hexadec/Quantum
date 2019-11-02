@@ -28,16 +28,19 @@ public class QuantumView extends View {
 
     public LinkedList<Qubit> qbits;
     private LinkedList<VisualOperator> gos;
+    private byte[] measuredQubits;
 
-    public static final int STEP = 60;
-    public static final int MAX_QUBITS = 6;
+    public static final int STEP = 70;
+    public static final int MAX_QUBITS = 7;
     public static final int GATE_SIZE = 18;
-    public final float UNIT = pxFromDp(super.getContext(), 1);
-    public final float START_Y = pxFromDp(super.getContext(), 20);
+    public final float UNIT;
+    public final float START_Y;
 
 
     public QuantumView(Context context) {
         super(context);
+        UNIT = pxFromDp(super.getContext(), 1);
+        START_Y = pxFromDp(super.getContext(), 20);
         qbits = new LinkedList<>();
         for (int i = 0; i < MAX_QUBITS; i++) {
             qbits.add(new Qubit());
@@ -54,6 +57,7 @@ public class QuantumView extends View {
         mPaint.setColor(Color.BLUE);
         mPaint.setStrokeWidth(5);
 
+        measuredQubits = new byte[MAX_QUBITS];
 
         mTextPaint = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setColor(Color.DKGRAY);
@@ -82,13 +86,6 @@ public class QuantumView extends View {
 
     }
 
-    public boolean isAnOperator(int x, int y) {
-        if (x < mPadding || x > getWidth() - mPadding) return false;
-        if (y < mPadding || y > getHeight() - mPadding || y > START_Y + pxFromDp(super.getContext(), STEP * MAX_QUBITS))
-            return false;
-        return true;
-    }
-
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -96,7 +93,7 @@ public class QuantumView extends View {
         mPaint.setColor(0xff888888);
 
         otherPaint.setStyle(Paint.Style.FILL);
-        otherPaint.setColor(0xffBA2121);
+        int qubitPos = 0;
         for (int i = (int) START_Y; i < getHeight() - 2 * mPadding - START_Y && i <= pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
             canvas.drawLine(mPadding, mPadding + i, getWidth() - mPadding, mPadding + i, mPaint);
 
@@ -107,6 +104,7 @@ public class QuantumView extends View {
             mPath.close();
             canvas.drawPath(mPath, mPaint);
 
+            otherPaint.setColor(measuredQubits[qubitPos] > 0 ? 0xffBA2121 : 0xff555555);
             canvas.drawRect(mPadding,
                     mPadding + i - pxFromDp(super.getContext(), GATE_SIZE),
                     mPadding + pxFromDp(super.getContext(), GATE_SIZE * 2),
@@ -114,6 +112,7 @@ public class QuantumView extends View {
                     otherPaint);
             canvas.drawText("q" + Math.round((i + START_Y) / pxFromDp(super.getContext(), STEP)), mPadding - pxFromDp(super.getContext(), 30), mPadding + i + pxFromDp(super.getContext(), 6), mTextPaint);
             canvas.drawText("⎥0⟩", mPadding + pxFromDp(super.getContext(), 2f), mPadding + i + pxFromDp(super.getContext(), 8f), whiteTextPaint);
+            qubitPos++;
         }
         int[] gatesNumber = new int[MAX_QUBITS];
         for (int i = 0; i < gos.size(); i++) {
@@ -175,6 +174,9 @@ public class QuantumView extends View {
             for (int j = 0; j < rects.size(); j++) {
                 if (posx <= rects.get(j).right && posx >= rects.get(j).left
                         && posy <= rects.get(j).bottom && posy >= rects.get(j).top) {
+                    for (int qubit : gos.get(i).getQubitIDs()) {
+                        measuredQubits[qubit]--;
+                    }
                     gos.remove(i);
                     invalidate();
                     return true;
@@ -185,6 +187,10 @@ public class QuantumView extends View {
     }
 
     public void addGate(int[] qubits, VisualOperator m) {
+        for (int qubit : qubits) {
+            if (qubit >= getDisplayedQubits()) return;
+            measuredQubits[qubit]++;
+        }
         VisualOperator mm = m.copy();
         mm.setQubitIDs(qubits);
         gos.addLast(mm);
@@ -230,6 +236,10 @@ public class QuantumView extends View {
             count++;
         }
         return count;
+    }
+
+    public byte[] getMeasuredQubits() {
+        return measuredQubits;
     }
 
     public LinkedList<VisualOperator> getOperators() {
