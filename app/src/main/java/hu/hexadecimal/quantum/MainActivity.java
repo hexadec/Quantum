@@ -24,13 +24,14 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -44,6 +45,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
 import hu.hexadecimal.quantum.graphics.QuantumView;
@@ -58,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = findViewById(R.id.toolbar2);
+        setSupportActionBar(toolbar);
 
         LinearLayout relativeLayout = findViewById(R.id.linearLayout);
         qv = new QuantumView(this);
@@ -99,6 +103,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 return gestureDetector.onTouchEvent(motionEvent);
+            }
+        });
+
+        FloatingActionButton fab = findViewById(R.id.fab_main);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(MainActivity.this, R.string.choose_experiment, Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("*/*");
+                startActivityForResult(intent, 42);
+                return;
             }
         });
     }
@@ -354,6 +370,29 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.save:
+                try {
+                    Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
+                    DocumentFile pickedDir = DocumentFile.fromTreeUri(MainActivity.this, uri);
+                    if (!pickedDir.exists()) {
+                        getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                        pickedDir = null;
+                    }
+                    SimpleDateFormat sdf = new SimpleDateFormat("'experiment'_YYYY-MM-dd_HH-mm-ss'" + QuantumView.FILE_EXTENSION + "'");
+                    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    String filename = sdf.format(new Date());
+                    DocumentFile newFile = pickedDir.createFile("application/octet-stream", filename);
+                    OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
+                    out.write(qv.exportGates());
+                    out.flush();
+                    out.close();
+                    Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + filename, Snackbar.LENGTH_LONG).show();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Snackbar.make(findViewById(R.id.parent2), getString(R.string.unknown_error), Snackbar.LENGTH_LONG).show();
+                }
+                break;
             case R.id.prefs:
                 Intent intent = new Intent(MainActivity.this, PreferenceActivity.class);
                 startActivity(intent);
@@ -417,7 +456,7 @@ public class MainActivity extends AppCompatActivity {
                                                 sb.append(',');
                                                 sb.append(probs[k]);
                                             }
-                                            SimpleDateFormat sdf = new SimpleDateFormat("'results'_YYYY-MM-DD_HH-mm-ss'.csv'");
+                                            SimpleDateFormat sdf = new SimpleDateFormat("'results'_YYYY-MM-dd_HH-mm-ss'.csv'");
                                             sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                                             String filename = sdf.format(new Date());
                                             DocumentFile newFile = pickedDir.createFile("text/csv", filename);
@@ -458,5 +497,25 @@ public class MainActivity extends AppCompatActivity {
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
+        if (resultCode == RESULT_OK && requestCode == 42) {
+            Uri uri = resultData.getData();
+            DocumentFile pickedFile = DocumentFile.fromSingleUri(this, uri);
+            try {
+                if (pickedFile.getName().endsWith(QuantumView.FILE_EXTENSION)) {
+                    Object obj = new ObjectInputStream(getContentResolver().openInputStream(pickedFile.getUri())).readObject();
+                    qv.importGates(obj);
+                } else {
+                    Snackbar.make(findViewById(R.id.parent2), R.string.invalid_file, Snackbar.LENGTH_LONG).show();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Snackbar.make(findViewById(R.id.parent2), getString(R.string.unknown_error), Snackbar.LENGTH_LONG).show();
+            }
+        }
     }
 }

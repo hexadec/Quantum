@@ -36,7 +36,7 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         super.onActivityResult(requestCode, resultCode, resultData);
-        if (resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK && requestCode == 42) {
             Uri treeUri = resultData.getData();
             try {
                 getContentResolver().releasePersistableUriPermission(

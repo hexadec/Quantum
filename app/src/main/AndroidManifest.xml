@@ -19,7 +19,9 @@
                 android:value="hu.hexadecimal.quantum.MainActivity" />
         </activity>
         <activity android:name=".PreferenceActivity" />
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

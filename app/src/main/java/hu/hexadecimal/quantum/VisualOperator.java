@@ -5,7 +5,6 @@ import android.util.Log;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -23,7 +22,7 @@ public class VisualOperator implements Serializable {
     private int NQBITS;
     public int color = 0xff000000;
     public String name;
-    private List<Rect> rectangle;
+    private transient LinkedList<Rect> rectangle;
     private int MATRIX_DIM;
     private int[] qubit_ids;
 
@@ -167,7 +166,7 @@ public class VisualOperator implements Serializable {
             }, "Identity", new String[]{"I"}, 0xff666666);
 
     public VisualOperator(int DIM, Complex[][] M, String name, String[] symbols, int color) {
-        rectangle = new ArrayList<>();
+        rectangle = new LinkedList<>();
         this.MATRIX_DIM = DIM;
         if (M == null) {
             throw new NullPointerException();
@@ -212,7 +211,7 @@ public class VisualOperator implements Serializable {
 
     public VisualOperator() {
         qubit_ids = new int[NQBITS];
-        rectangle = new ArrayList<>();
+        rectangle = new LinkedList<>();
         MATRIX_DIM = 4;
         name = "";
         NQBITS = 2;
@@ -613,14 +612,17 @@ public class VisualOperator implements Serializable {
     }
 
     public void addRect(@NonNull Rect rect) {
+        if (rectangle == null) rectangle = new LinkedList<>();
         rectangle.add(rect);
     }
 
     public void resetRect() {
+        if (rectangle == null) rectangle = new LinkedList<>();
         rectangle.clear();
     }
 
     public List<Rect> getRect() {
+        if (rectangle == null) rectangle = new LinkedList<>();
         return rectangle;
     }
 

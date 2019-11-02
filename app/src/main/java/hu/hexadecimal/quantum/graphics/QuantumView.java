@@ -13,6 +13,9 @@ import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.View;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -30,8 +33,10 @@ public class QuantumView extends View {
     private LinkedList<VisualOperator> gos;
     private byte[] measuredQubits;
 
+    public static final String FILE_EXTENSION = ".viqus";
+
     public static final int STEP = 70;
-    public static final int MAX_QUBITS = 7;
+    public static final int MAX_QUBITS = 8;
     public static final int GATE_SIZE = 18;
     public final float UNIT;
     public final float START_Y;
@@ -257,6 +262,38 @@ public class QuantumView extends View {
 
     public static float pxFromDp(final Context context, final float dp) {
         return dp * context.getResources().getDisplayMetrics().density;
+    }
+
+    public byte[] exportGates() {
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ObjectOutput output = new ObjectOutputStream(byteArrayOutputStream);
+            output.writeObject(gos);
+            output.flush();
+            return byteArrayOutputStream.toByteArray();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public boolean importGates(Object input) {
+        try {
+            if (input instanceof LinkedList && ((LinkedList<Object>) input).getFirst() instanceof VisualOperator) {
+                gos = (LinkedList<VisualOperator>) input;
+            }
+            measuredQubits = new byte[MAX_QUBITS];
+            for (VisualOperator vo : gos) {
+                for (int i : vo.getQubitIDs()) {
+                    measuredQubits[i]++;
+                }
+            }
+            invalidate();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 }

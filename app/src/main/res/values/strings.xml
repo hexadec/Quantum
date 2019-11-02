@@ -50,4 +50,9 @@
     <string name="delete_gate">Delete gate</string>
     <string name="export_csv">Export to CSV</string>
     <string name="successfully_exported">Successfully exported!</string>
+    <string name="save_experiment">Save experiment</string>
+    <string name="choose_experiment">Choose and experiment file to open</string>
+    <string name="invalid_file">Invalid file selected!</string>
+    <string name="experiment_saved">Saved to home folder as:</string>
+    <string name="unknown_error">An unknown error has occurred :(</string>
 </resources>

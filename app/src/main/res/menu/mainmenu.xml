@@ -3,6 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/save"
+        android:icon="@drawable/content_save"
+        android:title="@string/save_experiment"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/prefs"
         android:icon="@drawable/settings"
         android:title="@string/preferences"
@@ -11,21 +16,20 @@
         android:id="@+id/bloch"
         android:icon="@drawable/axis_arrow"
         android:title="@string/bloch_sphere"
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/matrix"
+        android:icon="@drawable/table_edit"
+        android:title="@string/matrix_editor"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/undo"
+        android:title="@string/undo_add_gate"
+        app:showAsAction="never" />
     <item
         android:id="@+id/run"
         android:icon="@drawable/play_pause"
         android:title="@string/run"
         app:showAsAction="always" />
-
-    <item
-        android:id="@+id/matrix"
-        android:title="@string/matrix_editor"
-        android:icon="@drawable/table_edit"
-        app:showAsAction="ifRoom" />
-
-    <item
-        android:id="@+id/undo"
-        android:title="@string/undo_add_gate"
-        app:showAsAction="never" />
 </menu>
