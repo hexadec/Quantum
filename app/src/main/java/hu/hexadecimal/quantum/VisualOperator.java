@@ -320,27 +320,151 @@ public class VisualOperator implements Serializable {
     }
 
     public boolean equals(VisualOperator visualOperator) {
-        Complex[][] m = visualOperator.matrix;
-        for (int i = 0; i < MATRIX_DIM; i++) {
-            for (int j = 0; j < MATRIX_DIM; j++) {
-                if (!matrix[i][j].equalsExact(visualOperator.matrix[i][j])) {
+        for (int i = 0; i < MATRIX_DIM; i++)
+            for (int j = 0; j < MATRIX_DIM; j++)
+                if (!matrix[i][j].equalsExact(visualOperator.matrix[i][j]))
                     return false;
-                }
-            }
-        }
+
         return true;
     }
 
     public boolean equals3Decimals(VisualOperator visualOperator) {
-        Complex[][] m = visualOperator.matrix;
-        for (int i = 0; i < MATRIX_DIM; i++) {
-            for (int j = 0; j < MATRIX_DIM; j++) {
-                if (!matrix[i][j].equals3Decimals(visualOperator.matrix[i][j])) {
+        for (int i = 0; i < MATRIX_DIM; i++)
+            for (int j = 0; j < MATRIX_DIM; j++)
+                if (!matrix[i][j].equals3Decimals(visualOperator.matrix[i][j]))
                     return false;
+
+        return true;
+    }
+
+    public static Complex[] toQubitArray(final Qubit[] qs) {
+        Complex[] inputMatrix = new Complex[(int) Math.pow(2, qs.length)];
+        for (int i = 0; i < (int) Math.pow(2, qs.length); i++)
+            for (int k = 0; k < qs.length; k++) {
+                if (k == 0) {
+                    inputMatrix[i] = Complex.multiply(qs[1].matrix[(i >> 1) % 2], qs[0].matrix[i % 2]);
+                    k += 1;
+                    continue;
+                }
+                inputMatrix[i] = Complex.multiply(inputMatrix[i], qs[k].matrix[(i >> k) % 2]);
+            }
+
+        return inputMatrix;
+    }
+
+    private static Complex[][] getQubitTensor(int qubits, VisualOperator v) {
+        if (v.getQubitIDs().length != v.getQubits() || v.getQubits() < 1) return null;
+        if (v.getQubits() == 1) return getSingleQubitTensor(qubits, v.getQubitIDs()[0], v);
+        if (v.getQubits() == qubits) return v.matrix;
+        Complex[][] tensor = new Complex[1][1];
+        for (int i = 0; i < qubits; i++) {
+            if (i == 0) {
+                tensor = tensorProduct(v.matrix, ID.matrix);
+                i += v.getQubits();
+            } else tensor = tensorProduct(tensor, ID.matrix);
+        }
+        return tensor;
+    }
+
+    private static Complex[][] getSingleQubitTensor(int qubits, int which, VisualOperator v) {
+        if (v.getQubits() != 1) return null;
+        if (qubits < which || qubits < 1 || which < 0) return null;
+        if (qubits == 1) return v.copy().matrix;
+        Complex[][] temp = new Complex[1][1];
+        for (int i = 0; i < qubits; i++) {
+            if (i == 0) {
+                temp = tensorProduct(which == i ? v.matrix : ID.matrix, which == i + 1 ? v.matrix : ID.matrix);
+                i++;
+            } else temp = tensorProduct(temp, which == i ? v.matrix : ID.matrix);
+        }
+        return temp;
+    }
+
+    private static Complex[][] tensorProduct(Complex[][] first, Complex[][] second) {
+        int firstDim = first[0].length;
+        int secondDim = second[0].length;
+        final Complex[][] result = new Complex[firstDim * secondDim][];
+        for (int m = 0; m < result.length; m++) {
+            final int col = firstDim * secondDim;
+            result[m] = new Complex[col];
+        }
+        for (int m = 0; m < firstDim; m++)
+            for (int n = 0; n < firstDim; n++)
+                for (int o = 0; o < secondDim; o++)
+                    for (int p = 0; p < secondDim; p++)
+                        result[secondDim * m + o][secondDim * n + p] = Complex.multiply(first[m][n], second[o][p]);
+
+        for (int i = 0; i < result[0].length; i++)
+            for (int j = 0; j < result[0].length; j++)
+                if (result[i][j] == null) result[i][j] = new Complex(0);
+
+        return result;
+    }
+
+    private static Complex[] operateOn(final Complex[] qubitArray, final Complex[][] gateTensor) {
+        Complex[] resultMatrix = new Complex[qubitArray.length];
+        for (int i = 0; i < gateTensor[0].length; i++) {
+            resultMatrix[i] = new Complex(0);
+            for (int j = 0; j < gateTensor[0].length; j++) {
+                resultMatrix[i].add(Complex.multiply(gateTensor[i][j], qubitArray[j]));
+            }
+        }
+        return resultMatrix;
+    }
+
+    public Complex[] operateOn(final Complex[] qubitArray, int qubits) {
+        if (NQBITS == 1) {
+            return operateOn(qubitArray, getQubitTensor(qubits, this));
+        }
+        Complex[] inputMatrix = new Complex[qubitArray.length];
+        for (int i = 0; i < qubitArray.length; i++) {
+            inputMatrix[i] = qubitArray[getPos(qubits, i)];
+        }
+        return operateOn(inputMatrix, getQubitTensor(qubits, this));
+    }
+
+    private int getPos(int qubits, int posNow) {
+        int[] x = new int[qubits];
+        for (int i = 0; i < qubits; i++) {
+            x[i] = (posNow >> i) % 2;
+        }
+        for (int i = 0; i < qubit_ids.length; i++) {
+            int tmp = x[i];
+            x[i] = x[qubit_ids[i]];
+            x[qubit_ids[i]] = tmp;
+        }
+        int ret = 0;
+        for (int i = 0; i < qubits; i++) {
+            ret += x[i] << i;
+        }
+        return ret;
+    }
+
+    public Qubit[] measure(final Complex[] qubitArray, int qubits) {
+        double[] probs = new double[qubitArray.length];
+        double subtrahend = 0;
+        for (int i = 0; i < qubitArray.length; i++) {
+            probs[i] = Complex.multiply(Complex.conjugate(qubitArray[i]), qubitArray[i]).real;
+            //Log.w("X", i + ": " + Integer.toBinaryString(i) + " : "+ probs[i]);
+        }
+        for (int i = 0; i < qubitArray.length; i++) {
+            double prob = random.nextDouble();
+            if (probs[i] > prob * (1 - subtrahend)) {
+                Qubit[] result = new Qubit[qubits];
+                for (int j = 0; j < qubits; j++) {
+                    result[j] = new Qubit();
+                    if ((i >> (j)) % 2 == 1) result[j].prepare(true);
+                }
+                return result;
+            } else {
+                subtrahend += probs[i];
+                if (i == qubitArray.length - 2) {
+                    subtrahend = 2;
                 }
             }
         }
-        return true;
+        Log.e("VisualOperator", "NO RESULT");
+        return null;
     }
 
     public Qubit[] operateOn(final Qubit[] qs) {
@@ -356,20 +480,10 @@ public class VisualOperator implements Serializable {
             q.matrix[1].add(Complex.multiply(matrix[1][1], qs[0].matrix[1]));
             return new Qubit[]{q};
         }
-        Complex[] inputMatrix = new Complex[MATRIX_DIM];
+        Complex[] inputMatrix = toQubitArray(qs);
         Complex[] resultMatrix = new Complex[MATRIX_DIM];
         for (int i = 0; i < MATRIX_DIM; i++) {
             resultMatrix[i] = new Complex(0);
-            for (int k = 0; k < NQBITS; k++) {
-                if (k == 0) {
-                    inputMatrix[i] = Complex.multiply(qs[NQBITS - 2].matrix[(i >> 1) % 2], qs[NQBITS - 1].matrix[i % 2]);
-                    k += 1;
-                    continue;
-                }
-                inputMatrix[i] = Complex.multiply(inputMatrix[i], qs[NQBITS - k - 1].matrix[(i >> k) % 2]);
-            }
-        }
-        for (int i = 0; i < MATRIX_DIM; i++) {
             for (int j = 0; j < MATRIX_DIM; j++) {
                 resultMatrix[i].add(Complex.multiply(matrix[i][j], inputMatrix[j]));
             }
@@ -481,16 +595,43 @@ public class VisualOperator implements Serializable {
         return null;
     }
 
-    public Complex determinant() {
+    public double determinantMod() {
         if (NQBITS == 1) {
-            return Complex.sub(Complex.multiply(matrix[0][0], matrix[1][1]), Complex.multiply(matrix[0][1], matrix[1][0]));
+            return Complex.sub(Complex.multiply(matrix[0][0], matrix[1][1]), Complex.multiply(matrix[0][1], matrix[1][0])).mod();
+        } else {
+            Qubit[] qs = new Qubit[NQBITS];
+            for (int m = 0; m < NQBITS; m++) {
+                qs[m] = new Qubit();
+            }
+            Complex[] inputMatrix = new Complex[MATRIX_DIM];
+            Complex[] resultMatrix = new Complex[MATRIX_DIM];
+            for (int i = 0; i < MATRIX_DIM; i++) {
+                resultMatrix[i] = new Complex(0);
+                for (int k = 0; k < NQBITS; k++) {
+                    if (k == 0) {
+                        inputMatrix[i] = Complex.multiply(qs[NQBITS - 2].matrix[(i >> 1) % 2], qs[NQBITS - 1].matrix[i % 2]);
+                        k += 1;
+                        continue;
+                    }
+                    inputMatrix[i] = Complex.multiply(inputMatrix[i], qs[NQBITS - k - 1].matrix[(i >> k) % 2]);
+                }
+            }
+            for (int i = 0; i < MATRIX_DIM; i++) {
+                for (int j = 0; j < MATRIX_DIM; j++) {
+                    resultMatrix[i].add(Complex.multiply(matrix[i][j], inputMatrix[j]));
+                }
+            }
+            double prob = 0f;
+            for (int i = 0; i < MATRIX_DIM; i++) {
+                prob += Complex.multiply(Complex.conjugate(resultMatrix[i]), resultMatrix[i]).real;
+            }
+            return prob;
         }
-        return getDeterminant(matrix, MATRIX_DIM, MATRIX_DIM);
     }
 
     public boolean isSpecial() {
-        Complex det = determinant();
-        return det.mod() < 1.0001 && det.mod() > 0.9999;
+        double detMod = determinantMod();
+        return detMod < 1.0001 && detMod > 0.9999;
     }
 
     public VisualOperator inverse() {
@@ -503,36 +644,6 @@ public class VisualOperator implements Serializable {
 
     public boolean isUnitary() {
         return inverse().equals3Decimals(hermitianConjugate(this));
-    }
-
-    private static void getCofactor(Complex mat[][], Complex temp[][], int p, int q, int n) {
-        int i = 0, j = 0;
-        for (int row = 0; row < n; row++) {
-            for (int col = 0; col < n; col++) {
-                if (row != p && col != q) {
-                    temp[i][j++] = mat[row][col];
-                    if (j == n - 1) {
-                        j = 0;
-                        i++;
-                    }
-                }
-            }
-        }
-    }
-
-    private static Complex getDeterminant(Complex matrix[][], int DIM, int DIM2) {
-        Complex D = new Complex(0);
-        if (DIM == 1)
-            return matrix[0][0];
-        Complex temp[][] = new Complex[DIM2][DIM2];
-        int sign = 1;
-        for (int f = 0; f < DIM; f++) {
-            getCofactor(matrix, temp, 0, f, DIM);
-            D.add(Complex.multiply(Complex.multiply(new Complex(sign), matrix[0][f]), getDeterminant(temp, DIM - 1, DIM2)));
-            sign = -sign;
-        }
-
-        return D;
     }
 
     private static Complex[][] invert(Complex a[][]) {

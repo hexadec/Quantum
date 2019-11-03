@@ -39,7 +39,7 @@
     <string name="invalid_complex">Invalid complex number: try the format x±yi</string>
     <string name="invalid_matrix">The matrix has to be member of the group SU(n) </string>
     <string name="check_matrix">Check matrix</string>
-    <string name="determinant">Determinant</string>
+    <string name="determinant">Det modulus</string>
     <string name="unitary">Unitary</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
@@ -50,8 +50,9 @@
     <string name="delete_gate">Delete gate</string>
     <string name="export_csv">Export to CSV</string>
     <string name="successfully_exported">Successfully exported!</string>
+    <string name="successfully_imported">Successfully imported!</string>
     <string name="save_experiment">Save experiment</string>
-    <string name="choose_experiment">Choose and experiment file to open</string>
+    <string name="choose_experiment">Choose an experiment file to open</string>
     <string name="invalid_file">Invalid file selected!</string>
     <string name="experiment_saved">Saved to home folder as:</string>
     <string name="unknown_error">An unknown error has occurred :(</string>

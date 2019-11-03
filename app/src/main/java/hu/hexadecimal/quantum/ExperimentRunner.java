@@ -46,24 +46,19 @@ public class ExperimentRunner {
                 @Override
                 public void run() {
                     Qubit[] qubits = new Qubit[QuantumView.MAX_QUBITS];
+                    VisualOperator vm = VisualOperator.CNOT.copy();
                     for (int j = 0; j < timestorun; j++) {
                         for (int k = 0; k < qubits.length; k++) {
                             qubits[k] = new Qubit();
                         }
+                        Complex[] quArray = VisualOperator.toQubitArray(qubits);
                         for (int m = 0; m < v.size(); m++) {
-                            int[] quids = v.get(m).getQubitIDs();
-                            Qubit[] subqubits = new Qubit[quids.length];
-                            for (int n = 0; n < subqubits.length; n++) {
-                                subqubits[n] = qubits[quids[n]];
-                            }
-                            Qubit[] resultqubits = ((VisualOperator) v.get(m)).operateOn(subqubits);
-                            for (int n = 0; n < subqubits.length; n++) {
-                                qubits[quids[n]] = resultqubits[n];
-                            }
+                            quArray = v.get(m).operateOn(quArray, qubits.length);
                         }
+                        qubits = vm.measure(quArray, qubits.length);
                         int cprob = 0;
                         for (int k = 0; k < qubits.length; k++) {
-                            cprob += qubits[k].measureZ() ? 1 << k : 0;
+                            cprob += qubits[qubits.length - k - 1].measureZ() ? 1 << k : 0;
                         }
                         sprobs[cprob][t_id]++;
                         status++;

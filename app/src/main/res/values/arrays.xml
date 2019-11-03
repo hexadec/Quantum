@@ -3,24 +3,24 @@
     <string-array name="shots">
         <item>Pick a single outcome</item>
         <item>128</item>
+        <item>256</item>
         <item>512</item>
         <item>1K</item>
         <item>4K</item>
-        <item>16K</item>
-        <item>131K</item>
-        <item>524K (only if you really need it)</item>
-        <item>4M (not recommended)</item>
+        <item>8K</item>
+        <item>16K (crazy)</item>
+        <item>32K (insane)</item>
     </string-array>
     <string-array name="shots_values">
         <item>1</item>
         <item>128</item>
+        <item>256</item>
         <item>512</item>
         <item>1024</item>
         <item>4096</item>
+        <item>8192</item>
         <item>16384</item>
-        <item>131072</item>
-        <item>524288</item>
-        <item>4194304</item>
+        <item>32768</item>
     </string-array>
     <string-array name="threads">
         <item>Single thread (not recommended)</item>

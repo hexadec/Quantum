@@ -36,6 +36,7 @@ import com.google.android.material.snackbar.Snackbar;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -144,14 +145,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void showAddGateDialog(float posx, float posy) {
         AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
-        adb.setTitle(R.string.select_action)
-                .setNegativeButton(R.string.delete_gate, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        qv.deleteGateAt(posx, posy);
-                    }
-                })
-                .setPositiveButton(R.string.add_gate, null)
+        adb.setTitle(R.string.select_action);
+        if (qv.whichGate(posx, posy) != null)
+            adb.setNegativeButton(R.string.delete_gate, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    qv.deleteGateAt(posx, posy);
+                }
+            });
+        adb.setPositiveButton(R.string.add_gate, null)
                 .setNeutralButton(R.string.cancel, null)
                 .setCancelable(true);
 
@@ -161,7 +163,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onShow(DialogInterface dialog) {
                 final Button multi = d.getButton(AlertDialog.BUTTON_POSITIVE);
-                d.getButton(DialogInterface.BUTTON_NEGATIVE).setEnabled(qv.whichGate(posx, posy) != null);
                 multi.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -210,10 +211,9 @@ public class MainActivity extends AppCompatActivity {
                         ArrayAdapter<String> adapter =
                                 new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, qs);
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                        qX[0].setAdapter(adapter);
-                        qX[1].setAdapter(adapter);
-                        qX[2].setAdapter(adapter);
-                        qX[3].setAdapter(adapter);
+                        for (int i = 0; i < qX.length; i++) {
+                            qX[i].setAdapter(adapter);
+                        }
                         final LinkedList<String> mGates = VisualOperator.getPredefinedGateNames();
                         Collections.sort(mGates);
                         ArrayAdapter<String> gadapter =
@@ -306,9 +306,9 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 switch (qbits) {
                                     case 1:
-                                        qX[1].setVisibility(View.GONE);
+                                        qX[1].setVisibility(View.INVISIBLE);
                                     case 2:
-                                        qX[2].setVisibility(View.GONE);
+                                        qX[2].setVisibility(View.INVISIBLE);
                                     case 3:
                                         qX[3].setVisibility(View.GONE);
                                     default:
@@ -357,6 +357,13 @@ public class MainActivity extends AppCompatActivity {
                         d.setContentView(view);
                     }
                 });
+                try {
+                    if (d.getButton(DialogInterface.BUTTON_NEGATIVE).getVisibility() != View.VISIBLE) {
+                        throw new Exception();
+                    }
+                } catch (Exception e) {
+                    multi.callOnClick();
+                }
             }
         });
         d.show();
@@ -379,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
                                 Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                         pickedDir = null;
                     }
-                    SimpleDateFormat sdf = new SimpleDateFormat("'experiment'_YYYY-MM-dd_HH-mm-ss'" + QuantumView.FILE_EXTENSION + "'");
+                    SimpleDateFormat sdf = new SimpleDateFormat("'experiment'_yyyy-MM-dd_HH-mm-ss'" + QuantumView.FILE_EXTENSION + "'");
                     sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                     String filename = sdf.format(new Date());
                     DocumentFile newFile = pickedDir.createFile("application/octet-stream", filename);
@@ -456,14 +463,14 @@ public class MainActivity extends AppCompatActivity {
                                                 sb.append(',');
                                                 sb.append(probs[k]);
                                             }
-                                            SimpleDateFormat sdf = new SimpleDateFormat("'results'_YYYY-MM-dd_HH-mm-ss'.csv'");
+                                            SimpleDateFormat sdf = new SimpleDateFormat("'results'_yyyy-MM-dd_HH-mm-ss'.csv'");
                                             sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
                                             String filename = sdf.format(new Date());
                                             DocumentFile newFile = pickedDir.createFile("text/csv", filename);
                                             OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
                                             out.write(sb.toString().getBytes());
                                             out.close();
-                                            Toast.makeText(MainActivity.this, filename + " \n" + getString(R.string.successfully_exported), Toast.LENGTH_SHORT).show();
+                                            Snackbar.make(findViewById(R.id.parent2), filename + " \n" + getString(R.string.successfully_exported), Snackbar.LENGTH_LONG).show();
                                         } catch (Exception e) {
                                             e.printStackTrace();
                                             Toast.makeText(MainActivity.this, R.string.choose_save_location_settings, Toast.LENGTH_LONG).show();
@@ -508,7 +515,11 @@ public class MainActivity extends AppCompatActivity {
             try {
                 if (pickedFile.getName().endsWith(QuantumView.FILE_EXTENSION)) {
                     Object obj = new ObjectInputStream(getContentResolver().openInputStream(pickedFile.getUri())).readObject();
-                    qv.importGates(obj);
+                    if (!qv.importGates(obj)) {
+                        throw new Exception("Maybe empty gate sequence?");
+                    } else {
+                        Snackbar.make(findViewById(R.id.parent2), R.string.successfully_imported, Snackbar.LENGTH_LONG).show();
+                    }
                 } else {
                     Snackbar.make(findViewById(R.id.parent2), R.string.invalid_file, Snackbar.LENGTH_LONG).show();
                 }

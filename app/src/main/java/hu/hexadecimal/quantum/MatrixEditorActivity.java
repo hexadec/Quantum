@@ -30,6 +30,7 @@ import android.widget.SeekBar;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 public class MatrixEditorActivity extends AppCompatActivity {
@@ -295,7 +296,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                                         .setErrorTextColor(ColorStateList.valueOf(!vo.isSpecial() || !vo.isUnitary() ? Color.RED : Color.GREEN));
                                 ((TextInputLayout) v.findViewById(R.id.editText3))
                                         .setError(getString(R.string.determinant) + ": "
-                                                + vo.determinant().toString3Decimals() + ". "
+                                                + new DecimalFormat("0.0##").format(vo.determinantMod()) + ". "
                                                 + getString(R.string.unitary) + ": "
                                                 + (vo.isUnitary() ? getString(R.string.yes) : getString(R.string.no)));
 
