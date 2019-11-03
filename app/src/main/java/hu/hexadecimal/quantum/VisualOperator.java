@@ -385,7 +385,7 @@ public class VisualOperator implements Serializable {
         int secondDim = second[0].length;
         final Complex[][] result = new Complex[firstDim * secondDim][];
         for (int m = 0; m < result.length; m++) {
-            final int col = firstDim * secondDim;
+            int col = firstDim * secondDim;
             result[m] = new Complex[col];
         }
         for (int m = 0; m < firstDim; m++)
@@ -634,85 +634,50 @@ public class VisualOperator implements Serializable {
         return detMod < 1.0001 && detMod > 0.9999;
     }
 
-    public VisualOperator inverse() {
-        VisualOperator mcopy = copy();
-        Complex[][] invm = VisualOperator.invert(mcopy.matrix);
-        mcopy.matrix = invm;
-        mcopy.transpose();
-        return mcopy;
-    }
-
     public boolean isUnitary() {
-        return inverse().equals3Decimals(hermitianConjugate(this));
-    }
-
-    private static Complex[][] invert(Complex a[][]) {
-        int n = a.length;
-        Complex x[][] = new Complex[n][n];
-        Complex b[][] = new Complex[n][n];
-        int index[] = new int[n];
-        for (int i = 0; i < n; ++i)
-            for (int j = 0; j < n; j++) {
-                b[i][j] = new Complex(i == j ? 1 : 0);
+        Qubit q1 = new Qubit();
+        Qubit q2 = new Qubit();
+        Qubit q3 = new Qubit();
+        q2.applyOperator(VisualOperator.HADAMARD);
+        q3.applyOperator(VisualOperator.HADAMARD);
+        q3.applyOperator(VisualOperator.S_GATE);
+        Qubit[] qa = new Qubit[NQBITS];
+        Qubit[] qb = new Qubit[NQBITS];
+        Qubit[] qc = new Qubit[NQBITS];
+        if (NQBITS != 1) {
+            for (int i = 0; i < NQBITS; i++) {
+                qubit_ids[i] = i;
+                qa[i] = q1.copy();
+                qb[i] = q2.copy();
+                qc[i] = q3.copy();
             }
-        gaussian(a, index);
-        for (int i = 0; i < n - 1; ++i)
-            for (int j = i + 1; j < n; ++j)
-                for (int k = 0; k < n; ++k)
-                    b[index[j]][k] = Complex.sub(b[index[j]][k], Complex.multiply(a[index[j]][i], b[index[i]][k]));
-
-        for (int i = 0; i < n; ++i) {
-            x[n - 1][i] = Complex.divide(b[index[n - 1]][i], a[index[n - 1]][n - 1]);
-            for (int j = n - 2; j >= 0; --j) {
-                x[j][i] = b[index[j]][i];
-                for (int k = j + 1; k < n; ++k) {
-                    x[j][i] = Complex.sub(x[j][i], Complex.multiply(a[index[j]][k], x[k][i]));
-                }
-                x[j][i] = Complex.divide(x[j][i], a[index[j]][j]);
+            Complex[] a1 = toQubitArray(qa);
+            Complex[] a2 = toQubitArray(qb);
+            Complex[] a3 = toQubitArray(qc);
+            VisualOperator vo = hermitianConjugate(this);
+            Complex[] o1 = vo.operateOn(operateOn(a1, NQBITS), NQBITS);
+            Complex[] o2 = vo.operateOn(operateOn(a1, NQBITS), NQBITS);
+            Complex[] o3 = vo.operateOn(operateOn(a1, NQBITS), NQBITS);
+            for (int i = 0; i < a1.length; i++) {
+                Log.e("X", a1[i] + "--" + o1[i]);
+                Log.e("X", a2[i] + "--" + o2[i]);
+                Log.e("X", a3[i] + "--" + o3[i]);
+                if (!a1[i].equals3Decimals(o1[i])) return false;
+                if (!a2[i].equals3Decimals(o2[i])) return false;
+                if (!a3[i].equals3Decimals(o3[i])) return false;
             }
-        }
-        return x;
-    }
-
-    private static void gaussian(Complex a[][], int index[]) {
-        int n = index.length;
-        Complex c[] = new Complex[n];
-
-        for (int i = 0; i < n; ++i)
-            index[i] = i;
-
-        for (int i = 0; i < n; ++i) {
-            Complex c1 = new Complex(0);
-            for (int j = 0; j < n; ++j) {
-                Complex c0 = new Complex(a[i][j].mod());
-                if (c0.mod() > c1.mod()) c1 = c0;
-            }
-            c[i] = c1;
-        }
-        int k = 0;
-        for (int j = 0; j < n - 1; ++j) {
-            Complex pi1 = new Complex(0);
-            for (int i = j; i < n; ++i) {
-                Complex pi0 = new Complex(a[index[i]][j].mod());
-                pi0 = Complex.divide(pi0, c[index[i]]);
-                if (pi0.mod() > pi1.mod()) {
-                    pi1 = pi0;
-                    k = i;
-                }
-            }
-
-            int itmp = index[j];
-            index[j] = index[k];
-            index[k] = itmp;
-            for (int i = j + 1; i < n; ++i) {
-                Complex pj = Complex.divide(a[index[i]][j], a[index[j]][j]);
-                a[index[i]][j] = pj;
-                for (int l = j + 1; l < n; ++l)
-                    a[index[i]][l] = Complex.sub(a[index[i]][l], Complex.multiply(pj, a[index[j]][l]));
+        } else {
+            Qubit o1 = hermitianConjugate(this).operateOn(operateOn(new Qubit[]{q1.copy()}))[0];
+            Qubit o2 = hermitianConjugate(this).operateOn(operateOn(new Qubit[]{q2.copy()}))[0];
+            Qubit o3 = hermitianConjugate(this).operateOn(operateOn(new Qubit[]{q3.copy()}))[0];
+            for (int i = 0; i < 2; i++) {
+                if (!o1.matrix[i].equals3Decimals(q1.matrix[i])) return false;
+                if (!o2.matrix[i].equals3Decimals(q2.matrix[i])) return false;
+                if (!o3.matrix[i].equals3Decimals(q3.matrix[i])) return false;
             }
         }
+        return true;
     }
-
 
     public void setColor(int color1) {
         color = color1;
