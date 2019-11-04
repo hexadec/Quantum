@@ -358,10 +358,13 @@ public class VisualOperator implements Serializable {
         if (v.getQubits() == qubits) return v.matrix;
         Complex[][] tensor = new Complex[1][1];
         for (int i = 0; i < qubits; i++) {
-            if (i == 0) {
-                tensor = tensorProduct(v.matrix, ID.matrix);
+            if (i + v.getQubits() == qubits - 1) {
+                tensor = tensorProduct(tensor, v.matrix);
                 i += v.getQubits();
-            } else tensor = tensorProduct(tensor, ID.matrix);
+            } else if (i == 0) {
+                tensor = tensorProduct(ID.matrix, ID.matrix);
+            } else
+                tensor = tensorProduct(tensor, ID.matrix);
         }
         return tensor;
     }
@@ -373,9 +376,9 @@ public class VisualOperator implements Serializable {
         Complex[][] temp = new Complex[1][1];
         for (int i = 0; i < qubits; i++) {
             if (i == 0) {
-                temp = tensorProduct(which == i ? v.matrix : ID.matrix, which == i + 1 ? v.matrix : ID.matrix);
+                temp = tensorProduct(which == qubits - 2 ? v.matrix : ID.matrix, which == (qubits - 1) ? v.matrix : ID.matrix);
                 i++;
-            } else temp = tensorProduct(temp, which == i ? v.matrix : ID.matrix);
+            } else temp = tensorProduct(which == (qubits - i - 1) ? v.matrix : ID.matrix, temp);
         }
         return temp;
     }
@@ -418,24 +421,29 @@ public class VisualOperator implements Serializable {
         }
         Complex[] inputMatrix = new Complex[qubitArray.length];
         for (int i = 0; i < qubitArray.length; i++) {
-            inputMatrix[i] = qubitArray[getPos(qubits, i)];
+            //Log.e("X", getPos(qubits, i) + "-" + i);
+            inputMatrix[getPos(qubits, i)] = qubitArray[i].copy();
         }
-        return operateOn(inputMatrix, getQubitTensor(qubits, this));
+        inputMatrix = operateOn(inputMatrix, getQubitTensor(qubits, this));
+        for (int i = 0; i < qubitArray.length; i++) {
+            qubitArray[i] = inputMatrix[getPos(qubits, i)].copy();
+        }
+        return qubitArray;
     }
 
-    private int getPos(int qubits, int posNow) {
+    private int getPos(final int qubits, final int posNow) {
         int[] x = new int[qubits];
         for (int i = 0; i < qubits; i++) {
-            x[i] = (posNow >> i) % 2;
+            x[i] = ((posNow) >> (qubits - i - 1)) % 2;
         }
         for (int i = 0; i < qubit_ids.length; i++) {
-            int tmp = x[i];
-            x[i] = x[qubit_ids[i]];
-            x[qubit_ids[i]] = tmp;
+            int tmp = x[qubits - i - 1];
+            x[qubits - i - 1] = x[qubit_ids[qubit_ids.length - i - 1]];
+            x[qubit_ids[qubit_ids.length - i - 1]] = tmp;
         }
         int ret = 0;
         for (int i = 0; i < qubits; i++) {
-            ret += x[i] << i;
+            ret += x[i] << (qubits - i - 1);
         }
         return ret;
     }

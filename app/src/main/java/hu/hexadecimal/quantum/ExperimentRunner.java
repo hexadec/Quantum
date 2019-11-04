@@ -54,11 +54,14 @@ public class ExperimentRunner {
                         Complex[] quArray = VisualOperator.toQubitArray(qubits);
                         for (int m = 0; m < v.size(); m++) {
                             quArray = v.get(m).operateOn(quArray, qubits.length);
+                            /*for (int k = 0; k < quArray.length; k++) {
+                                Log.w("X", quArray[k].toString3Decimals() + " - " + Integer.toBinaryString(k));
+                            }*/
                         }
                         qubits = vm.measure(quArray, qubits.length);
                         int cprob = 0;
                         for (int k = 0; k < qubits.length; k++) {
-                            cprob += qubits[qubits.length - k - 1].measureZ() ? 1 << k : 0;
+                            cprob += qubits[k].measureZ() ? 1 << (qubits.length - k - 1) : 0;
                         }
                         sprobs[cprob][t_id]++;
                         status++;
