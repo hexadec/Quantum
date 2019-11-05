@@ -11,9 +11,11 @@ A software for Android that emulates the actions of a quantum computer
 - At most 6 qubits
 - Gates with at most 4 qubits
 - Parallel processing (1-64 threads)
-- Extremely high number of shots (up to 2^19)
+- Extremely high number of shots (up to 2^20)
 - Lots of predefined gates
 - Get results immediately
+- Export results
+- Import / Export gate sequence
 - Show bloch sphere
 
 ### Predefined Gates
@@ -27,15 +29,13 @@ A software for Android that emulates the actions of a quantum computer
 - Identity
 
 ##### Multi Qubit
-- CNOT
+- CNOT/CY/CZ (Controlled Pauli)
 - SWAP
 - Toffoli
 - Fredkin
 - 2 & 3 Qubit Identity
 
 ###### Planned features
-Export results\
-Export & import gate sequence\
 Create and run algorithms with loops and conditions
 
 (C) All rights reserved! (for now)

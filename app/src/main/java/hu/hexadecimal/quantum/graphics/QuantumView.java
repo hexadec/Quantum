@@ -12,6 +12,8 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutput;
@@ -194,6 +196,8 @@ public class QuantumView extends View {
     public void addGate(int[] qubits, VisualOperator m) {
         for (int qubit : qubits) {
             if (qubit >= getDisplayedQubits()) return;
+            if (!canAddGate(qubit))
+                setLayoutParams(new LinearLayout.LayoutParams(getWidth() + 400, ViewGroup.LayoutParams.MATCH_PARENT));
             measuredQubits[qubit]++;
         }
         VisualOperator mm = m.copy();
@@ -209,8 +213,8 @@ public class QuantumView extends View {
         int gateNumber = 0;
         DisplayMetrics displayMetrics = new DisplayMetrics();
         ((Activity) (getContext())).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        int width = displayMetrics.widthPixels;
-        for (int i = 0; i <= gos.size(); i++) {
+        int width = getWidth() < 1 ? displayMetrics.widthPixels : getWidth();
+        for (int i = 0; i <= gos.size() + 1; i++) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     if (IntStream.of(gos.get(i).getQubitIDs()).noneMatch(x -> x == qbit)) continue;
@@ -280,13 +284,12 @@ public class QuantumView extends View {
     public boolean importGates(Object input) {
         try {
             if (input instanceof LinkedList && ((LinkedList<Object>) input).getFirst() instanceof VisualOperator) {
-                gos = (LinkedList<VisualOperator>) input;
-            }
-            measuredQubits = new byte[MAX_QUBITS];
-            for (VisualOperator vo : gos) {
-                for (int i : vo.getQubitIDs()) {
-                    measuredQubits[i]++;
-                }
+                gos = new LinkedList<>();
+                measuredQubits = new byte[MAX_QUBITS];
+                invalidate();
+            } else return false;
+            for (VisualOperator vo : ((LinkedList<VisualOperator>) input)) {
+                addGate(vo.getQubitIDs(), vo);
             }
             invalidate();
             return true;
