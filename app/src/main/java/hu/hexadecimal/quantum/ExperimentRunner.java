@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import java.util.LinkedList;
+import java.util.Random;
 
 import hu.hexadecimal.quantum.graphics.QuantumView;
 
@@ -46,22 +47,28 @@ public class ExperimentRunner {
                 @Override
                 public void run() {
                     Qubit[] qubits = new Qubit[QuantumView.MAX_QUBITS];
-                    VisualOperator vm = VisualOperator.CNOT.copy();
+                    try {
+                        //To prevent each thread using the same random numbers
+                        Thread.sleep(0, new Random().nextInt(1000) * t_id);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    VisualOperator vm = new VisualOperator();
+                    for (int k = 0; k < qubits.length; k++) {
+                        qubits[k] = new Qubit();
+                    }
+                    Complex[] quArray = VisualOperator.toQubitArray(qubits);
+                    for (int m = 0; m < v.size(); m++) {
+                        quArray = v.get(m).operateOn(quArray, qubits.length);
+                    }
                     for (int j = 0; j < timestorun; j++) {
-                        for (int k = 0; k < qubits.length; k++) {
-                            qubits[k] = new Qubit();
-                        }
-                        Complex[] quArray = VisualOperator.toQubitArray(qubits);
-                        for (int m = 0; m < v.size(); m++) {
-                            quArray = v.get(m).operateOn(quArray, qubits.length);
-                            /*for (int k = 0; k < quArray.length; k++) {
-                                Log.w("X", quArray[k].toString3Decimals() + " - " + Integer.toBinaryString(k));
-                            }*/
-                        }
                         qubits = vm.measure(quArray, qubits.length);
                         int cprob = 0;
                         for (int k = 0; k < qubits.length; k++) {
                             cprob += qubits[k].measureZ() ? 1 << (qubits.length - k - 1) : 0;
+                        }
+                        for (int k = 0; k < qubits.length; k++) {
+                            qubits[k] = new Qubit();
                         }
                         sprobs[cprob][t_id]++;
                         status++;

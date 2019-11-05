@@ -6,7 +6,7 @@ android {
         applicationId "hu.hexadecimal.quantum"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 16
+        versionCode 17
         versionName "frenchfries-alpha." + versionCode
     }
     buildTypes {

@@ -210,6 +210,7 @@ public class VisualOperator implements Serializable {
     }
 
     public VisualOperator() {
+        random = new Random();
         qubit_ids = new int[NQBITS];
         rectangle = new LinkedList<>();
         MATRIX_DIM = 4;

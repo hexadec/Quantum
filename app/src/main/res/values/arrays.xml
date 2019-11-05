@@ -7,9 +7,10 @@
         <item>512</item>
         <item>1K</item>
         <item>4K</item>
-        <item>8K</item>
-        <item>16K (crazy)</item>
-        <item>32K (insane)</item>
+        <item>16K</item>
+        <item>64K</item>
+        <item>256K</item>
+        <item>1M</item>
     </string-array>
     <string-array name="shots_values">
         <item>1</item>
@@ -18,9 +19,10 @@
         <item>512</item>
         <item>1024</item>
         <item>4096</item>
-        <item>8192</item>
         <item>16384</item>
-        <item>32768</item>
+        <item>65536</item>
+        <item>262144</item>
+        <item>1048576</item>
     </string-array>
     <string-array name="threads">
         <item>Single thread (not recommended)</item>

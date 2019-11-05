@@ -489,7 +489,7 @@ public class MainActivity extends AppCompatActivity {
                                             continue outerfor;
                                         }
                                     }
-                                    textView.setText(textView.getText() + "\n" + String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + probs[i]);
+                                    textView.setText(textView.getText() + "\n\t" + String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + probs[i]);
                                 }
                                 scrollView.addView(textView);
                                 adb.setView(scrollView);
