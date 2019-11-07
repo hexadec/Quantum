@@ -55,4 +55,5 @@
     <string name="invalid_file">Invalid file selected!</string>
     <string name="experiment_saved">Saved to home folder as:</string>
     <string name="unknown_error">An unknown error has occurred :(</string>
+    <string name="no_user_gates">No user defined gates are available!</string>
 </resources>
