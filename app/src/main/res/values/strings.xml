@@ -56,4 +56,6 @@
     <string name="experiment_saved">Saved to home folder as:</string>
     <string name="unknown_error">An unknown error has occurred :(</string>
     <string name="no_user_gates">No user defined gates are available!</string>
+    <string name="no_gates">No gates to be saved!</string>
+    <string name="probability_mode">Probability mode</string>
 </resources>

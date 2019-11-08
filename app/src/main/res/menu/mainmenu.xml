@@ -6,30 +6,46 @@
         android:id="@+id/save"
         android:icon="@drawable/content_save"
         android:title="@string/save_experiment"
+        android:orderInCategory="0"
         app:showAsAction="always" />
     <item
         android:id="@+id/prefs"
         android:icon="@drawable/settings"
+        android:orderInCategory="2"
         android:title="@string/preferences"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/bloch"
         android:icon="@drawable/axis_arrow"
+        android:orderInCategory="3"
         android:title="@string/bloch_sphere"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/matrix"
         android:icon="@drawable/table_edit"
+        android:orderInCategory="4"
         android:title="@string/matrix_editor"
         app:showAsAction="ifRoom" />
+
     <item
         android:id="@+id/undo"
         android:title="@string/undo_add_gate"
-        app:showAsAction="never" />
+        android:orderInCategory="6"
+        app:showAsAction="never"
+        android:icon="@drawable/undo"/>
+
     <item
         android:id="@+id/run"
         android:icon="@drawable/play_pause"
         android:title="@string/run"
+        android:orderInCategory="1"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/probability"
+        android:icon="@drawable/alpha_p_circle_outline"
+        android:title="@string/probability_mode"
+        android:orderInCategory="5"
+        app:showAsAction="ifRoom" />
 </menu>

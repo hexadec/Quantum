@@ -11,6 +11,7 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -214,13 +215,15 @@ public class QuantumView extends View {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         ((Activity) (getContext())).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int width = getWidth() < 1 ? displayMetrics.widthPixels : getWidth();
+        outerloop:
         for (int i = 0; i <= gos.size() + 1; i++) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     if (IntStream.of(gos.get(i).getQubitIDs()).noneMatch(x -> x == qbit)) continue;
                 } else {
                     for (int k = 0; k < gos.size(); k++) {
-                        if (gos.get(i).getQubitIDs()[k] != qbit) continue;
+                        if (gos.get(i).getQubitIDs()[k] == qbit) break;
+                        if (k == gos.size() - 1) continue outerloop;
                     }
                 }
             } catch (IndexOutOfBoundsException e) {
@@ -247,6 +250,15 @@ public class QuantumView extends View {
         return count;
     }
 
+    public int whichQubit(float posy) {
+        int count = 0;
+        for (int i = (int) START_Y; i < getHeight() - 2 * mPadding - START_Y && i <= pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
+            if (posy > i && posy < i + (int) pxFromDp(super.getContext(), STEP)) return count;
+            count++;
+        }
+        return -1;
+    }
+
     public byte[] getMeasuredQubits() {
         return measuredQubits;
     }
@@ -257,7 +269,10 @@ public class QuantumView extends View {
 
     public boolean removeLastGate() {
         if (gos.size() > 0) {
-            gos.removeLast();
+            VisualOperator v = gos.removeLast();
+            for (int i = 0; i < v.getQubitIDs().length; i++) {
+                measuredQubits[v.getQubitIDs()[i]]--;
+            }
             invalidate();
             return true;
         }

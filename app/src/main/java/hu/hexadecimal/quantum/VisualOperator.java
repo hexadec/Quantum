@@ -476,6 +476,14 @@ public class VisualOperator implements Serializable {
         return null;
     }
 
+    public static float[] measureProbabilities(final Complex[] qubitArray) {
+        float[] probs = new float[qubitArray.length];
+        for (int i = 0; i < qubitArray.length; i++) {
+            probs[i] = (float) Complex.multiply(Complex.conjugate(qubitArray[i]), qubitArray[i]).real;
+        }
+        return probs;
+    }
+
     public Qubit[] operateOn(final Qubit[] qs) {
         if (qs.length != NQBITS) {
             Log.e("VisualOperator", "NO RESULT");

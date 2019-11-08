@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -35,6 +36,7 @@ import com.google.android.material.snackbar.Snackbar;
 
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,6 +47,7 @@ import java.util.TimeZone;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.documentfile.provider.DocumentFile;
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
 import hu.hexadecimal.quantum.graphics.QuantumView;
@@ -54,10 +57,13 @@ public class MainActivity extends AppCompatActivity {
     BlochSphereView glSurfaceView;
     QuantumView qv;
     private ProgressDialog progressDialog;
+    private Menu menu;
+    private boolean probabilityMode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        probabilityMode = false;
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar2);
         setSupportActionBar(toolbar);
@@ -226,6 +232,7 @@ public class MainActivity extends AppCompatActivity {
                                 for (int i = 0; i < qX.length; i++) {
                                     qX[i].setAdapter(adapter);
                                 }
+                                qX[0].setSelection(qv.whichQubit(posy));
                                 gateName.setAdapter(gadapter);
                                 gateType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                                     @Override
@@ -407,12 +414,37 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.mainmenu, menu);
+        this.menu = menu;
         return true;
+    }
+
+    protected boolean onPrepareOptionsPanel(View view, Menu menu) {
+        if (menu != null) {
+            if (menu.getClass().getSimpleName().equals("MenuBuilder")) {
+                try {
+                    Method m = menu.getClass().getDeclaredMethod(
+                            "setOptionalIconsVisible", Boolean.TYPE);
+                    m.setAccessible(true);
+                    m.invoke(menu, true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return super.onPrepareOptionsPanel(view, menu);
     }
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.probability:
+                menu.getItem(5).setIcon(ContextCompat.getDrawable(this, probabilityMode ? R.drawable.alpha_p_circle_outline : R.drawable.alpha_p_circle));
+                probabilityMode = !probabilityMode;
+                break;
             case R.id.save:
+                if (qv.getOperators().size() < 1) {
+                    Snackbar.make(findViewById(R.id.parent2), getString(R.string.no_gates), Snackbar.LENGTH_LONG).show();
+                    return true;
+                }
                 try {
                     Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
                     DocumentFile pickedDir = DocumentFile.fromTreeUri(MainActivity.this, uri);
@@ -469,7 +501,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         ExperimentRunner experimentRunner = new ExperimentRunner(qv.getOperators());
                         long startTime = System.currentTimeMillis();
-                        float[] probs = experimentRunner.runExperiment(shots, threads, handler);
+                        float[] probs = experimentRunner.runExperiment(shots, threads, handler, probabilityMode);
                         long time = System.currentTimeMillis() - startTime;
                         String t = time / 1000 + "s " + time % 1000 + "ms";
                         runOnUiThread(new Runnable() {

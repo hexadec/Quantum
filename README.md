@@ -6,9 +6,13 @@ A software for Android that emulates the actions of a quantum computer
 > This app will also show the matrix and vector representations of the states and operators in a straightforward way.
 > The limit is only the computing power of your device!
 
+### About the backend
+> The app uses a home-made backend written entirely in Java. Since the app does not use
+> Qiskit, no such functionality is included. Scripts cannot be run, however, it is coming soon!
+
 ### Main features
 
-- At most 6 qubits
+- At most 8 qubits
 - Gates with at most 4 qubits
 - Parallel processing (1-64 threads)
 - Extremely high number of shots (up to 2^20)
