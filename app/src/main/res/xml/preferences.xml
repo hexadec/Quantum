@@ -26,8 +26,9 @@
             android:icon="@drawable/folder_home"
             android:title="@string/save_location" />
 
-        <Preference
-            android:enabled="false"
+        <hu.hexadecimal.quantum.graphics.BigPreference
+            android:enabled="true"
+            android:key="help"
             android:summary="@string/settings_help_long"
             android:title="@string/settings_help" />
 

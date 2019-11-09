@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.view.View;
 
+import androidx.core.graphics.PaintCompat;
 import hu.hexadecimal.quantum.Complex;
 import hu.hexadecimal.quantum.VisualOperator;
 import hu.hexadecimal.quantum.Qubit;
@@ -56,31 +57,33 @@ public class BlochSphereView extends View {
 
         int xpos = getWidth();
         int ypos = getHeight();
+        char verticalBar = PaintCompat.hasGlyph(textPaint, "⎥") ? '⎥' : '|';
+        if (verticalBar == '|') textPaint.setTextSize(pxFromDp(super.getContext(), 17));
         if (getHeight() < getWidth()) {
-            final int radius = xpos / 6;
+            final int radius = ypos / 4 * (xpos / ypos) / 2;
             final int cx1 = xpos / 4;
             final int cx2 = xpos / 4 * 3;
             final int cy = ypos / 2;
             canvas.drawCircle(cx1, cy, radius, mPaint);
             otherPaint.setColor(0xff666666);
-            otherPaint.setStrokeWidth(2);
+            otherPaint.setStrokeWidth(pxFromDp(super.getContext(), 1));
             canvas.drawLine(cx1 - radius, cy, cx1 + radius, cy, otherPaint);
             canvas.drawLine(cx1, cy - radius, cx1, cy + radius, otherPaint);
-            canvas.drawText("⎥i-⟩", cx1 - radius - pxFromDp(super.getContext(), 40), cy + pxFromDp(super.getContext(), 7), textPaint);
-            canvas.drawText("⎥i+⟩", cx1 + radius + pxFromDp(super.getContext(), 4), cy + pxFromDp(super.getContext(), 7), textPaint);
-            canvas.drawText("⎥1⟩", cx1 - pxFromDp(super.getContext(), 13), cy + radius + pxFromDp(super.getContext(), 20), textPaint);
-            canvas.drawText("⎥0⟩", cx1 - pxFromDp(super.getContext(), 13), cy - radius - pxFromDp(super.getContext(), 10), textPaint);
+            canvas.drawText(verticalBar + "i-⟩", cx1 - radius - pxFromDp(super.getContext(), 40), cy + pxFromDp(super.getContext(), 7), textPaint);
+            canvas.drawText(verticalBar + "i+⟩", cx1 + radius + pxFromDp(super.getContext(), 4), cy + pxFromDp(super.getContext(), 7), textPaint);
+            canvas.drawText(verticalBar + "1⟩", cx1 - pxFromDp(super.getContext(), 13), cy + radius + pxFromDp(super.getContext(), 20), textPaint);
+            canvas.drawText(verticalBar + "0⟩", cx1 - pxFromDp(super.getContext(), 13), cy - radius - pxFromDp(super.getContext(), 10), textPaint);
 
             canvas.drawCircle(cx2, ypos / 2, radius, mPaint);
             canvas.drawLine(cx2 - radius, cy, cx2 + radius, cy, otherPaint);
             canvas.drawLine(cx2, cy - radius, cx2, cy + radius, otherPaint);
-            canvas.drawText("⎥i-⟩", cx2 - radius - pxFromDp(super.getContext(), 40), cy + pxFromDp(super.getContext(), 7), textPaint);
-            canvas.drawText("⎥i+⟩", cx2 + radius + pxFromDp(super.getContext(), 4), cy + pxFromDp(super.getContext(), 7), textPaint);
-            canvas.drawText("⎥+⟩", cx2 - pxFromDp(super.getContext(), 13), cy + radius + pxFromDp(super.getContext(), 20), textPaint);
-            canvas.drawText("⎥-⟩", cx2 - pxFromDp(super.getContext(), 13), cy - radius - pxFromDp(super.getContext(), 10), textPaint);
+            canvas.drawText(verticalBar + "i-⟩", cx2 - radius - pxFromDp(super.getContext(), 40), cy + pxFromDp(super.getContext(), 7), textPaint);
+            canvas.drawText(verticalBar + "i+⟩", cx2 + radius + pxFromDp(super.getContext(), 4), cy + pxFromDp(super.getContext(), 7), textPaint);
+            canvas.drawText(verticalBar + "+⟩", cx2 - pxFromDp(super.getContext(), 13), cy + radius + pxFromDp(super.getContext(), 20), textPaint);
+            canvas.drawText(verticalBar + "-⟩", cx2 - pxFromDp(super.getContext(), 13), cy - radius - pxFromDp(super.getContext(), 10), textPaint);
 
             otherPaint.setColor(0xffcc0000);
-            otherPaint.setStrokeWidth(11);
+            otherPaint.setStrokeWidth(pxFromDp(super.getContext(), 5));
             canvas.drawCircle(cx1 - radius + radius * 2 * ProbY, cy - radius + radius * 2 * ProbZ, pxFromDp(super.getContext(), 4), otherPaint);
             canvas.drawCircle(cx2 - radius + radius * 2 * ProbY, cy - radius + radius * 2 * ProbX, pxFromDp(super.getContext(), 4), otherPaint);
         } else {
@@ -90,24 +93,24 @@ public class BlochSphereView extends View {
             final int cy2 = ypos / 4 * 3;
             canvas.drawCircle(cx, cy1, radius, mPaint);
             otherPaint.setColor(0xff666666);
-            otherPaint.setStrokeWidth(2);
+            otherPaint.setStrokeWidth(pxFromDp(super.getContext(), 1));
             canvas.drawLine(cx - radius, cy1, cx + radius, cy1, otherPaint);
             canvas.drawLine(cx, cy1 - radius, cx, cy1 + radius, otherPaint);
-            canvas.drawText("⎥0⟩", cx - pxFromDp(super.getContext(), 13), cy1 - radius - pxFromDp(super.getContext(), 10), textPaint);
-            canvas.drawText("⎥1⟩", cx - pxFromDp(super.getContext(), 13), cy1 + radius + pxFromDp(super.getContext(), 20), textPaint);
-            canvas.drawText("⎥i+⟩", cx + radius + pxFromDp(super.getContext(), 4), cy1 + pxFromDp(super.getContext(), 7), textPaint);
-            canvas.drawText("⎥i-⟩", cx - radius - pxFromDp(super.getContext(), 40), cy1 + pxFromDp(super.getContext(), 7), textPaint);
+            canvas.drawText(verticalBar + "0⟩", cx - pxFromDp(super.getContext(), 13), cy1 - radius - pxFromDp(super.getContext(), 10), textPaint);
+            canvas.drawText(verticalBar + "1⟩", cx - pxFromDp(super.getContext(), 13), cy1 + radius + pxFromDp(super.getContext(), 20), textPaint);
+            canvas.drawText(verticalBar + "i+⟩", cx + radius + pxFromDp(super.getContext(), 4), cy1 + pxFromDp(super.getContext(), 7), textPaint);
+            canvas.drawText(verticalBar + "i-⟩", cx - radius - pxFromDp(super.getContext(), 40), cy1 + pxFromDp(super.getContext(), 7), textPaint);
 
             canvas.drawCircle(cx, cy2, radius, mPaint);
             canvas.drawLine(cx - radius, cy2, cx + radius, cy2, otherPaint);
             canvas.drawLine(cx, cy2 - radius, cx, cy2 + radius, otherPaint);
-            canvas.drawText("⎥-⟩", cx - pxFromDp(super.getContext(), 13), cy2 - radius - pxFromDp(super.getContext(), 10), textPaint);
-            canvas.drawText("⎥+⟩", cx - pxFromDp(super.getContext(), 13), cy2 + radius + pxFromDp(super.getContext(), 20), textPaint);
-            canvas.drawText("⎥i+⟩", cx + radius + pxFromDp(super.getContext(), 4), cy2 + pxFromDp(super.getContext(), 7), textPaint);
-            canvas.drawText("⎥i-⟩", cx - radius - pxFromDp(super.getContext(), 40), cy2 + pxFromDp(super.getContext(), 7), textPaint);
+            canvas.drawText(verticalBar + "-⟩", cx - pxFromDp(super.getContext(), 13), cy2 - radius - pxFromDp(super.getContext(), 10), textPaint);
+            canvas.drawText(verticalBar + "+⟩", cx - pxFromDp(super.getContext(), 13), cy2 + radius + pxFromDp(super.getContext(), 20), textPaint);
+            canvas.drawText(verticalBar + "i+⟩", cx + radius + pxFromDp(super.getContext(), 4), cy2 + pxFromDp(super.getContext(), 7), textPaint);
+            canvas.drawText(verticalBar + "i-⟩", cx - radius - pxFromDp(super.getContext(), 40), cy2 + pxFromDp(super.getContext(), 7), textPaint);
 
             otherPaint.setColor(0xffcc0000);
-            otherPaint.setStrokeWidth(11);
+            otherPaint.setStrokeWidth(pxFromDp(super.getContext(), 4.5f));
             canvas.drawCircle(cx - radius + radius * 2 * ProbY, cy1 - radius + radius * 2 * ProbZ, pxFromDp(super.getContext(), 4), otherPaint);
             canvas.drawCircle(cx - radius + radius * 2 * ProbY, cy2 - radius + radius * 2 * ProbX, pxFromDp(super.getContext(), 4), otherPaint);
         }

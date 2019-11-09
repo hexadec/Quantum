@@ -268,6 +268,9 @@ public class VisualOperator implements Serializable {
     public void hermitianConjugate() {
         transpose();
         conjugate();
+        for (int i = 0; i < NQBITS; i++) {
+            symbols[i] += "†";
+        }
     }
 
     public static VisualOperator hermitianConjugate(VisualOperator visualOperator) {

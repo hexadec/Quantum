@@ -17,9 +17,12 @@
     <string name="wait">Executing experiment, please wait&#8230;</string>
     <string name="undo_add_gate">Undo \&quot;Add gate\&quot;</string>
     <string name="settings_help">Help</string>
-    <string name="settings_help_long">
-    Shots: select how many times to run the experiment. It is a good idea to increase this
-    value as you start using more qubits.\nThreads: usually it is enough to use as many threads as CPU cores your device has, however, a little more won\'t deteriorate performance.</string>
+    <string name="settings_help_long"><![CDATA[
+    <b>Shots:</b> select how many times to run the experiment. It is a good idea to increase this
+    value as you start using more qubits. However, you can choose to use the probability mode, where you get \"exact\" results.
+    <br/><b>Threads:</b> usually it is enough to use as many threads as CPU cores your device has, however, a little more won\'t deteriorate performance.
+    <br/><b>Output folder:</b> select where to export the results/gate sequence and user-defined matrices.
+    ]]></string>
     <string name="matrix_editor">Matrix editor</string>
     <string name="matrix_editor_detailed">Create and edit custom gates</string>
     <string name="gate_name">Gate name</string>
@@ -27,6 +30,7 @@
     <string name="matrix">Matrix</string>
     <string name="choose_qubit_number">Number of qubits 1&#8211;4</string>
     <string name="add_gate">Add gate</string>
+    <string name="edit_gate">Edit gate</string>
     <string name="choose_save_location">Please select where to save the files. You can change it later in the settings</string>
     <string name="choose_save_location_settings">Please select where to save the files. Navigate into settings and select output folder</string>
     <string name="save_location">Output folder</string>
@@ -58,4 +62,5 @@
     <string name="no_user_gates">No user defined gates are available!</string>
     <string name="no_gates">No gates to be saved!</string>
     <string name="probability_mode">Probability mode</string>
+    <string name="hermitian_conjugate">Hermitian conjugate</string>
 </resources>

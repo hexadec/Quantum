@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
+import android.text.Html;
 
 import androidx.documentfile.provider.DocumentFile;
 
@@ -14,6 +15,8 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
         Preference saveLoc = findPreference("save_loc");
+        Preference halp = findPreference("help");
+        halp.setSummary(Html.fromHtml(getString(R.string.settings_help_long)));
         String path = getString(R.string.no_folder_selected);
         try {
             Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();

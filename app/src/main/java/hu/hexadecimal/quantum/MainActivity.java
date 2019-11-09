@@ -9,6 +9,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
@@ -21,10 +22,10 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -149,7 +150,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void showAddGateDialog(float posx, float posy) {
         AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
-        VisualOperator v;
+        final VisualOperator v;
         if ((v = qv.whichGate(posx, posy)) != null) {
             adb.setTitle(R.string.select_action);
             adb.setNegativeButton(R.string.delete_gate, new DialogInterface.OnClickListener() {
@@ -158,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                     qv.deleteGateAt(posx, posy);
                 }
             });
-            adb.setPositiveButton(R.string.add_gate, null);
+            adb.setPositiveButton(R.string.edit_gate, null);
             adb.setNeutralButton(R.string.cancel, null);
         }
         adb.setCancelable(true);
@@ -204,19 +205,20 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        final View view = MainActivity.this.getLayoutInflater().inflate(R.layout.gate_selector, null);
-                        final Spinner gateType = view.findViewById(R.id.type_spinner);
+                        Looper.prepare();
+                        final View mainView = MainActivity.this.getLayoutInflater().inflate(R.layout.gate_selector, null);
+                        final Spinner gateType = mainView.findViewById(R.id.type_spinner);
                         List<String> qs = new ArrayList<>();
                         for (int i = 0; i < qv.getDisplayedQubits(); i++) {
                             qs.add("q" + (i + 1));
                         }
-                        final Spinner filter = view.findViewById(R.id.filter_spinner);
-                        final Spinner gateName = view.findViewById(R.id.gate_name_spinner);
+                        final Spinner filter = mainView.findViewById(R.id.filter_spinner);
+                        final Spinner gateName = mainView.findViewById(R.id.gate_name_spinner);
                         final Spinner[] qX = new Spinner[]{
-                                view.findViewById(R.id.order_first),
-                                view.findViewById(R.id.order_second),
-                                view.findViewById(R.id.order_third),
-                                view.findViewById(R.id.order_fourth)};
+                                mainView.findViewById(R.id.order_first),
+                                mainView.findViewById(R.id.order_second),
+                                mainView.findViewById(R.id.order_third),
+                                mainView.findViewById(R.id.order_fourth)};
                         ArrayAdapter<String> adapter =
                                 new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, qs);
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -232,7 +234,13 @@ public class MainActivity extends AppCompatActivity {
                                 for (int i = 0; i < qX.length; i++) {
                                     qX[i].setAdapter(adapter);
                                 }
-                                qX[0].setSelection(qv.whichQubit(posy));
+                                if (v != null) {
+                                    for (int i = 0; i < v.getQubitIDs().length; i++) {
+                                        qX[i].setSelection(v.getQubitIDs()[i]);
+                                    }
+                                } else {
+                                    qX[0].setSelection(qv.whichQubit(posy));
+                                }
                                 gateName.setAdapter(gadapter);
                                 gateType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                                     @Override
@@ -339,13 +347,13 @@ public class MainActivity extends AppCompatActivity {
                                     public void onNothingSelected(AdapterView<?> adapterView) {
                                     }
                                 });
-                                view.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
+                                mainView.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
                                         d.cancel();
                                     }
                                 });
-                                view.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
+                                mainView.findViewById(R.id.ok).setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
                                         if (operators.size() == 0 && gateType.getSelectedItemPosition() != 0) {
@@ -371,16 +379,21 @@ public class MainActivity extends AppCompatActivity {
                                                 }
                                             }
                                         }
-                                        qv.addGate(qids, gateType.getSelectedItemPosition() == 0
-                                                ? VisualOperator.findGateByName((String) gateName.getSelectedItem())
-                                                : operators.get(gateName.getSelectedItemPosition()));
+                                        VisualOperator gate = gateType.getSelectedItemPosition() == 0
+                                                ? VisualOperator.findGateByName((String) gateName.getSelectedItem()).copy()
+                                                : operators.get(gateName.getSelectedItemPosition()).copy();
+                                        if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked()) gate.hermitianConjugate();
+                                        if (v == null)
+                                            qv.addGate(qids, gate);
+                                        else
+                                            qv.replaceGateAt(qids, gate, posx, posy);
                                         d.cancel();
                                     }
                                 });
                                 d.setTitle(R.string.select_gate);
                                 try {
-                                    d.setView(view);
-                                    d.setContentView(view);
+                                    d.setView(mainView);
+                                    d.setContentView(mainView);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -495,8 +508,13 @@ public class MainActivity extends AppCompatActivity {
                         return true;
                     }
                 });
-                progressDialog = ProgressDialog.show(
-                        MainActivity.this, "", MainActivity.this.getString(R.string.wait), true);
+                try {
+                    progressDialog = ProgressDialog.show(
+                            MainActivity.this, "", MainActivity.this.getString(R.string.wait), true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    progressDialog = null;
+                }
                 new Thread() {
                     public void run() {
                         ExperimentRunner experimentRunner = new ExperimentRunner(qv.getOperators());
@@ -556,12 +574,17 @@ public class MainActivity extends AppCompatActivity {
                                             continue outerfor;
                                         }
                                     }
-                                    textView.setText(textView.getText() + "\n\t" + String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + probs[i]);
+                                    textView.setText(textView.getText() + "\n\t\t" + String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + probs[i]);
                                 }
                                 scrollView.addView(textView);
                                 adb.setView(scrollView);
                                 adb.show();
-                                progressDialog.cancel();
+                                try {
+                                    progressDialog.cancel();
+                                } catch (Exception e) {
+                                    progressDialog = null;
+                                    e.printStackTrace();
+                                }
                             }
                         });
                     }
