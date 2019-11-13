@@ -362,6 +362,9 @@ public class VisualOperator implements Serializable {
         if (v.getQubits() == qubits) return v.matrix;
         Complex[][] tensor = new Complex[1][1];
         for (int i = 0; i < qubits; i++) {
+            if (v.getQubits() == qubits) {
+                return v.copy().matrix;
+            }
             if (i + v.getQubits() == qubits - 1) {
                 tensor = tensorProduct(tensor, v.matrix);
                 i += v.getQubits();
@@ -425,7 +428,6 @@ public class VisualOperator implements Serializable {
         }
         Complex[] inputMatrix = new Complex[qubitArray.length];
         for (int i = 0; i < qubitArray.length; i++) {
-            //Log.e("X", getPos(qubits, i) + "-" + i);
             inputMatrix[getPos(qubits, i)] = qubitArray[i].copy();
         }
         inputMatrix = operateOn(inputMatrix, getQubitTensor(qubits, this));
@@ -661,12 +663,12 @@ public class VisualOperator implements Serializable {
         q2.applyOperator(VisualOperator.HADAMARD);
         q3.applyOperator(VisualOperator.HADAMARD);
         q3.applyOperator(VisualOperator.S_GATE);
-        Qubit[] qa = new Qubit[NQBITS];
-        Qubit[] qb = new Qubit[NQBITS];
-        Qubit[] qc = new Qubit[NQBITS];
+        Qubit[] qa = new Qubit[NQBITS + 2];
+        Qubit[] qb = new Qubit[NQBITS + 2];
+        Qubit[] qc = new Qubit[NQBITS + 2];
         if (NQBITS != 1) {
-            for (int i = 0; i < NQBITS; i++) {
-                qubit_ids[i] = i;
+            for (int i = 0; i < NQBITS + 2; i++) {
+                if (i < NQBITS) qubit_ids[i] = i;
                 qa[i] = q1.copy();
                 qb[i] = q2.copy();
                 qc[i] = q3.copy();
@@ -675,16 +677,19 @@ public class VisualOperator implements Serializable {
             Complex[] a2 = toQubitArray(qb);
             Complex[] a3 = toQubitArray(qc);
             VisualOperator vo = hermitianConjugate(this);
-            Complex[] o1 = vo.operateOn(operateOn(a1, NQBITS), NQBITS);
-            Complex[] o2 = vo.operateOn(operateOn(a1, NQBITS), NQBITS);
-            Complex[] o3 = vo.operateOn(operateOn(a1, NQBITS), NQBITS);
+            Complex[] o1 = vo.copy().operateOn(copy().operateOn(a1, NQBITS + 2), NQBITS + 2);
+            Complex[] o2 = vo.copy().operateOn(copy().operateOn(a2, NQBITS + 2), NQBITS + 2);
+            Complex[] o3 = vo.copy().operateOn(copy().operateOn(a3, NQBITS + 2), NQBITS + 2);
+            Complex[] b1 = toQubitArray(qa);
+            Complex[] b2 = toQubitArray(qb);
+            Complex[] b3 = toQubitArray(qc);
             for (int i = 0; i < a1.length; i++) {
-                Log.e("X", a1[i] + "--" + o1[i]);
-                Log.e("X", a2[i] + "--" + o2[i]);
-                Log.e("X", a3[i] + "--" + o3[i]);
-                if (!a1[i].equals3Decimals(o1[i])) return false;
-                if (!a2[i].equals3Decimals(o2[i])) return false;
-                if (!a3[i].equals3Decimals(o3[i])) return false;
+                Log.e("1", b1[i] + "--" + o1[i]);
+                Log.e("2", b2[i] + "--" + o2[i]);
+                Log.e("3", b3[i] + "--" + o3[i]);
+                if (!b1[i].equals3Decimals(o1[i])) return false;
+                if (!b2[i].equals3Decimals(o2[i])) return false;
+                if (!b3[i].equals3Decimals(o3[i])) return false;
             }
         } else {
             Qubit o1 = hermitianConjugate(this).operateOn(operateOn(new Qubit[]{q1.copy()}))[0];

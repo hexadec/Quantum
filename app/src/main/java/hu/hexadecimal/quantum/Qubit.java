@@ -60,8 +60,8 @@ public class Qubit {
 
     public Qubit copy() {
         Complex[] matrix2 = new Complex[2];
-        matrix2[0] = matrix[0];
-        matrix2[1] = matrix[1];
+        matrix2[0] = matrix[0].copy();
+        matrix2[1] = matrix[1].copy();
         return new Qubit(matrix2);
     }
 }
