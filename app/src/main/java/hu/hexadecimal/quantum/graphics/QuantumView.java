@@ -94,6 +94,10 @@ public class QuantumView extends View {
 
     }
 
+    public double getLimit() {
+        return getHeight() - 1.4 * mPadding - START_Y;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -103,7 +107,7 @@ public class QuantumView extends View {
         otherPaint.setStyle(Paint.Style.FILL);
         int qubitPos = 0;
         char verticalBar = PaintCompat.hasGlyph(whiteTextPaint, "⎥") ? '⎥' : '|';
-        for (int i = (int) START_Y; i < getHeight() - 2 * mPadding - START_Y && i <= pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
+        for (int i = (int) START_Y; i < getLimit() && i <= pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
             canvas.drawLine(mPadding, mPadding + i, getWidth() - mPadding, mPadding + i, mPaint);
 
             mPath.reset();
@@ -168,8 +172,6 @@ public class QuantumView extends View {
         for (int i = 0; i < gos.size(); i++) {
             List<Rect> rects = gos.get(i).getRect();
             for (int j = 0; j < rects.size(); j++) {
-                //Log.w("Z", gos.get(i).getName());
-                //Log.w("Y", posx + ":" + posy + " - " + rects.get(j).right + ":" + rects.get(j).left + ":" + rects.get(j).bottom + ":" + rects.get(j).top);
                 if (posx <= rects.get(j).right && posx >= rects.get(j).left
                         && posy <= rects.get(j).bottom && posy >= rects.get(j).top) {
                     return gos.get(i);
@@ -278,7 +280,7 @@ public class QuantumView extends View {
 
     public int getDisplayedQubits() {
         int count = 0;
-        for (int i = (int) START_Y; i < getHeight() - 2 * mPadding - START_Y && i <= pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
+        for (int i = (int) START_Y; i < getLimit() && i <= pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
             count++;
         }
         return count;
@@ -286,7 +288,7 @@ public class QuantumView extends View {
 
     public int whichQubit(float posy) {
         int count = 0;
-        for (int i = (int) START_Y; i < getHeight() - 2 * mPadding - START_Y && i <= pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
+        for (int i = (int) START_Y; i < getLimit() && i <= pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
             if (posy > i && posy < i + (int) pxFromDp(super.getContext(), STEP)) return count;
             count++;
         }

@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
         }
         glSurfaceView.setQBit(q2);
         AlertDialog.Builder adb = new AlertDialog.Builder(this);
-        adb.setTitle(R.string.bloch_sphere);
+        adb.setTitle(getString(R.string.bloch_sphere) + ": q1");
         adb.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {

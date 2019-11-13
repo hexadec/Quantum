@@ -13,7 +13,8 @@
             android:name=".MatrixEditorActivity"
             android:label="@string/matrix_editor"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:configChanges="orientation|screenSize">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="hu.hexadecimal.quantum.MainActivity" />
