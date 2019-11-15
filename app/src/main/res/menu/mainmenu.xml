@@ -35,12 +35,12 @@
         app:showAsAction="never"
         android:icon="@drawable/undo"/>
 
-    <item
+    <!--<item
         android:id="@+id/run"
         android:icon="@drawable/play_pause"
         android:title="@string/run"
         android:orderInCategory="1"
-        app:showAsAction="always" />
+        app:showAsAction="always" />-->
 
     <item
         android:id="@+id/probability"

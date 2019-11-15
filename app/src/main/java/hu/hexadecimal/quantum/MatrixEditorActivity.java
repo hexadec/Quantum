@@ -1,5 +1,8 @@
 package hu.hexadecimal.quantum;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
@@ -77,9 +80,9 @@ public class MatrixEditorActivity extends AppCompatActivity {
             public void onItemClick(View view, int position) {
                 VisualOperator vo = operators.get(position);
                 AlertDialog.Builder adb = new AlertDialog.Builder(MatrixEditorActivity.this);
-                adb.setTitle(R.string.delete_gate_question);
-                adb.setNegativeButton(R.string.no, null);
-                adb.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                adb.setTitle(R.string.select_action);
+                adb.setNeutralButton(R.string.cancel, null);
+                adb.setPositiveButton(R.string.delete_gate, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         try {
@@ -91,10 +94,28 @@ public class MatrixEditorActivity extends AppCompatActivity {
                         }
                     }
                 });
+                adb.setNegativeButton(R.string.copy_matrix, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("Matrix", vo.toString());
+                        clipboard.setPrimaryClip(clip);
+                    }
+                });
                 adb.show();
             }
         });
-        recyclerView.setAdapter(adapter);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        recyclerView.setAdapter(adapter);
+                    }
+                });
+            }
+        }).start();
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {

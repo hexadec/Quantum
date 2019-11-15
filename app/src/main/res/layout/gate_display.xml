@@ -2,7 +2,8 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_marginBottom="8dp"
+    android:background="#ffffff"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -47,7 +48,7 @@
         app:layout_constraintTop_toBottomOf="@+id/gate_name_disp"
         app:layout_constraintBottom_toTopOf="@id/gate_matrix_disp"/>
 
-    <TextView
+    <WebView
         android:id="@+id/gate_matrix_disp"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -55,8 +56,18 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
         android:text="Matrix"
-        android:gravity="center"
+        android:scrollbars="none"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/gate_symbols_disp" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/gate_matrix_disp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

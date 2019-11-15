@@ -63,4 +63,7 @@
     <string name="no_gates">No gates to be saved!</string>
     <string name="probability_mode">Probability mode</string>
     <string name="hermitian_conjugate">Hermitian conjugate</string>
+    <string name="use_different_qubits">A qubit can only be used once in each gate</string>
+    <string name="click_to_start">Click anywhere on the screen to start!</string>
+    <string name="copy_matrix">Copy matrix</string>
 </resources>

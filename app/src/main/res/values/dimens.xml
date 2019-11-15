@@ -1,3 +1,4 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="fab_margin_matrix">88dp</dimen>
 </resources>

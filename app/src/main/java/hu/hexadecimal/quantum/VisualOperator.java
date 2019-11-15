@@ -62,14 +62,23 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
                     }, "SWAP", new String[]{"✖", "✖"}, 0xffE19417);
 
-    public static final transient VisualOperator ID2 =
+    public static final transient VisualOperator CS =
             new VisualOperator(4,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
-                    }, "2-qb identity", new String[]{"I", "I"}, 0xff666666);
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0, 1)}
+                    }, "Controlled π/2 shift", new String[]{"●", "S"}, 0xff21BAAB);
+
+    public static final transient VisualOperator CT =
+            new VisualOperator(4,
+                    new Complex[][]{
+                            {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(Math.PI / 4)}
+                    }, "Controlled π/4 shift", new String[]{"●", "T"}, 0xffBA7021);
 
     public static final transient VisualOperator TOFFOLI =
             new VisualOperator(8,
@@ -97,25 +106,12 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
                     }, "Fredkin", new String[]{"●", "✖", "✖"}, 0xff17DCE1);
 
-    public static final transient VisualOperator ID3 =
-            new VisualOperator(8,
-                    new Complex[][]{
-                            {new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
-                            {new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
-                    }, "3-qb identity", new String[]{"I", "I", "I"}, 0xff17DCE1);
-
     public static final transient VisualOperator HADAMARD =
             VisualOperator.multiply(
                     new VisualOperator(2, new Complex[][]{
                             new Complex[]{new Complex(1), new Complex(1)},
                             new Complex[]{new Complex(1), new Complex(-1)}
-                    }, "Hadamard", new String[]{"H"}, 0xff2155BA), new Complex(1 / Math.sqrt(2)));
+                    }, "Hadamard", new String[]{"H"}, 0xff2155BA), new Complex(1 / Math.sqrt(2), 0));
 
     public static final transient VisualOperator PAULI_Z =
             new VisualOperator(2, new Complex[][]{
@@ -138,26 +134,26 @@ public class VisualOperator implements Serializable {
     public static final transient VisualOperator T_GATE =
             new VisualOperator(2, new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
-                    new Complex[]{new Complex(0), new Complex(1, Math.PI / 4, true)}
-            }, "PI/4 Phase-shift", new String[]{"T"}, 0xffBA7021);
+                    new Complex[]{new Complex(0), new Complex(Math.PI / 4)}
+            }, "π/4 Phase-shift", new String[]{"T"}, 0xffBA7021);
 
     public static final transient VisualOperator S_GATE =
             new VisualOperator(2, new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(0, 1)}
-            }, "PI/2 Phase-shift", new String[]{"S"}, 0xff21BAAB);
+            }, "π/2 Phase-shift", new String[]{"S"}, 0xff21BAAB);
 
     public static final transient VisualOperator PI6_GATE =
             new VisualOperator(2, new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
-                    new Complex[]{new Complex(0), new Complex(1, Math.PI / 6, true)}
-            }, "PI/6 Phase-shift", new String[]{"\u03C06"}, 0xffDCE117);
+                    new Complex[]{new Complex(0), new Complex(Math.PI / 6)}
+            }, "π/6 Phase-shift", new String[]{"π6"}, 0xffDCE117);
 
     public static final transient VisualOperator SQRT_NOT =
             VisualOperator.multiply(new VisualOperator(2, new Complex[][]{
                     new Complex[]{new Complex(1, 1), new Complex(1, -1)},
                     new Complex[]{new Complex(1, -1), new Complex(1, 1)}
-            }, "√NOT", new String[]{"√X"}, 0xff2155BA), new Complex(0.5));
+            }, "√NOT", new String[]{"√X"}, 0xff2155BA), new Complex(0.5, 0));
 
     public static final transient VisualOperator ID =
             new VisualOperator(2, new Complex[][]{
@@ -320,6 +316,50 @@ public class VisualOperator implements Serializable {
             sb.deleteCharAt(sb.length() - 2);
             sb.append('\n');
         }
+        return sb.toString();
+    }
+
+    public String toStringHtmlTable() {
+        String[][] matrixString = new String[MATRIX_DIM][MATRIX_DIM];
+        int[] colLength = new int[MATRIX_DIM];
+        int sumLen = 0;
+        for (int i = 0; i < MATRIX_DIM; i++) {
+            for (int j = 0; j < MATRIX_DIM; j++) {
+                matrixString[i][j] = matrix[i][j].toString3Decimals();
+                int len = matrixString[i][j].length();
+                if (len > colLength[i]) colLength[i] = len;
+                if (i == MATRIX_DIM - 1) sumLen += colLength[j];
+            }
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "<style>\n" +
+                "table, th, td {\n" +
+                "  border: 1px solid #BBB;\n" +
+                "  border-collapse: collapse;\n" +
+                "}\n" +
+                "th, td {\n" +
+                "  padding: 6px;\n" +
+                "}\n" +
+                "td {\n" +
+                " text-align: center;\n" +
+                "}\n" +
+                "</style>\n" +
+                "</head>\n" +
+                "<body>");
+        sb.append("<table align=\"center\">\n");
+        for (int i = 0; i < MATRIX_DIM; i++) {
+            sb.append("<tr>\n");
+            for (int j = 0; j < MATRIX_DIM; j++) {
+                sb.append("<td>");
+                sb.append(matrixString[i][j]);
+                sb.append("</td>\n");
+            }
+            sb.append("</tr>\n");
+        }
+        sb.append("</table>\n</body>");
         return sb.toString();
     }
 

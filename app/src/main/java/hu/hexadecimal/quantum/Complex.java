@@ -9,7 +9,11 @@ public class Complex implements Serializable {
     public double real = 0;
     public double imaginary = 0;
 
-    public Complex(double realPart) {
+    /**
+     *
+     * @param realPart BE CAREFUL!! This must be an int
+     */
+    public Complex(int realPart) {
         real = realPart;
     }
 
@@ -21,6 +25,15 @@ public class Complex implements Serializable {
     public Complex(double mod, double arg, boolean flag) {
         real = Math.cos(arg) * mod;
         imaginary = Math.sin(arg) * mod;
+    }
+
+    /**
+     *
+     * @param arg BE CAREFUL!! This must be a double
+     */
+    public Complex(double arg) {
+        real = Math.cos(arg);
+        imaginary = Math.sin(arg);
     }
 
     public double mod() {
@@ -122,14 +135,14 @@ public class Complex implements Serializable {
     }
 
     public static Complex sin(Complex complex) {
-        Complex epz = Complex.exponent(new Complex(Math.E), new Complex((-1) * complex.imaginary, complex.real));
-        Complex enz = Complex.exponent(new Complex(Math.E), new Complex(complex.imaginary, (-1) * complex.real));
+        Complex epz = Complex.exponent(new Complex(Math.E, 0), new Complex((-1) * complex.imaginary, complex.real));
+        Complex enz = Complex.exponent(new Complex(Math.E, 0), new Complex(complex.imaginary, (-1) * complex.real));
         return Complex.divide(Complex.sub(epz, enz), new Complex(0, 2));
     }
 
     public static Complex cos(Complex complex) {
-        Complex epz = Complex.exponent(new Complex(Math.E), new Complex((-1) * complex.imaginary, complex.real));
-        Complex enz = Complex.exponent(new Complex(Math.E), new Complex(complex.imaginary, (-1) * complex.real));
+        Complex epz = Complex.exponent(new Complex(Math.E, 0), new Complex((-1) * complex.imaginary, complex.real));
+        Complex enz = Complex.exponent(new Complex(Math.E, 0), new Complex(complex.imaginary, (-1) * complex.real));
         return Complex.multiply(Complex.add(epz, enz), new Complex(0.5, 0));
     }
 

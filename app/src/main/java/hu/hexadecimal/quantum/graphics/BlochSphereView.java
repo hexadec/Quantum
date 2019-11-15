@@ -60,7 +60,7 @@ public class BlochSphereView extends View {
         char verticalBar = PaintCompat.hasGlyph(textPaint, "⎥") ? '⎥' : '|';
         if (verticalBar == '|') textPaint.setTextSize(pxFromDp(super.getContext(), 17));
         if (getHeight() < getWidth()) {
-            final int radius = ypos / 4 * (xpos / ypos) / 2;
+            final int radius = (int) (ypos / 4 * (xpos / ypos) / 1.4);
             final int cx1 = xpos / 4;
             final int cx2 = xpos / 4 * 3;
             final int cy = ypos / 2;
@@ -83,9 +83,9 @@ public class BlochSphereView extends View {
             canvas.drawText(verticalBar + "-⟩", cx2 - pxFromDp(super.getContext(), 13), cy - radius - pxFromDp(super.getContext(), 10), textPaint);
 
             otherPaint.setColor(0xffcc0000);
-            otherPaint.setStrokeWidth(pxFromDp(super.getContext(), 5));
-            canvas.drawCircle(cx1 - radius + radius * 2 * ProbY, cy - radius + radius * 2 * ProbZ, pxFromDp(super.getContext(), 4), otherPaint);
-            canvas.drawCircle(cx2 - radius + radius * 2 * ProbY, cy - radius + radius * 2 * ProbX, pxFromDp(super.getContext(), 4), otherPaint);
+            otherPaint.setStrokeWidth(pxFromDp(super.getContext(), 6));
+            canvas.drawCircle(cx1 - radius + radius * 2 * ProbY, cy - radius + radius * 2 * ProbZ, pxFromDp(super.getContext(), 6), otherPaint);
+            canvas.drawCircle(cx2 - radius + radius * 2 * ProbY, cy - radius + radius * 2 * ProbX, pxFromDp(super.getContext(), 6), otherPaint);
         } else {
             final int radius = ypos / 6;
             final int cx = xpos / 2;
@@ -110,9 +110,9 @@ public class BlochSphereView extends View {
             canvas.drawText(verticalBar + "i-⟩", cx - radius - pxFromDp(super.getContext(), 40), cy2 + pxFromDp(super.getContext(), 7), textPaint);
 
             otherPaint.setColor(0xffcc0000);
-            otherPaint.setStrokeWidth(pxFromDp(super.getContext(), 4.5f));
-            canvas.drawCircle(cx - radius + radius * 2 * ProbY, cy1 - radius + radius * 2 * ProbZ, pxFromDp(super.getContext(), 4), otherPaint);
-            canvas.drawCircle(cx - radius + radius * 2 * ProbY, cy2 - radius + radius * 2 * ProbX, pxFromDp(super.getContext(), 4), otherPaint);
+            otherPaint.setStrokeWidth(pxFromDp(super.getContext(), 6));
+            canvas.drawCircle(cx - radius + radius * 2 * ProbY, cy1 - radius + radius * 2 * ProbZ, pxFromDp(super.getContext(), 6), otherPaint);
+            canvas.drawCircle(cx - radius + radius * 2 * ProbY, cy2 - radius + radius * 2 * ProbX, pxFromDp(super.getContext(), 6), otherPaint);
         }
     }
 

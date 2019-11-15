@@ -123,6 +123,115 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
         });
+
+        FloatingActionButton execute = findViewById(R.id.fab_matrix);
+        execute.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+                final int shots = Integer.valueOf(pref.getString("shots", "1024"));
+                final int threads = Integer.valueOf(pref.getString("threads", "8"));
+                final Handler handler = new Handler(new Handler.Callback() {
+                    @Override
+                    public boolean handleMessage(Message message) {
+                        try {
+                            progressDialog.setMessage(MainActivity.this.getString(R.string.wait) + "\n" + message.what + "/" + shots);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        return true;
+                    }
+                });
+                try {
+                    progressDialog = ProgressDialog.show(
+                            MainActivity.this, "", MainActivity.this.getString(R.string.wait), true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    progressDialog = null;
+                }
+                new Thread() {
+                    public void run() {
+                        ExperimentRunner experimentRunner = new ExperimentRunner(qv.getOperators());
+                        long startTime = System.currentTimeMillis();
+                        float[] probs = experimentRunner.runExperiment(shots, threads, handler, probabilityMode);
+                        long time = System.currentTimeMillis() - startTime;
+                        String t = time / 1000 + "s " + time % 1000 + "ms";
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
+                                adb.setCancelable(false);
+                                adb.setPositiveButton("OK", null);
+                                adb.setNeutralButton(R.string.export_csv, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        try {
+                                            Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
+                                            DocumentFile pickedDir = DocumentFile.fromTreeUri(MainActivity.this, uri);
+                                            if (!pickedDir.exists()) {
+                                                getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                                                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                                pickedDir = null;
+                                            }
+                                            StringBuilder sb = new StringBuilder();
+                                            for (int k = 0; k < probs.length; k++) {
+                                                if (k != 0) sb.append("\r\n");
+                                                sb.append(k);
+                                                sb.append(',');
+                                                sb.append(String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(k)).replace(' ', '0'));
+                                                sb.append(',');
+                                                sb.append(probs[k]);
+                                            }
+                                            SimpleDateFormat sdf = new SimpleDateFormat("'results'_yyyy-MM-dd_HH-mm-ss'.csv'");
+                                            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                                            String filename = sdf.format(new Date());
+                                            DocumentFile newFile = pickedDir.createFile("text/csv", filename);
+                                            OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
+                                            out.write(sb.toString().getBytes());
+                                            out.close();
+                                            Snackbar.make(findViewById(R.id.parent2), filename + " \n" + getString(R.string.successfully_exported), Snackbar.LENGTH_LONG).show();
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                            Toast.makeText(MainActivity.this, R.string.choose_save_location_settings, Toast.LENGTH_LONG).show();
+                                        }
+                                    }
+                                });
+                                adb.setTitle(getString(R.string.results) + ": \t" + t);
+                                ScrollView scrollView = new ScrollView(MainActivity.this);
+                                TextView textView = new TextView(MainActivity.this);
+                                textView.setTypeface(Typeface.MONOSPACE);
+                                byte[] measuredQubits = qv.getMeasuredQubits();
+                                outerfor:
+                                for (int i = 0; i < probs.length; i++) {
+                                    for (int j = 0; j < measuredQubits.length; j++) {
+                                        if (measuredQubits[j] < 1 && (i >> j) % 2 == 1) {
+                                            continue outerfor;
+                                        }
+                                    }
+                                    textView.setText(textView.getText() + "\n\t\t" + String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + probs[i]);
+                                }
+                                scrollView.addView(textView);
+                                adb.setView(scrollView);
+                                adb.show();
+                                try {
+                                    progressDialog.cancel();
+                                } catch (Exception e) {
+                                    progressDialog = null;
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+                    }
+                }.start();
+            }
+        });
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
+        int help_shown = pref.getInt("help_shown", 0);
+        if (help_shown < 5) {
+            Snackbar.make(findViewById(R.id.parent2), R.string.click_to_start, Snackbar.LENGTH_LONG).show();
+            pref.edit().putInt("help_shown", ++help_shown).apply();
+        }
     }
 
     public void displayBlochSphere() {
@@ -322,21 +431,19 @@ public class MainActivity extends AppCompatActivity {
 
                                         int qbits = gateType.getSelectedItemPosition() == 0 ? VisualOperator.findGateByName(adapter.getItem(i)).getQubits() : operators.get(i).getQubits();
                                         switch (qbits) {
-                                            case 1:
-                                                qX[0].setVisibility(View.VISIBLE);
-                                            case 2:
-                                                qX[1].setVisibility(View.VISIBLE);
-                                            case 3:
-                                                qX[2].setVisibility(View.VISIBLE);
                                             case 4:
                                                 qX[3].setVisibility(View.VISIBLE);
+                                            case 3:
+                                                qX[2].setVisibility(View.VISIBLE);
+                                            case 2:
+                                                qX[1].setVisibility(View.VISIBLE);
                                             default:
                                         }
                                         switch (qbits) {
                                             case 1:
                                                 qX[1].setVisibility(View.INVISIBLE);
                                             case 2:
-                                                qX[2].setVisibility(View.INVISIBLE);
+                                                qX[2].setVisibility(View.GONE);
                                             case 3:
                                                 qX[3].setVisibility(View.GONE);
                                             default:
@@ -375,6 +482,7 @@ public class MainActivity extends AppCompatActivity {
                                             for (int j = i + 1; j < qbits; j++) {
                                                 if (qids[i] == qids[j]) {
                                                     d.cancel();
+                                                    Snackbar.make(findViewById(R.id.parent2), R.string.use_different_qubits, Snackbar.LENGTH_LONG).show();
                                                     return;
                                                 }
                                             }
@@ -382,7 +490,8 @@ public class MainActivity extends AppCompatActivity {
                                         VisualOperator gate = gateType.getSelectedItemPosition() == 0
                                                 ? VisualOperator.findGateByName((String) gateName.getSelectedItem()).copy()
                                                 : operators.get(gateName.getSelectedItemPosition()).copy();
-                                        if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked()) gate.hermitianConjugate();
+                                        if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
+                                            gate.hermitianConjugate();
                                         if (v == null)
                                             qv.addGate(qids, gate);
                                         else
@@ -450,7 +559,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.probability:
-                menu.getItem(5).setIcon(ContextCompat.getDrawable(this, probabilityMode ? R.drawable.alpha_p_circle_outline : R.drawable.alpha_p_circle));
+                menu.getItem(menu.size() - 2).setIcon(ContextCompat.getDrawable(this, probabilityMode ? R.drawable.alpha_p_circle_outline : R.drawable.alpha_p_circle));
                 probabilityMode = !probabilityMode;
                 break;
             case R.id.save:
@@ -492,103 +601,6 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.bloch:
                 displayBlochSphere();
-                break;
-            case R.id.run:
-                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-                final int shots = Integer.valueOf(pref.getString("shots", "1024"));
-                final int threads = Integer.valueOf(pref.getString("threads", "8"));
-                final Handler handler = new Handler(new Handler.Callback() {
-                    @Override
-                    public boolean handleMessage(Message message) {
-                        try {
-                            progressDialog.setMessage(MainActivity.this.getString(R.string.wait) + "\n" + message.what + "/" + shots);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        return true;
-                    }
-                });
-                try {
-                    progressDialog = ProgressDialog.show(
-                            MainActivity.this, "", MainActivity.this.getString(R.string.wait), true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    progressDialog = null;
-                }
-                new Thread() {
-                    public void run() {
-                        ExperimentRunner experimentRunner = new ExperimentRunner(qv.getOperators());
-                        long startTime = System.currentTimeMillis();
-                        float[] probs = experimentRunner.runExperiment(shots, threads, handler, probabilityMode);
-                        long time = System.currentTimeMillis() - startTime;
-                        String t = time / 1000 + "s " + time % 1000 + "ms";
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
-                                adb.setCancelable(false);
-                                adb.setPositiveButton("OK", null);
-                                adb.setNeutralButton(R.string.export_csv, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        try {
-                                            Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
-                                            DocumentFile pickedDir = DocumentFile.fromTreeUri(MainActivity.this, uri);
-                                            if (!pickedDir.exists()) {
-                                                getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                                                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                                                pickedDir = null;
-                                            }
-                                            StringBuilder sb = new StringBuilder();
-                                            for (int k = 0; k < probs.length; k++) {
-                                                if (k != 0) sb.append("\r\n");
-                                                sb.append(k);
-                                                sb.append(',');
-                                                sb.append(String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(k)).replace(' ', '0'));
-                                                sb.append(',');
-                                                sb.append(probs[k]);
-                                            }
-                                            SimpleDateFormat sdf = new SimpleDateFormat("'results'_yyyy-MM-dd_HH-mm-ss'.csv'");
-                                            sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-                                            String filename = sdf.format(new Date());
-                                            DocumentFile newFile = pickedDir.createFile("text/csv", filename);
-                                            OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                                            out.write(sb.toString().getBytes());
-                                            out.close();
-                                            Snackbar.make(findViewById(R.id.parent2), filename + " \n" + getString(R.string.successfully_exported), Snackbar.LENGTH_LONG).show();
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                            Toast.makeText(MainActivity.this, R.string.choose_save_location_settings, Toast.LENGTH_LONG).show();
-                                        }
-                                    }
-                                });
-                                adb.setTitle(getString(R.string.results) + ": \t" + t);
-                                ScrollView scrollView = new ScrollView(MainActivity.this);
-                                TextView textView = new TextView(MainActivity.this);
-                                textView.setTypeface(Typeface.MONOSPACE);
-                                byte[] measuredQubits = qv.getMeasuredQubits();
-                                outerfor:
-                                for (int i = 0; i < probs.length; i++) {
-                                    for (int j = 0; j < measuredQubits.length; j++) {
-                                        if (measuredQubits[j] < 1 && (i >> j) % 2 == 1) {
-                                            continue outerfor;
-                                        }
-                                    }
-                                    textView.setText(textView.getText() + "\n\t\t" + String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + probs[i]);
-                                }
-                                scrollView.addView(textView);
-                                adb.setView(scrollView);
-                                adb.show();
-                                try {
-                                    progressDialog.cancel();
-                                } catch (Exception e) {
-                                    progressDialog = null;
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
-                    }
-                }.start();
                 break;
             default:
 

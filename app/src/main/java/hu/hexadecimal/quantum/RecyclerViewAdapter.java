@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.TextView;
 
 import java.util.List;
@@ -36,13 +37,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.gateName.setText(operator.getName());
         holder.color.setBackgroundColor(operator.getColor());
         StringBuilder symbol = new StringBuilder();
-        for (String s : ((VisualOperator) operator).getSymbols()) {
+        for (String s : operator.getSymbols()) {
             symbol.append("  ");
             symbol.append(s);
         }
         holder.gateSymbols.setText(symbol.toString());
-        holder.gateMatrix.setText(((VisualOperator) operator).toString());
-
+        holder.gateMatrix.loadData(operator.toStringHtmlTable(), "text/html", "UTF-8");
     }
 
     // total number of rows
@@ -56,7 +56,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView gateName;
         TextView gateSymbols;
-        TextView gateMatrix;
+        WebView gateMatrix;
         View color;
 
         ViewHolder(View itemView) {
