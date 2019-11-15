@@ -192,7 +192,9 @@ public class MainActivity extends AppCompatActivity {
                                             Snackbar.make(findViewById(R.id.parent2), filename + " \n" + getString(R.string.successfully_exported), Snackbar.LENGTH_LONG).show();
                                         } catch (Exception e) {
                                             e.printStackTrace();
-                                            Toast.makeText(MainActivity.this, R.string.choose_save_location_settings, Toast.LENGTH_LONG).show();
+                                            Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.choose_save_location_settings, Snackbar.LENGTH_LONG);
+                                            snackbar.getView().setBackgroundColor(0xffD81010);
+                                            snackbar.show();
                                         }
                                     }
                                 });
@@ -482,7 +484,9 @@ public class MainActivity extends AppCompatActivity {
                                             for (int j = i + 1; j < qbits; j++) {
                                                 if (qids[i] == qids[j]) {
                                                     d.cancel();
-                                                    Snackbar.make(findViewById(R.id.parent2), R.string.use_different_qubits, Snackbar.LENGTH_LONG).show();
+                                                    Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.use_different_qubits, Snackbar.LENGTH_LONG);
+                                                    snackbar.getView().setBackgroundColor(0xffD81010);
+                                                    snackbar.show();
                                                     return;
                                                 }
                                             }
@@ -586,7 +590,9 @@ public class MainActivity extends AppCompatActivity {
                     Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + filename, Snackbar.LENGTH_LONG).show();
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Snackbar.make(findViewById(R.id.parent2), getString(R.string.unknown_error), Snackbar.LENGTH_LONG).show();
+                    Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
+                    snackbar.getView().setBackgroundColor(0xffD81010);
+                    snackbar.show();
                 }
                 break;
             case R.id.prefs:
@@ -623,11 +629,15 @@ public class MainActivity extends AppCompatActivity {
                         Snackbar.make(findViewById(R.id.parent2), R.string.successfully_imported, Snackbar.LENGTH_LONG).show();
                     }
                 } else {
-                    Snackbar.make(findViewById(R.id.parent2), R.string.invalid_file, Snackbar.LENGTH_LONG).show();
+                    Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.invalid_file, Snackbar.LENGTH_LONG);
+                    snackbar.getView().setBackgroundColor(0xffD81010);
+                    snackbar.show();
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                Snackbar.make(findViewById(R.id.parent2), getString(R.string.unknown_error), Snackbar.LENGTH_LONG).show();
+                Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
+                snackbar.getView().setBackgroundColor(0xffD81010);
+                snackbar.show();
             }
         }
     }

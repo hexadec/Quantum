@@ -1,6 +1,7 @@
 package hu.hexadecimal.quantum;
 
 import android.content.Context;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,11 +38,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         holder.gateName.setText(operator.getName());
         holder.color.setBackgroundColor(operator.getColor());
         StringBuilder symbol = new StringBuilder();
-        for (String s : operator.getSymbols()) {
-            symbol.append("  ");
-            symbol.append(s);
+        for (int i = 0; i < operator.getSymbols().length; i++) {
+            if (i != 0) symbol.append('\u2003');
+            symbol.append("<b>q");
+            symbol.append(i + 1);
+            symbol.append("</b>:\u2002");
+            symbol.append(operator.getSymbols()[i]);
         }
-        holder.gateSymbols.setText(symbol.toString());
+        holder.gateSymbols.setText(Html.fromHtml(symbol.toString()));
         holder.gateMatrix.loadData(operator.toStringHtmlTable(), "text/html", "UTF-8");
     }
 

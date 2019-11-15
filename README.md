@@ -34,6 +34,8 @@ A software for Android that emulates the actions of a quantum computer
 
 ##### Multi Qubit
 - CNOT/CY/CZ (Controlled Pauli)
+- Controlled T-gate
+- Controlled S-gate
 - SWAP
 - Toffoli
 - Fredkin
