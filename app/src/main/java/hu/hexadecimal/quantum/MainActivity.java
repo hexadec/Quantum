@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
                                 ScrollView scrollView = new ScrollView(MainActivity.this);
                                 TextView textView = new TextView(MainActivity.this);
                                 textView.setTypeface(Typeface.MONOSPACE);
-                                byte[] measuredQubits = qv.getMeasuredQubits();
+                                short[] measuredQubits = qv.getMeasuredQubits();
                                 outerfor:
                                 for (int i = 0; i < probs.length; i++) {
                                     for (int j = 0; j < measuredQubits.length; j++) {
@@ -599,8 +599,8 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, PreferenceActivity.class);
                 startActivity(intent);
                 break;
-            case R.id.undo:
-                qv.removeLastGate();
+            case R.id.clear:
+                qv.clearScreen();
                 break;
             case R.id.matrix:
                 startActivity(new Intent(MainActivity.this, MatrixEditorActivity.class));

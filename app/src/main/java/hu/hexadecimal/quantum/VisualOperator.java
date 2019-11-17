@@ -18,6 +18,9 @@ public class VisualOperator implements Serializable {
     private String[] symbols;
     private Random random;
 
+    /**
+     * Visual Quantum Gate
+     */
     public static final String FILE_EXTENSION = ".vqg";
     private int NQBITS;
     public int color = 0xff000000;
@@ -67,8 +70,8 @@ public class VisualOperator implements Serializable {
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(0), new Complex(0, 1)}
+                            {new Complex(0), new Complex(0), new Complex(-Math.PI / 4), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(Math.PI / 4)}
                     }, "Controlled π/2 shift", new String[]{"●", "S"}, 0xff21BAAB);
 
     public static final transient VisualOperator CT =
@@ -76,9 +79,18 @@ public class VisualOperator implements Serializable {
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(0), new Complex(Math.PI / 4)}
+                            {new Complex(0), new Complex(0), new Complex(-Math.PI / 8), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(Math.PI / 8)}
                     }, "Controlled π/4 shift", new String[]{"●", "T"}, 0xffBA7021);
+
+    public static final transient VisualOperator CH =
+            new VisualOperator(4,
+                    new Complex[][]{
+                            {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(1.0 / Math.sqrt(2), 0), new Complex(1.0 / Math.sqrt(2), 0)},
+                            {new Complex(0), new Complex(0), new Complex(1.0 / Math.sqrt(2), 0),  new Complex(-1.0 / Math.sqrt(2), 0)}
+                    }, "Controlled Hadamard", new String[]{"●", "H"}, 0xff2155BA);
 
     public static final transient VisualOperator TOFFOLI =
             new VisualOperator(8,
@@ -499,7 +511,6 @@ public class VisualOperator implements Serializable {
         double subtrahend = 0;
         for (int i = 0; i < qubitArray.length; i++) {
             probs[i] = Complex.multiply(Complex.conjugate(qubitArray[i]), qubitArray[i]).real;
-            //Log.w("X", i + ": " + Integer.toBinaryString(i) + " : "+ probs[i]);
         }
         for (int i = 0; i < qubitArray.length; i++) {
             double prob = random.nextDouble();
@@ -523,7 +534,9 @@ public class VisualOperator implements Serializable {
 
     public static float[] measureProbabilities(final Complex[] qubitArray) {
         float[] probs = new float[qubitArray.length];
+        Log.w("STATE", "The statevector of the system is the following");
         for (int i = 0; i < qubitArray.length; i++) {
+            if (!qubitArray[i].isZero()) Log.w("STATE" + i, qubitArray[i].toString3Decimals());
             probs[i] = (float) Complex.multiply(Complex.conjugate(qubitArray[i]), qubitArray[i]).real;
         }
         return probs;

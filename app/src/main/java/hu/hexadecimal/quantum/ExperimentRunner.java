@@ -21,7 +21,7 @@ public class ExperimentRunner {
         if (threads < 1 || threads > 1000) {
             threads = 4;
         }
-        if ((shots == 1 || probabilityMode) && threads > 1)
+        if ((((shots == 0 && (probabilityMode = true))) || shots == 1 || probabilityMode) && threads > 1)
             threads = shots = 1;
         int timestorun = shots / threads == 0 ? 1 : shots / threads;
         Thread[] t = new Thread[threads];
@@ -95,7 +95,6 @@ public class ExperimentRunner {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            VisualOperator vm = new VisualOperator();
             for (int k = 0; k < qubits.length; k++) {
                 qubits[k] = new Qubit();
             }

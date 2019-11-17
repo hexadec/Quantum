@@ -34,8 +34,11 @@ public class QuantumView extends View {
 
     public LinkedList<Qubit> qbits;
     private LinkedList<VisualOperator> gos;
-    private byte[] measuredQubits;
+    private short[] measuredQubits;
 
+    /**
+     * VIsual QUantum-gate Sequence
+     */
     public static final String FILE_EXTENSION = ".viqus";
 
     public static final int STEP = 70;
@@ -65,7 +68,7 @@ public class QuantumView extends View {
         mPaint.setColor(Color.BLUE);
         mPaint.setStrokeWidth(5);
 
-        measuredQubits = new byte[MAX_QUBITS];
+        measuredQubits = new short[MAX_QUBITS];
 
         mTextPaint = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setColor(Color.DKGRAY);
@@ -142,6 +145,10 @@ public class QuantumView extends View {
                         ((int) (mPadding + (int) pxFromDp(super.getContext(), 20) + (pxFromDp(super.getContext(), STEP) * qubitids[j]) + pxFromDp(super.getContext(), GATE_SIZE))));
                 String symbol = "C";
                 symbol = v.getSymbols()[j];
+                if (symbol.length() > 2)
+                    whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 18));
+                else
+                    whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 24));
                 v.addRect(areaRect);
                 RectF bounds = new RectF(areaRect);
                 bounds.right = whiteTextPaint.measureText(symbol, 0, symbol.length());
@@ -165,6 +172,7 @@ public class QuantumView extends View {
                 canvas.drawText(symbol, bounds.left, bounds.top - whiteTextPaint.ascent(), whiteTextPaint);
             }
         }
+        whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 24));
 
     }
 
@@ -295,7 +303,7 @@ public class QuantumView extends View {
         return -1;
     }
 
-    public byte[] getMeasuredQubits() {
+    public short[] getMeasuredQubits() {
         return measuredQubits;
     }
 
@@ -313,6 +321,13 @@ public class QuantumView extends View {
             return true;
         }
         return false;
+    }
+
+    public void clearScreen() {
+        gos = new LinkedList<>();
+        measuredQubits = null;
+        measuredQubits = new short[MAX_QUBITS];
+        invalidate();
     }
 
     public static float pxFromDp(final Context context, final float dp) {
@@ -336,7 +351,7 @@ public class QuantumView extends View {
         try {
             if (input instanceof LinkedList && ((LinkedList<Object>) input).getFirst() instanceof VisualOperator) {
                 gos = new LinkedList<>();
-                measuredQubits = new byte[MAX_QUBITS];
+                measuredQubits = new short[MAX_QUBITS];
                 invalidate();
             } else return false;
             for (VisualOperator vo : ((LinkedList<VisualOperator>) input)) {

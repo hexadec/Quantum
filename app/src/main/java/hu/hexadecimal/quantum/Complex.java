@@ -244,6 +244,12 @@ public class Complex implements Serializable {
         else return equalsExact((Complex) complex);
     }
 
+    /**
+     *
+     * @param string
+     * @return
+     * @throws IllegalArgumentException if any error occurred during parsing
+     */
     public static Complex fromString(String string) throws IllegalArgumentException {
         try {
             double real = 0;

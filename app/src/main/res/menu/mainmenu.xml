@@ -29,11 +29,11 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/undo"
-        android:title="@string/undo_add_gate"
+        android:id="@+id/clear"
+        android:title="@string/clear_screen"
         android:orderInCategory="6"
         app:showAsAction="never"
-        android:icon="@drawable/undo"/>
+        android:icon="@drawable/delete"/>
 
     <!--<item
         android:id="@+id/run"

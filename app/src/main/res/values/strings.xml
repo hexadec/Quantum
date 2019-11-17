@@ -15,7 +15,7 @@
     <string name="select_order_of_qubits">Select the order of qubits for the chosen operator</string>
     <string name="results">Results</string>
     <string name="wait">Executing experiment, please wait&#8230;</string>
-    <string name="undo_add_gate">Undo \&quot;Add gate\&quot;</string>
+    <string name="clear_screen">Remove all gates</string>
     <string name="settings_help">Help</string>
     <string name="settings_help_long"><![CDATA[
     <b>Shots:</b> select how many times to run the experiment. It is a good idea to increase this

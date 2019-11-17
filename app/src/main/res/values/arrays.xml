@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="shots">
+        <item>Always use probability mode</item>
         <item>Pick a single outcome</item>
         <item>128</item>
-        <item>256</item>
         <item>512</item>
         <item>1K</item>
         <item>4K</item>
@@ -13,9 +13,9 @@
         <item>1M</item>
     </string-array>
     <string-array name="shots_values">
+        <item>0</item>
         <item>1</item>
         <item>128</item>
-        <item>256</item>
         <item>512</item>
         <item>1024</item>
         <item>4096</item>
