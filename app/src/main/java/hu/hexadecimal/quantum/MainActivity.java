@@ -599,6 +599,10 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, PreferenceActivity.class);
                 startActivity(intent);
                 break;
+            case R.id.help:
+                Intent intent1 = new Intent(MainActivity.this, HelpActivity.class);
+                startActivity(intent1);
+                break;
             case R.id.clear:
                 qv.clearScreen();
                 break;

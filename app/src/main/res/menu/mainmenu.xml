@@ -5,9 +5,17 @@
     <item
         android:id="@+id/save"
         android:icon="@drawable/content_save"
-        android:title="@string/save_experiment"
         android:orderInCategory="0"
+        android:title="@string/save_experiment"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/help"
+        android:icon="@drawable/book_information_variant"
+        android:orderInCategory="1"
+        android:title="@string/help_menu"
+        app:showAsAction="always" />
+
     <item
         android:id="@+id/prefs"
         android:icon="@drawable/settings"
@@ -30,10 +38,10 @@
 
     <item
         android:id="@+id/clear"
-        android:title="@string/clear_screen"
+        android:icon="@drawable/delete"
         android:orderInCategory="6"
-        app:showAsAction="never"
-        android:icon="@drawable/delete"/>
+        android:title="@string/clear_screen"
+        app:showAsAction="never" />
 
     <!--<item
         android:id="@+id/run"
@@ -45,7 +53,7 @@
     <item
         android:id="@+id/probability"
         android:icon="@drawable/alpha_p_circle_outline"
-        android:title="@string/probability_mode"
         android:orderInCategory="5"
+        android:title="@string/probability_mode"
         app:showAsAction="ifRoom" />
 </menu>

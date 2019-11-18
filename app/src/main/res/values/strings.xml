@@ -66,4 +66,5 @@
     <string name="use_different_qubits">A qubit can only be used once in each gate</string>
     <string name="click_to_start">Click anywhere on the screen to start!</string>
     <string name="copy_matrix">Copy matrix</string>
+    <string name="help_menu">Help</string>
 </resources>

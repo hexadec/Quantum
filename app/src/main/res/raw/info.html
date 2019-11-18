@@ -1,0 +1,110 @@
+<body>
+    <h3>
+        <strong>Quantum Computing for Android</strong>
+    </h3>
+    <p>
+        <em>Single Qubit gates</em>
+    </p>
+    <p style="text-align: justify;">
+        <strong>Hadamard</strong>
+        <br />The Hadamard gate rotates the qubit along the xy-axis. This gate brings the qubit
+        into a superposition of 0 and 1.
+    </p>
+    <p>&lt;Hmatrix&gt;</p>
+    <p style="text-align: justify;">
+        <strong>Pauli gates</strong>
+        <br />The Pauli gates rotate the qubit along the corresponding axes (X, Y, and Z).
+    </p>
+    <p>&lt;Xmatrix&gt;</p>
+    <p>&lt;Ymatrix&gt;</p>
+    <p>&lt;Zmatrix&gt;</p>
+    <p style="text-align: justify;">
+        <strong>S, T and &pi;/6 phase-shift gates</strong>
+        <br />These gates change the phase of the qubits (along the Z axis). The S gate is a
+        &pi;/2 phase-shift and the T is a &pi;/4 phase-shift. In order to make use of them, the qubit
+        has to be in a superposition of 0 and 1. In a pure 0 or 1 state, phase-shift has no effect.
+    </p>
+    <p>&lt;Smatrix&gt;</p>
+    <p>&lt;Tmatrix&gt;</p>
+    <p>&lt;P6matrix&gt;</p>
+    <p style="text-align: justify;">
+        <strong>SQRT_NOT</strong>
+        <br />Similarly to the Hadamard gate, the square root of the NOT gate brings the qubit into
+        a superposition of 0 and 1 states, however, with a phase shift of -&pi;/2.
+    </p>
+    <p>&lt;Qmatrix&gt;</p>
+    <p style="text-align: justify;">
+        <strong>Identity</strong>
+        <br />The identity matrix keeps the qubit in its current state (i.e does nothing).
+    </p>
+    <p>&lt;Imatrix&gt;</p>
+    <p style="text-align: justify;">
+        <br/>
+        <em>Multi Qubit gates</em>
+        <br />Multi qubit gates act on a pair or more qubits, and usually they have one or more
+        control and target qubits. A control qubit influences how the gate will act on the target
+        qubit. Sometimes, however, both qubits are equal, eg. in the SWAP gate.
+        <br/>
+    </p>
+    <p style="text-align: justify;">
+        <strong>CNOT</strong>
+        <br />It is perhaps the most important gate in working with entanglement on quantum
+        computers. To put things simple, it basically rotates the target qubit around its x-axis if
+        the control qubit is measured 1 right after the application of the gate. It is a controlled Pauli-gate.
+    </p>
+    <p>&lt;CNOTmatrix&gt;</p>
+    <p style="text-align: justify;">
+        <strong>Controlled Y</strong>
+        <br />Similarly to CNOT, it performs a rotation if the control qubit is measured 1, however,
+        around the y-axis. This gate is also a controlled Pauli gate.
+    </p>
+    <p>&lt;CYmatrix&gt;</p>
+    <p style="text-align: justify;">
+        <strong>Controlled Z
+            <br />
+        </strong>
+        As the above two gates, this gate performs a rotation along the Z-axis if the control qubit
+        is measured 1. Besides being a controlled Pauli gate, this is also a controlled phase-shift
+        gate with an angle&nbsp;&pi;.
+    </p>
+    <p>&lt;CZmatrix&gt;</p>
+    <p style="text-align: justify;">
+        <strong>Controlled S
+            <br />
+        </strong>
+        Controlled S gate performs a relative phase shift of&nbsp;&pi;/2 between the two qubits if
+        the control qubit is&nbsp;1.
+    </p>
+    <p>&lt;CSmatrix&gt;</p>
+    <p style="text-align: justify;">
+        <strong>Controlled T
+            <br />
+        </strong>
+        Controlled T gate performs a relative phase shift of&nbsp;&pi;/4 between the two qubits if the
+        control qubit is&nbsp;1.
+    </p>
+    <p>&lt;CTmatrix&gt;</p>
+    <p style="text-align: justify;">
+        <strong>Controlled Hadamard
+            <br />
+        </strong>
+        The controlled version of the Hadamard gate.
+    </p>
+    <p>&lt;CHmatrix&gt;</p>
+    <p style="text-align: justify;">
+        <strong>SWAP</strong>
+        <br />The swap gate swaps the properties of 2 qubits.
+    </p>
+    <p>&lt;SWAPmatrix&gt;</p>
+    <p style="text-align: justify;">
+        <strong>Toffoli</strong>
+        <br />The most common 3 qubit gate performs a NOT operation on the target qubit if both
+        control qubits are measured&nbsp;1.
+    </p>
+    <p>&lt;CCXmatrix&gt;</p>
+    <p style="text-align: justify;">
+        <strong>Fredkin</strong>
+        <br />This 3 qubit gate is also known as Controlled SWAP.
+    </p>
+    <p>&lt;CSWAPmatrix&gt;</p>
+</body>

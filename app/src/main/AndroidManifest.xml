@@ -10,11 +10,20 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
+            android:name=".HelpActivity"
+            android:configChanges="orientation|screenSize"
+            android:label="@string/help_menu"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="hu.hexadecimal.quantum.MainActivity" />
+        </activity>
+        <activity
             android:name=".MatrixEditorActivity"
+            android:configChanges="orientation|screenSize"
             android:label="@string/matrix_editor"
             android:parentActivityName=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:configChanges="orientation|screenSize">
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="hu.hexadecimal.quantum.MainActivity" />
@@ -22,8 +31,9 @@
         <activity android:name=".PreferenceActivity" />
         <activity
             android:name=".MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"
+            android:launchMode="singleTop"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

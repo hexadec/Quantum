@@ -89,7 +89,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(1.0 / Math.sqrt(2), 0), new Complex(1.0 / Math.sqrt(2), 0)},
-                            {new Complex(0), new Complex(0), new Complex(1.0 / Math.sqrt(2), 0),  new Complex(-1.0 / Math.sqrt(2), 0)}
+                            {new Complex(0), new Complex(0), new Complex(1.0 / Math.sqrt(2), 0), new Complex(-1.0 / Math.sqrt(2), 0)}
                     }, "Controlled Hadamard", new String[]{"●", "H"}, 0xff2155BA);
 
     public static final transient VisualOperator TOFFOLI =
@@ -332,6 +332,10 @@ public class VisualOperator implements Serializable {
     }
 
     public String toStringHtmlTable() {
+        return toStringHtmlTable(false);
+    }
+
+    public String toStringHtmlTable(boolean caption) {
         String[][] matrixString = new String[MATRIX_DIM][MATRIX_DIM];
         int[] colLength = new int[MATRIX_DIM];
         int sumLen = 0;
@@ -362,6 +366,11 @@ public class VisualOperator implements Serializable {
                 "</head>\n" +
                 "<body>");
         sb.append("<table align=\"center\">\n");
+        if (caption) {
+            sb.append("<caption>");
+            sb.append(name);
+            sb.append("</caption>");
+        }
         for (int i = 0; i < MATRIX_DIM; i++) {
             sb.append("<tr>\n");
             for (int j = 0; j < MATRIX_DIM; j++) {

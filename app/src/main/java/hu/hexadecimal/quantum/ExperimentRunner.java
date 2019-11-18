@@ -50,7 +50,7 @@ public class ExperimentRunner {
                     public void run() {
                         Qubit[] qubits = new Qubit[QuantumView.MAX_QUBITS];
                         try {
-                            //To prevent each thread using the same random numbers
+                            //To prevent each thread from using the same random numbers
                             Thread.sleep(0, new Random().nextInt(1000) * t_id);
                         } catch (Exception e) {
                             e.printStackTrace();
