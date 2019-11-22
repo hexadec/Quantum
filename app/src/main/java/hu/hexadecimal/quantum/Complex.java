@@ -2,6 +2,8 @@ package hu.hexadecimal.quantum;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 public class Complex implements Serializable {
 
@@ -10,7 +12,6 @@ public class Complex implements Serializable {
     public double imaginary = 0;
 
     /**
-     *
      * @param realPart BE CAREFUL!! This must be an int
      */
     public Complex(int realPart) {
@@ -28,7 +29,6 @@ public class Complex implements Serializable {
     }
 
     /**
-     *
      * @param arg BE CAREFUL!! This must be a double
      */
     public Complex(double arg) {
@@ -147,16 +147,16 @@ public class Complex implements Serializable {
     }
 
     /**
-     * Converts the complex number to a string with a precision of 3 decimal places
+     * Converts the complex number to a string with a precision of at most 8 decimal places
      *
      * @return
      */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append(new DecimalFormat("0.000#####").format(real));
-        sb.append(imaginary < 0 ? " - " : " + ");
-        sb.append(new DecimalFormat("0.000#####").format(Math.abs(imaginary)));
+        sb.append(new DecimalFormat("0.0#######", new DecimalFormatSymbols(Locale.UK)).format(real));
+        sb.append(imaginary < 0 ? "-" : "+");
+        sb.append(new DecimalFormat("0.0#######", new DecimalFormatSymbols(Locale.UK)).format(Math.abs(imaginary)));
         sb.append('i');
         return sb.toString();
     }
@@ -168,11 +168,13 @@ public class Complex implements Serializable {
      */
     public String toString3Decimals() {
         StringBuilder sb = new StringBuilder();
-        if (Math.abs(real) >= 0.0005)
-            sb.append(new DecimalFormat("0.0##").format(real));
+        if (Math.abs(real) >= 0.0005) {
+            if (real >= 0) sb.append('+');
+            sb.append(new DecimalFormat("0.###", new DecimalFormatSymbols(Locale.UK)).format(real));
+        }
         if (Math.abs(imaginary) >= 0.0005) {
-            sb.append(imaginary < 0 ? "-" : "+");
-            sb.append(new DecimalFormat("0.0##").format(Math.abs(imaginary)));
+            sb.append(imaginary < 0 ? '-' : '+');
+            sb.append(new DecimalFormat("0.###", new DecimalFormatSymbols(Locale.UK)).format(Math.abs(imaginary)));
             sb.append('i');
         }
         if (sb.length() < 1) {
@@ -188,10 +190,10 @@ public class Complex implements Serializable {
      */
     public String toStringModArg() {
         StringBuilder sb = new StringBuilder();
-        sb.append(new DecimalFormat("0.000#####").format(mod()));
+        sb.append(new DecimalFormat("0.000#####", new DecimalFormatSymbols(Locale.UK)).format(mod()));
         sb.append('*');
         sb.append("e^i");
-        sb.append(new DecimalFormat("0.000#####").format(arg()));
+        sb.append(new DecimalFormat("0.000#####", new DecimalFormatSymbols(Locale.UK)).format(arg()));
         return sb.toString();
     }
 
@@ -202,10 +204,10 @@ public class Complex implements Serializable {
      */
     public String toStringModArg3Decimals() {
         StringBuilder sb = new StringBuilder();
-        sb.append(new DecimalFormat("0.000").format(mod()));
+        sb.append(new DecimalFormat("0.0##", new DecimalFormatSymbols(Locale.UK)).format(mod()));
         sb.append('*');
         sb.append("e^i");
-        sb.append(new DecimalFormat("0.000").format(arg()));
+        sb.append(new DecimalFormat("0.0##", new DecimalFormatSymbols(Locale.UK)).format(arg()));
         return sb.toString();
     }
 
@@ -245,7 +247,6 @@ public class Complex implements Serializable {
     }
 
     /**
-     *
      * @param string
      * @return
      * @throws IllegalArgumentException if any error occurred during parsing
@@ -260,7 +261,7 @@ public class Complex implements Serializable {
             } else if (string.matches("(.)+([+])(.)*i")) {
                 real = Double.valueOf(string.substring(0, string.lastIndexOf("+")));
                 imaginary = Double.valueOf(string.substring(string.lastIndexOf("+")).replace("i", string.substring(string.lastIndexOf("+")).length() == 1 ? "1" : ""));
-            } else if (string.matches("([-])(.)*i")){
+            } else if (string.matches("([-])(.)*i")) {
                 imaginary = Double.valueOf(string.replace("i", string.length() == 2 ? "1" : ""));
             } else if (string.matches("\\d*\\.?\\d*i")) {
                 imaginary = Double.valueOf(string.replace("i", string.length() == 1 ? "1" : ""));

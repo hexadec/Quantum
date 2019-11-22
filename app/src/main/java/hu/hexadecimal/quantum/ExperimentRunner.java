@@ -133,4 +133,28 @@ public class ExperimentRunner {
         finished = true;
         return nprobs;
     }
+
+    public Complex[] getStatevector() {
+        Qubit[] qubits = new Qubit[QuantumView.MAX_QUBITS];
+        for (int k = 0; k < qubits.length; k++) {
+            qubits[k] = new Qubit();
+        }
+        Complex[] quArray = VisualOperator.toQubitArray(qubits);
+        for (int m = 0; m < v.size(); m++) {
+            quArray = v.get(m).operateOn(quArray, qubits.length);
+        }
+        Complex[] orderedQuArray = new Complex[quArray.length];
+        for (int m = 0; m < quArray.length; m++) {
+            int[] x = new int[qubits.length];
+            for (int i = 0; i < qubits.length; i++) {
+                x[i] = ((m) >> (qubits.length - i - 1)) % 2;
+            }
+            int ret = 0;
+            for (int i = 0; i < qubits.length; i++) {
+                ret += x[i] << (i);
+            }
+            orderedQuArray[m] = quArray[ret];
+        }
+        return orderedQuArray;
+    }
 }

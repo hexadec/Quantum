@@ -1,6 +1,7 @@
 package hu.hexadecimal.quantum;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -35,15 +37,19 @@ import android.widget.Toast;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.ByteArrayInputStream;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimeZone;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -60,10 +66,14 @@ public class MainActivity extends AppCompatActivity {
     private ProgressDialog progressDialog;
     private Menu menu;
     private boolean probabilityMode;
+    private boolean saved;
+
+    private static final String GATES_KEY = "gates";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        saved = true;
         probabilityMode = false;
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar2);
@@ -154,6 +164,11 @@ public class MainActivity extends AppCompatActivity {
                         ExperimentRunner experimentRunner = new ExperimentRunner(qv.getOperators());
                         long startTime = System.currentTimeMillis();
                         float[] probs = experimentRunner.runExperiment(shots, threads, handler, probabilityMode);
+                        Complex[] statevectorm = null;
+                        if (shots == 0 || probabilityMode) {
+                            statevectorm = experimentRunner.getStatevector();
+                        }
+                        final Complex[] statevector = statevectorm;
                         long time = System.currentTimeMillis() - startTime;
                         String t = time / 1000 + "s " + time % 1000 + "ms";
                         runOnUiThread(new Runnable() {
@@ -174,13 +189,18 @@ public class MainActivity extends AppCompatActivity {
                                                 pickedDir = null;
                                             }
                                             StringBuilder sb = new StringBuilder();
+                                            DecimalFormat df = new DecimalFormat("0.########", new DecimalFormatSymbols(Locale.UK));
                                             for (int k = 0; k < probs.length; k++) {
                                                 if (k != 0) sb.append("\r\n");
                                                 sb.append(k);
                                                 sb.append(',');
                                                 sb.append(String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(k)).replace(' ', '0'));
                                                 sb.append(',');
-                                                sb.append(probs[k]);
+                                                sb.append(df.format(probs[k]));
+                                                if (statevector != null) {
+                                                    sb.append(',');
+                                                    sb.append(statevector[k].toString());
+                                                }
                                             }
                                             SimpleDateFormat sdf = new SimpleDateFormat("'results'_yyyy-MM-dd_HH-mm-ss'.csv'");
                                             sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
@@ -203,6 +223,7 @@ public class MainActivity extends AppCompatActivity {
                                 TextView textView = new TextView(MainActivity.this);
                                 textView.setTypeface(Typeface.MONOSPACE);
                                 short[] measuredQubits = qv.getMeasuredQubits();
+                                DecimalFormat df = new DecimalFormat(statevector == null ? "0.0########" : "0.#####");
                                 outerfor:
                                 for (int i = 0; i < probs.length; i++) {
                                     for (int j = 0; j < measuredQubits.length; j++) {
@@ -210,7 +231,7 @@ public class MainActivity extends AppCompatActivity {
                                             continue outerfor;
                                         }
                                     }
-                                    textView.setText(textView.getText() + "\n\t\t" + String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + probs[i]);
+                                    textView.setText(textView.getText() + "\n\u2003\u2003\u2003" + String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + df.format(probs[i]) + (statevector != null ? "\u2003\u2003" + statevector[i].toString3Decimals() : ""));
                                 }
                                 scrollView.addView(textView);
                                 adb.setView(scrollView);
@@ -268,6 +289,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     qv.deleteGateAt(posx, posy);
+                    saved = false;
                 }
             });
             adb.setPositiveButton(R.string.edit_gate, null);
@@ -491,6 +513,7 @@ public class MainActivity extends AppCompatActivity {
                                                 }
                                             }
                                         }
+                                        saved = false;
                                         VisualOperator gate = gateType.getSelectedItemPosition() == 0
                                                 ? VisualOperator.findGateByName((String) gateName.getSelectedItem()).copy()
                                                 : operators.get(gateName.getSelectedItemPosition()).copy();
@@ -594,6 +617,7 @@ public class MainActivity extends AppCompatActivity {
                     snackbar.getView().setBackgroundColor(0xffD81010);
                     snackbar.show();
                 }
+                saved = true;
                 break;
             case R.id.prefs:
                 Intent intent = new Intent(MainActivity.this, PreferenceActivity.class);
@@ -604,6 +628,7 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent1);
                 break;
             case R.id.clear:
+                saved = true;
                 qv.clearScreen();
                 break;
             case R.id.matrix:
@@ -630,6 +655,7 @@ public class MainActivity extends AppCompatActivity {
                     if (!qv.importGates(obj)) {
                         throw new Exception("Maybe empty gate sequence?");
                     } else {
+                        saved = true;
                         Snackbar.make(findViewById(R.id.parent2), R.string.successfully_imported, Snackbar.LENGTH_LONG).show();
                     }
                 } else {
@@ -643,6 +669,38 @@ public class MainActivity extends AppCompatActivity {
                 snackbar.getView().setBackgroundColor(0xffD81010);
                 snackbar.show();
             }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!saved && qv.getOperators().size() > 2) {
+            final Dialog d = new Dialog(this,android.R.style.Theme_Translucent_NoTitleBar);
+            View v = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.back_dialog, null);
+            v.findViewById(R.id.exit).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    MainActivity.super.onBackPressed();
+                }
+            });
+            v.findViewById(R.id.cancel_back).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    d.cancel();
+                }
+            });
+            v.findViewById(R.id.exitMain).setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    d.cancel();
+                }
+            });
+            d.setContentView(v);
+            d.setCanceledOnTouchOutside(true);
+            d.setCancelable(true);
+            d.show();
+        } else {
+            super.onBackPressed();
         }
     }
 }
