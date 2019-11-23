@@ -6,7 +6,7 @@ android {
         applicationId "hu.hexadecimal.quantum"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 25
+        versionCode 26
         versionName "honiedhazelnut-alpha." + versionCode
     }
     buildTypes {
@@ -23,12 +23,6 @@ android {
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
     }
-    /*externalNativeBuild {
-        cmake {
-            cppFlags "-std=c++14 -fexceptions"
-            path "CMakeLists.txt"
-        }
-    }*/
 }
 
 dependencies {

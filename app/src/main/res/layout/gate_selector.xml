@@ -104,63 +104,116 @@
 
         <SeekBar
             android:id="@+id/order_first"
-            android:layout_width="match_parent"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="16dp"
-            android:spinnerMode="dialog"
-            style="@style/Widget.AppCompat.SeekBar.Discrete"
             android:max="7"
+            android:thumb="@drawable/seek_thumb"
+            android:progressDrawable="@drawable/seek_progress"
             app:layout_constraintBottom_toTopOf="@+id/order_second"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/qtext1"
             app:layout_constraintTop_toBottomOf="@+id/order_info" />
+
+        <TextView
+            android:id="@+id/qtext1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="q1"
+            app:layout_constraintBottom_toBottomOf="@id/order_first"
+            app:layout_constraintEnd_toStartOf="@+id/order_first"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/order_first" />
 
         <SeekBar
             android:id="@+id/order_second"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             style="@style/Widget.AppCompat.SeekBar.Discrete"
-            android:max="7"
-            android:layout_marginStart="16dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
             android:layout_marginTop="12dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="12dp"
+            android:max="7"
+            android:thumb="@drawable/seek_thumb"
+            android:progressDrawable="@drawable/seek_progress"
             app:layout_constraintBottom_toTopOf="@+id/order_third"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/qtext2"
             app:layout_constraintTop_toBottomOf="@+id/order_first" />
+
+        <TextView
+            android:id="@+id/qtext2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="q1"
+            app:layout_constraintBottom_toBottomOf="@id/order_second"
+            app:layout_constraintEnd_toStartOf="@+id/order_second"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/order_second" />
 
         <SeekBar
             android:id="@+id/order_third"
             style="@style/Widget.AppCompat.SeekBar.Discrete"
-            android:max="7"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="12dp"
+            android:max="7"
             android:visibility="gone"
+            android:thumb="@drawable/seek_thumb"
+            android:progressDrawable="@drawable/seek_progress"
             app:layout_constraintBottom_toTopOf="@+id/order_fourth"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/qtext3"
             app:layout_constraintTop_toBottomOf="@+id/order_second" />
+
+        <TextView
+            android:id="@+id/qtext3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="q1"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/order_third"
+            app:layout_constraintEnd_toStartOf="@+id/order_third"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/order_third" />
 
         <SeekBar
             android:id="@+id/order_fourth"
-            android:layout_width="match_parent"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="8dp"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="12dp"
-            style="@style/Widget.AppCompat.SeekBar.Discrete"
             android:max="7"
             android:visibility="gone"
+            android:thumb="@drawable/seek_thumb"
+            android:progressDrawable="@drawable/seek_progress"
             app:layout_constraintBottom_toTopOf="@+id/hermitianConjugate"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/qtext4"
             app:layout_constraintTop_toBottomOf="@+id/order_third" />
+
+        <TextView
+            android:id="@+id/qtext4"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="q1"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/order_fourth"
+            app:layout_constraintEnd_toStartOf="@+id/order_fourth"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/order_fourth" />
 
         <Button
             android:id="@+id/cancel"

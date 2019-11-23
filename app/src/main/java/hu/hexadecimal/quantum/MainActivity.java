@@ -353,6 +353,11 @@ public class MainActivity extends AppCompatActivity {
                                 mainView.findViewById(R.id.order_second),
                                 mainView.findViewById(R.id.order_third),
                                 mainView.findViewById(R.id.order_fourth)};
+                        final TextView[] tX = new TextView[]{
+                                mainView.findViewById(R.id.qtext1),
+                                mainView.findViewById(R.id.qtext2),
+                                mainView.findViewById(R.id.qtext3),
+                                mainView.findViewById(R.id.qtext4)};
                         /*ArrayAdapter<String> adapter =
                                 new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, qs);
                         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);*/
@@ -367,7 +372,22 @@ public class MainActivity extends AppCompatActivity {
                             public void run() {
                                 gateName.setAdapter(gadapter);
                                 for (int i = 0; i < qX.length; i++) {
+                                    final int loop_pos = i;
                                     qX[i].setMax(qv.getDisplayedQubits() - 1);
+                                    qX[i].setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                                        @Override
+                                        public void onProgressChanged(SeekBar seekBar, int j, boolean b) {
+                                            tX[loop_pos].setText("q"+(j+1));
+                                        }
+
+                                        @Override
+                                        public void onStartTrackingTouch(SeekBar seekBar) {
+                                        }
+
+                                        @Override
+                                        public void onStopTrackingTouch(SeekBar seekBar) {
+                                        }
+                                    });
                                 }
                                 if (v != null) {
                                     for (int i = 0; i < v.getQubitIDs().length; i++) {
@@ -470,19 +490,25 @@ public class MainActivity extends AppCompatActivity {
                                         switch (qbits) {
                                             case 4:
                                                 qX[3].setVisibility(View.VISIBLE);
+                                                tX[3].setVisibility(View.VISIBLE);
                                             case 3:
                                                 qX[2].setVisibility(View.VISIBLE);
+                                                tX[2].setVisibility(View.VISIBLE);
                                             case 2:
                                                 qX[1].setVisibility(View.VISIBLE);
+                                                tX[1].setVisibility(View.VISIBLE);
                                             default:
                                         }
                                         switch (qbits) {
                                             case 1:
                                                 qX[1].setVisibility(View.INVISIBLE);
+                                                tX[1].setVisibility(View.INVISIBLE);
                                             case 2:
                                                 qX[2].setVisibility(View.GONE);
+                                                tX[2].setVisibility(View.GONE);
                                             case 3:
                                                 qX[3].setVisibility(View.GONE);
+                                                tX[3].setVisibility(View.GONE);
                                             default:
                                         }
                                     }
