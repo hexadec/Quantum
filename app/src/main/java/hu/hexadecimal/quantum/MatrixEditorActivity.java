@@ -317,7 +317,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                                         .setErrorTextColor(ColorStateList.valueOf(!vo.isSpecial() || !vo.isUnitary() ? Color.RED : Color.GREEN));
                                 ((TextInputLayout) v.findViewById(R.id.editText3))
                                         .setError(getString(R.string.determinant) + ": "
-                                                + new DecimalFormat("0.0##").format(vo.determinantMod()) + ". "
+                                                + new DecimalFormat("0.0###").format(vo.determinantMod()) + ". "
                                                 + getString(R.string.unitary) + ": "
                                                 + (vo.isUnitary() ? getString(R.string.yes) : getString(R.string.no)));
 

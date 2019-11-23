@@ -30,6 +30,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -341,20 +342,20 @@ public class MainActivity extends AppCompatActivity {
                         Looper.prepare();
                         final View mainView = MainActivity.this.getLayoutInflater().inflate(R.layout.gate_selector, null);
                         final Spinner gateType = mainView.findViewById(R.id.type_spinner);
-                        List<String> qs = new ArrayList<>();
+                        /*List<String> qs = new ArrayList<>();
                         for (int i = 0; i < qv.getDisplayedQubits(); i++) {
                             qs.add("q" + (i + 1));
-                        }
+                        }*/
                         final Spinner filter = mainView.findViewById(R.id.filter_spinner);
                         final Spinner gateName = mainView.findViewById(R.id.gate_name_spinner);
-                        final Spinner[] qX = new Spinner[]{
+                        final SeekBar[] qX = new SeekBar[]{
                                 mainView.findViewById(R.id.order_first),
                                 mainView.findViewById(R.id.order_second),
                                 mainView.findViewById(R.id.order_third),
                                 mainView.findViewById(R.id.order_fourth)};
-                        ArrayAdapter<String> adapter =
+                        /*ArrayAdapter<String> adapter =
                                 new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, qs);
-                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);*/
                         final LinkedList<String> mGates = VisualOperator.getPredefinedGateNames();
                         Collections.sort(mGates);
                         ArrayAdapter<String> gadapter =
@@ -364,85 +365,97 @@ public class MainActivity extends AppCompatActivity {
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
+                                gateName.setAdapter(gadapter);
                                 for (int i = 0; i < qX.length; i++) {
-                                    qX[i].setAdapter(adapter);
+                                    qX[i].setMax(qv.getDisplayedQubits() - 1);
                                 }
                                 if (v != null) {
                                     for (int i = 0; i < v.getQubitIDs().length; i++) {
-                                        qX[i].setSelection(v.getQubitIDs()[i]);
+                                        qX[i].setProgress(v.getQubitIDs()[i]);
+                                        int pos = mGates.indexOf(v.getName());
+                                        if (pos >= 0) gateName.setSelection(pos);
                                     }
                                 } else {
-                                    qX[0].setSelection(qv.whichQubit(posy));
+                                    qX[0].setProgress(qv.whichQubit(posy));
                                 }
-                                gateName.setAdapter(gadapter);
-                                gateType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                gateType.post(new Runnable() {
                                     @Override
-                                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                        if (i == 0) {
-                                            filter.setEnabled(true);
-                                            if (filter.getSelectedItemPosition() == 0) {
-                                                ArrayAdapter<String> gadapter =
-                                                        new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
+                                    public void run() {
+                                        gateType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                            @Override
+                                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                                if (i == 0) {
+                                                    filter.setEnabled(true);
+                                                    if (filter.getSelectedItemPosition() == 0) {
+                                                        ArrayAdapter<String> gadapter =
+                                                                new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
 
-                                                gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                                gateName.setAdapter(gadapter);
-                                            } else {
-                                                LinkedList<String> mGates = VisualOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
-                                                Collections.sort(mGates);
-                                                ArrayAdapter<String> gadapter =
-                                                        new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
+                                                        gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                                        gateName.setAdapter(gadapter);
+                                                    } else {
+                                                        LinkedList<String> mGates = VisualOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
+                                                        Collections.sort(mGates);
+                                                        ArrayAdapter<String> gadapter =
+                                                                new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
 
-                                                gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                                gateName.setAdapter(gadapter);
+                                                        gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                                        gateName.setAdapter(gadapter);
+                                                    }
+                                                } else {
+                                                    if (operators.size() > 0) {
+                                                        filter.setEnabled(false);
+                                                        filter.setSelection(0);
+                                                        ArrayAdapter<String> gadapter =
+                                                                new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, operatorNames);
+                                                        gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                                        gateName.setAdapter(gadapter);
+                                                    } else {
+                                                        gateType.setSelection(0);
+                                                        Toast t = Toast.makeText(MainActivity.this, R.string.no_user_gates, Toast.LENGTH_SHORT);
+                                                        t.setGravity(Gravity.CENTER, 0, 0);
+                                                        t.show();
+                                                    }
+                                                }
                                             }
-                                        } else {
-                                            if (operators.size() > 0) {
-                                                filter.setEnabled(false);
-                                                filter.setSelection(0);
-                                                ArrayAdapter<String> gadapter =
-                                                        new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, operatorNames);
-                                                gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                                gateName.setAdapter(gadapter);
-                                            } else {
-                                                gateType.setSelection(0);
-                                                Toast t = Toast.makeText(MainActivity.this, R.string.no_user_gates, Toast.LENGTH_SHORT);
-                                                t.setGravity(Gravity.CENTER, 0, 0);
-                                                t.show();
-                                            }
-                                        }
-                                    }
 
-                                    @Override
-                                    public void onNothingSelected(AdapterView<?> adapterView) {
+                                            @Override
+                                            public void onNothingSelected(AdapterView<?> adapterView) {
+                                            }
+                                        });
                                     }
                                 });
-                                filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                filter.post(new Runnable() {
                                     @Override
-                                    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                        if (gateType.getSelectedItemPosition() == 0) {
-                                            if (i == 0) {
-                                                ArrayAdapter<String> gadapter =
-                                                        new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
+                                    public void run() {
+                                        filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                            @Override
+                                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                                if (gateType.getSelectedItemPosition() == 0) {
+                                                    if (i == 0) {
+                                                        ArrayAdapter<String> gadapter =
+                                                                new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
 
-                                                gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                                gateName.setAdapter(gadapter);
-                                            } else {
-                                                LinkedList<String> mGates = VisualOperator.getPredefinedGateNames(i == 1);
-                                                Collections.sort(mGates);
-                                                ArrayAdapter<String> gadapter =
-                                                        new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
+                                                        gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                                        gateName.setAdapter(gadapter);
+                                                    } else {
+                                                        LinkedList<String> mGates = VisualOperator.getPredefinedGateNames(i == 1);
+                                                        Collections.sort(mGates);
+                                                        ArrayAdapter<String> gadapter =
+                                                                new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
 
-                                                gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                                gateName.setAdapter(gadapter);
+                                                        gadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                                        gateName.setAdapter(gadapter);
+                                                    }
+                                                } else {
+
+                                                }
                                             }
-                                        } else {
 
-                                        }
-                                    }
+                                            @Override
+                                            public void onNothingSelected(AdapterView<?> adapterView) {
 
-                                    @Override
-                                    public void onNothingSelected(AdapterView<?> adapterView) {
-
+                                            }
+                                        });
                                     }
                                 });
                                 gateName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -478,6 +491,7 @@ public class MainActivity extends AppCompatActivity {
                                     public void onNothingSelected(AdapterView<?> adapterView) {
                                     }
                                 });
+
                                 mainView.findViewById(R.id.cancel).setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {
@@ -500,7 +514,7 @@ public class MainActivity extends AppCompatActivity {
                                                 : operators.get(gateName.getSelectedItemPosition()).getQubits();
                                         int[] qids = new int[qbits];
                                         for (int i = 0; i < qbits; i++) {
-                                            qids[i] = qX[i].getSelectedItemPosition();
+                                            qids[i] = qX[i].getProgress();
                                         }
                                         for (int i = 0; i < qbits; i++) {
                                             for (int j = i + 1; j < qbits; j++) {
@@ -675,7 +689,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         if (!saved && qv.getOperators().size() > 2) {
-            final Dialog d = new Dialog(this,android.R.style.Theme_Translucent_NoTitleBar);
+            final Dialog d = new Dialog(this, android.R.style.Theme_Translucent_NoTitleBar);
             View v = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.back_dialog, null);
             v.findViewById(R.id.exit).setOnClickListener(new View.OnClickListener() {
                 @Override

@@ -255,6 +255,7 @@ public class Complex implements Serializable {
         try {
             double real = 0;
             double imaginary = 0;
+            if (string.startsWith("+")) string = string.substring(1);
             if (string.matches("(.)+([-])(.)*i")) {
                 real = Double.valueOf(string.substring(0, string.lastIndexOf("-")));
                 imaginary = Double.valueOf(string.substring(string.lastIndexOf("-")).replace("i", string.substring(string.lastIndexOf("-")).length() == 1 ? "1" : ""));

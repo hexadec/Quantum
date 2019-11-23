@@ -48,15 +48,14 @@
         android:layout_height="48sp"
         android:layout_marginStart="24dp"
         android:background="@drawable/button_bg"
+        android:gravity="center"
         android:text="@string/exit"
         android:textAlignment="gravity"
-        android:gravity="center"
+        android:textColor="#FFFFFF"
         android:textIsSelectable="false"
         android:textSize="24sp"
-        android:textColor="#FFFFFF"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/guideline" />
+        app:layout_constraintStart_toEndOf="@+id/guideline"
+        app:layout_constraintTop_toTopOf="@+id/guideline2" />
 
     <Button
         android:id="@+id/cancel_back"
@@ -64,15 +63,14 @@
         android:layout_height="48sp"
         android:layout_marginEnd="24dp"
         android:background="@drawable/button_bg"
+        android:gravity="center"
         android:text="@string/cancel"
-        android:textColor="#FFFFFF"
         android:textAlignment="gravity"
+        android:textColor="#FFFFFF"
         android:textIsSelectable="false"
         android:textSize="24sp"
-        android:gravity="center"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/guideline" />
+        app:layout_constraintEnd_toStartOf="@+id/guideline"
+        app:layout_constraintTop_toTopOf="@+id/guideline2" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
@@ -80,4 +78,17 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5" />
+
+    <TextView
+        android:id="@+id/textView5"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="@string/are_you_sure"
+        android:textAlignment="center"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/guideline2"
+        app:layout_constraintEnd_toEndOf="@+id/exit"
+        app:layout_constraintStart_toStartOf="@+id/cancel_back" />
 </androidx.constraintlayout.widget.ConstraintLayout>
