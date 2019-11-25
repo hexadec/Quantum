@@ -146,6 +146,24 @@ public class Complex implements Serializable {
         return Complex.multiply(Complex.add(epz, enz), new Complex(0.5, 0));
     }
 
+    public static Complex sinh(Complex complex) {
+        Complex epz = Complex.exponent(new Complex(Math.E, 0), new Complex(complex.real, complex.imaginary));
+        Complex enz = Complex.exponent(new Complex(Math.E, 0), new Complex(-complex.real, -complex.imaginary));
+        return Complex.multiply(Complex.sub(epz, enz), new Complex(0.5, 0));
+    }
+
+    public static Complex cosh(Complex complex) {
+        Complex epz = Complex.exponent(new Complex(Math.E, 0), new Complex(complex.real, complex.imaginary));
+        Complex enz = Complex.exponent(new Complex(Math.E, 0), new Complex(-complex.real, -complex.imaginary));
+        return Complex.multiply(Complex.add(epz, enz), new Complex(0.5, 0));
+    }
+
+    public static Complex log(Complex base, Complex anti_logarithm) {
+        Complex loga = Complex.add(new Complex(Math.log(anti_logarithm.mod()), 0.0), Complex.multiply(new Complex(0, 1), new Complex(anti_logarithm.arg(), 0)));
+        Complex logb = Complex.add(new Complex(Math.log(base.mod()), 0.0), Complex.multiply(new Complex(0, 1), new Complex(base.arg(), 0)));
+        return Complex.divide(loga, logb);
+    }
+
     /**
      * Converts the complex number to a string with a precision of at most 8 decimal places
      *
@@ -173,8 +191,10 @@ public class Complex implements Serializable {
             sb.append(new DecimalFormat("0.###", new DecimalFormatSymbols(Locale.UK)).format(real));
         }
         if (Math.abs(imaginary) >= 0.0005) {
-            sb.append(imaginary < 0 ? '-' : '+');
-            sb.append(new DecimalFormat("0.###", new DecimalFormatSymbols(Locale.UK)).format(Math.abs(imaginary)));
+            sb.append(imaginary < 0 ? "-" : sb.length() > 0 ? "+" : "");
+            String im = new DecimalFormat("0.###", new DecimalFormatSymbols(Locale.UK)).format(Math.abs(imaginary));
+            if (!im.equals("1"))
+                sb.append(im);
             sb.append('i');
         }
         if (sb.length() < 1) {
@@ -251,23 +271,29 @@ public class Complex implements Serializable {
      * @return
      * @throws IllegalArgumentException if any error occurred during parsing
      */
-    public static Complex fromString(String string) throws IllegalArgumentException {
+    public static Complex parse(String string) throws IllegalArgumentException {
         try {
             double real = 0;
             double imaginary = 0;
             if (string.startsWith("+")) string = string.substring(1);
             if (string.matches("(.)+([-])(.)*i")) {
                 real = Double.valueOf(string.substring(0, string.lastIndexOf("-")));
-                imaginary = Double.valueOf(string.substring(string.lastIndexOf("-")).replace("i", string.substring(string.lastIndexOf("-")).length() == 1 ? "1" : ""));
+                imaginary = Double.valueOf(string.substring(string.lastIndexOf("-") + 1).replace("i", string.substring(string.lastIndexOf("-") + 1).length() == 1 ? "-1" : ""));
             } else if (string.matches("(.)+([+])(.)*i")) {
                 real = Double.valueOf(string.substring(0, string.lastIndexOf("+")));
-                imaginary = Double.valueOf(string.substring(string.lastIndexOf("+")).replace("i", string.substring(string.lastIndexOf("+")).length() == 1 ? "1" : ""));
+                imaginary = Double.valueOf(string.substring(string.lastIndexOf("+") + 1).replace("i", string.substring(string.lastIndexOf("+") + 1).length() == 1 ? "1" : ""));
             } else if (string.matches("([-])(.)*i")) {
                 imaginary = Double.valueOf(string.replace("i", string.length() == 2 ? "1" : ""));
             } else if (string.matches("\\d*\\.?\\d*i")) {
                 imaginary = Double.valueOf(string.replace("i", string.length() == 1 ? "1" : ""));
             } else if (string.matches("-\\d+(\\.)?\\d*") || string.matches("\\d+(\\.)?\\d*")) {
                 real = Double.valueOf(string);
+            } else if (string.matches("(\\d*\\.?\\d*)e\\^i(\\d*\\.?\\d*)")) {
+                String mod = string.split("e")[0];
+                String arg = string.split("i").length > 1 ? string.split("i")[1] : "1";
+                double modulus = mod.length() > 0 ? Double.valueOf(mod) : 1;
+                double argument = arg.length() > 0 ? Double.valueOf(arg) : 1;
+                return new Complex(modulus, argument, false);
             }
             return new Complex(real, imaginary);
         } catch (Exception e) {

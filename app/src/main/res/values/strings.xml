@@ -71,4 +71,6 @@
     <string name="are_you_sure">Do you really want to quit?</string>
     <string name="any_unsaved_will_be_lost">Any unsaved changes will be lost</string>
     <string name="exit">Exit</string>
+    <string name="next_qubit">Next qubit</string>
+    <string name="previous_qubit">Prev. qubit</string>
 </resources>

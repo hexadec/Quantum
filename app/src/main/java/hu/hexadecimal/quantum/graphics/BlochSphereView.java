@@ -41,6 +41,7 @@ public class BlochSphereView extends View {
 
     public void setQBit(Qubit qb) {
         this.qb = qb;
+        invalidate();
     }
 
     @Override

@@ -30,51 +30,45 @@ public class ExperimentRunner {
         finished = false;
         int[][] sprobs = new int[(int) Math.pow(2, QuantumView.MAX_QUBITS)][threads];
         if (!probabilityMode) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    while (status < shots2 && !finished) {
-                        try {
-                            Thread.sleep(500);
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        handler.sendEmptyMessage(status);
+            new Thread(() -> {
+                while (status < shots2 && !finished) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
+                    handler.sendEmptyMessage(status);
                 }
             }).start();
             for (int i = 0; i < threads; i++) {
                 final int t_id = i;
-                t[i] = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Qubit[] qubits = new Qubit[QuantumView.MAX_QUBITS];
-                        try {
-                            //To prevent each thread from using the same random numbers
-                            Thread.sleep(0, new Random().nextInt(1000) * t_id);
-                        } catch (Exception e) {
-                            e.printStackTrace();
+                t[i] = new Thread(() -> {
+                    Qubit[] qubits = new Qubit[QuantumView.MAX_QUBITS];
+                    try {
+                        //To prevent each thread from using the same random numbers
+                        Thread.sleep(0, new Random().nextInt(1000) * t_id);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    VisualOperator vm = new VisualOperator();
+                    for (int k = 0; k < qubits.length; k++) {
+                        qubits[k] = new Qubit();
+                    }
+                    Complex[] quArray = VisualOperator.toQubitArray(qubits);
+                    for (int m = 0; m < v.size(); m++) {
+                        quArray = v.get(m).operateOn(quArray, qubits.length);
+                    }
+                    for (int j = 0; j < timestorun; j++) {
+                        qubits = vm.measure(quArray, qubits.length);
+                        int cprob = 0;
+                        for (int k = 0; k < qubits.length; k++) {
+                            cprob += qubits[k].measureZ() ? 1 << (qubits.length - k - 1) : 0;
                         }
-                        VisualOperator vm = new VisualOperator();
                         for (int k = 0; k < qubits.length; k++) {
                             qubits[k] = new Qubit();
                         }
-                        Complex[] quArray = VisualOperator.toQubitArray(qubits);
-                        for (int m = 0; m < v.size(); m++) {
-                            quArray = v.get(m).operateOn(quArray, qubits.length);
-                        }
-                        for (int j = 0; j < timestorun; j++) {
-                            qubits = vm.measure(quArray, qubits.length);
-                            int cprob = 0;
-                            for (int k = 0; k < qubits.length; k++) {
-                                cprob += qubits[k].measureZ() ? 1 << (qubits.length - k - 1) : 0;
-                            }
-                            for (int k = 0; k < qubits.length; k++) {
-                                qubits[k] = new Qubit();
-                            }
-                            sprobs[cprob][t_id]++;
-                            status++;
-                        }
+                        sprobs[cprob][t_id]++;
+                        status++;
                     }
                 });
                 t[i].start();
@@ -102,23 +96,21 @@ public class ExperimentRunner {
             for (int m = 0; m < v.size(); m++) {
                 quArray = v.get(m).operateOn(quArray, qubits.length);
             }
-            if (probabilityMode) {
-                float[] nprobs = new float[sprobs.length];
-                float[] probs = VisualOperator.measureProbabilities(quArray);
-                for (int m = 0; m < probs.length; m++) {
-                    int[] x = new int[qubits.length];
-                    for (int i = 0; i < qubits.length; i++) {
-                        x[i] = ((m) >> (qubits.length - i - 1)) % 2;
-                    }
-                    int ret = 0;
-                    for (int i = 0; i < qubits.length; i++) {
-                        ret += x[i] << (i);
-                    }
-                    nprobs[m] = probs[ret];
+            float[] nprobs = new float[sprobs.length];
+            float[] probs = VisualOperator.measureProbabilities(quArray);
+            for (int m = 0; m < probs.length; m++) {
+                int[] x = new int[qubits.length];
+                for (int i = 0; i < qubits.length; i++) {
+                    x[i] = ((m) >> (qubits.length - i - 1)) % 2;
                 }
-                finished = true;
-                return nprobs;
+                int ret = 0;
+                for (int i = 0; i < qubits.length; i++) {
+                    ret += x[i] << (i);
+                }
+                nprobs[m] = probs[ret];
             }
+            finished = true;
+            return nprobs;
         }
         float[] nprobs = new float[sprobs.length];
         for (int o = 0; o < sprobs.length; o++) {

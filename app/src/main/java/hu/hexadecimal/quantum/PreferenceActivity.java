@@ -26,13 +26,10 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
             e.printStackTrace();
         }
         saveLoc.setSummary(path);
-        saveLoc.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                startActivityForResult(intent, 42);
-                return true;
-            }
+        saveLoc.setOnPreferenceClickListener((Preference preference) -> {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+            startActivityForResult(intent, 42);
+            return true;
         });
     }
 

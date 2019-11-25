@@ -29,6 +29,11 @@ public class VisualOperator implements Serializable {
     private int MATRIX_DIM;
     private int[] qubit_ids;
 
+    public static final int HTML_MODE_BODY = 0b1;
+    public static final int HTML_MODE_CAPTION = 0b10;
+    public static final int HTML_MODE_FAT = 0b100;
+    public static final int HTML_MODE_BASIC = 0b0;
+
     public static final transient VisualOperator CNOT =
             new VisualOperator(4,
                     new Complex[][]{
@@ -331,42 +336,38 @@ public class VisualOperator implements Serializable {
         return sb.toString();
     }
 
+    /**
+     * Default behaviour, using HTML_MODE_BODY
+     *
+     * @return
+     */
     public String toStringHtmlTable() {
-        return toStringHtmlTable(false);
+        return toStringHtmlTable(HTML_MODE_BODY);
     }
 
-    public String toStringHtmlTable(boolean caption) {
-        String[][] matrixString = new String[MATRIX_DIM][MATRIX_DIM];
-        int[] colLength = new int[MATRIX_DIM];
-        int sumLen = 0;
-        for (int i = 0; i < MATRIX_DIM; i++) {
-            for (int j = 0; j < MATRIX_DIM; j++) {
-                matrixString[i][j] = matrix[i][j].toString3Decimals();
-                int len = matrixString[i][j].length();
-                if (len > colLength[i]) colLength[i] = len;
-                if (i == MATRIX_DIM - 1) sumLen += colLength[j];
-            }
-        }
+    public String toStringHtmlTable(int MODE) {
         StringBuilder sb = new StringBuilder();
-        sb.append("<!DOCTYPE html>\n" +
-                "<html>\n" +
-                "<head>\n" +
-                "<style>\n" +
-                "table, th, td {\n" +
-                "  border: 1px solid #BBB;\n" +
-                "  border-collapse: collapse;\n" +
-                "}\n" +
-                "th, td {\n" +
-                "  padding: 6px;\n" +
-                "}\n" +
-                "td {\n" +
-                " text-align: center;\n" +
-                "}\n" +
-                "</style>\n" +
-                "</head>\n" +
-                "<body>");
+        if ((MODE & HTML_MODE_BODY) > 0) {
+            sb.append("<!DOCTYPE html>\n" +
+                    "<html>\n" +
+                    "<head>\n" +
+                    "<style>\n" +
+                    "table, th, td {\n" +
+                    "  border: 1px solid #BBB;\n" +
+                    "  border-collapse: collapse;\n" +
+                    "}\n" +
+                    "th, td {\n" +
+                    "  padding: 6px;\n" +
+                    "}\n" +
+                    "td {\n" +
+                    " text-align: center;\n" +
+                    "}\n" +
+                    "</style>\n" +
+                    "</head>\n" +
+                    "<body>");
+        }
         sb.append("<table align=\"center\">\n");
-        if (caption) {
+        if ((MODE & HTML_MODE_CAPTION) > 0) {
             sb.append("<caption>");
             sb.append(name);
             sb.append("</caption>");
@@ -375,7 +376,11 @@ public class VisualOperator implements Serializable {
             sb.append("<tr>\n");
             for (int j = 0; j < MATRIX_DIM; j++) {
                 sb.append("<td>");
-                sb.append(matrixString[i][j]);
+                String matrixString = matrix[i][j].toString3Decimals();
+                if ((MODE & HTML_MODE_FAT) > 0 && matrixString.length() < 3)
+                    sb.append("\u2002").append(matrixString).append("\u2002");
+                else
+                    sb.append(matrixString);
                 sb.append("</td>\n");
             }
             sb.append("</tr>\n");

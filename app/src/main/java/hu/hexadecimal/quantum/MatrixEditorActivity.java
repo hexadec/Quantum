@@ -228,7 +228,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                                 try {
                                     for (int i = 0; i < strMatrix[0].length; i++) {
                                         for (int j = 0; j < strMatrix[0].length; j++) {
-                                            cmatrix[i][j] = Complex.fromString(strMatrix[i][j]);
+                                            cmatrix[i][j] = Complex.parse(strMatrix[i][j]);
                                         }
                                     }
                                 } catch (IllegalArgumentException e) {
@@ -303,7 +303,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                                 try {
                                     for (int i = 0; i < strMatrix[0].length; i++) {
                                         for (int j = 0; j < strMatrix[0].length; j++) {
-                                            cmatrix[i][j] = Complex.fromString(strMatrix[i][j]);
+                                            cmatrix[i][j] = Complex.parse(strMatrix[i][j]);
                                         }
                                     }
                                 } catch (IllegalArgumentException e) {
