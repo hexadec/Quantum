@@ -231,7 +231,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                                             cmatrix[i][j] = Complex.parse(strMatrix[i][j]);
                                         }
                                     }
-                                } catch (IllegalArgumentException e) {
+                                } catch (NumberFormatException e) {
                                     e.printStackTrace();
                                     showErr(3);
                                     return;
@@ -306,7 +306,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                                             cmatrix[i][j] = Complex.parse(strMatrix[i][j]);
                                         }
                                     }
-                                } catch (IllegalArgumentException e) {
+                                } catch (NumberFormatException e) {
                                     e.printStackTrace();
                                     showErr(3);
                                     return;

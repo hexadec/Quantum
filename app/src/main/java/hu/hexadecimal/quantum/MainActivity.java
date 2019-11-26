@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                 float[] probabilities = experimentRunner.runExperiment(shots, threads, handler, probabilityMode);
                 Complex[] tempStateVector = null;
                 if (shots == 0 || probabilityMode) {
-                    tempStateVector = experimentRunner.getStatevector();
+                    tempStateVector = experimentRunner.getStateVector();
                 }
                 final Complex[] stateVector = tempStateVector;
                 long time = System.currentTimeMillis() - startTime;
@@ -205,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
                                 continue outerFor;
                             }
                         }
-                        textView.setText(textView.getText() + "\n\u2003\u2003\u2003" + String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + df.format(probabilities[i]) + (stateVector != null ? "\u2003\u2003" + stateVector[i].toString3Decimals() : ""));
+                        textView.setText(textView.getText() + "\n\u2003" + String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + df.format(probabilities[i]) + (stateVector != null ? "\u2003\u2003" + stateVector[i].toString5Decimals() : ""));
                     }
                     scrollView.addView(textView);
                     adb.setView(scrollView);

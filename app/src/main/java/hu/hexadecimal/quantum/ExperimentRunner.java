@@ -11,7 +11,7 @@ import hu.hexadecimal.quantum.graphics.QuantumView;
 public class ExperimentRunner {
     private final LinkedList<VisualOperator> v;
     private int status;
-    boolean finished = false;
+    private boolean finished = false;
 
     public ExperimentRunner(LinkedList<VisualOperator> visualOperators) {
         v = visualOperators;
@@ -126,7 +126,7 @@ public class ExperimentRunner {
         return nprobs;
     }
 
-    public Complex[] getStatevector() {
+    public Complex[] getStateVector() {
         Qubit[] qubits = new Qubit[QuantumView.MAX_QUBITS];
         for (int k = 0; k < qubits.length; k++) {
             qubits[k] = new Qubit();

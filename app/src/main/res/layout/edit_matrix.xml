@@ -124,7 +124,7 @@
                 android:id="@+id/editText30"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:digits="0123456789.,-+i\n"
+                android:digits="0123456789.,-+ie^\n"
                 android:ems="10"
                 android:gravity="center"
                 android:hint="@string/matrix"

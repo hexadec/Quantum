@@ -204,6 +204,30 @@ public class Complex implements Serializable {
     }
 
     /**
+     * Converts the complex number to a string with a precision of 5 decimal places
+     *
+     * @return
+     */
+    public String toString5Decimals() {
+        StringBuilder sb = new StringBuilder();
+        if (Math.abs(real) >= 0.000005) {
+            if (real >= 0) sb.append('+');
+            sb.append(new DecimalFormat("0.00###", new DecimalFormatSymbols(Locale.UK)).format(real));
+        }
+        if (Math.abs(imaginary) >= 0.000005) {
+            sb.append(imaginary < 0 ? "-" : sb.length() > 0 ? "+" : "");
+            String im = new DecimalFormat("0.00###", new DecimalFormatSymbols(Locale.UK)).format(Math.abs(imaginary));
+            if (!im.equals("1"))
+                sb.append(im);
+            sb.append('i');
+        }
+        if (sb.length() < 1) {
+            sb.append('0');
+        }
+        return sb.toString();
+    }
+
+    /**
      * Converts the complex number to a string in modulus-argument form with a precision of 8 decimal places
      *
      * @return
@@ -267,11 +291,11 @@ public class Complex implements Serializable {
     }
 
     /**
-     * @param string
-     * @return
-     * @throws IllegalArgumentException if any error occurred during parsing
+     * @param string input
+     * @return A complex number
+     * @throws NumberFormatException if any error occurred during parsing
      */
-    public static Complex parse(String string) throws IllegalArgumentException {
+    public static Complex parse(String string) throws NumberFormatException {
         try {
             double real = 0;
             double imaginary = 0;
@@ -294,11 +318,13 @@ public class Complex implements Serializable {
                 double modulus = mod.length() > 0 ? Double.valueOf(mod) : 1;
                 double argument = arg.length() > 0 ? Double.valueOf(arg) : 1;
                 return new Complex(modulus, argument, false);
+            } else {
+                throw new NumberFormatException("Unknown format!");
             }
             return new Complex(real, imaginary);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new IllegalArgumentException(e.getMessage());
+            throw new NumberFormatException(e.getMessage());
         }
     }
 

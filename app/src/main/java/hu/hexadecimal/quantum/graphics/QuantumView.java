@@ -18,14 +18,12 @@ import android.widget.LinearLayout;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.IntStream;
 
 import androidx.core.graphics.PaintCompat;
 import hu.hexadecimal.quantum.VisualOperator;
-import hu.hexadecimal.quantum.Qubit;
 
 public class QuantumView extends View {
 
@@ -33,7 +31,6 @@ public class QuantumView extends View {
     int mPadding;
     Path mPath;
 
-    public LinkedList<Qubit> qbits;
     private LinkedList<VisualOperator> gos;
     private short[] measuredQubits;
 
@@ -53,10 +50,6 @@ public class QuantumView extends View {
         super(context);
         UNIT = pxFromDp(super.getContext(), 1);
         START_Y = pxFromDp(super.getContext(), 20);
-        qbits = new LinkedList<>();
-        for (int i = 0; i < MAX_QUBITS; i++) {
-            qbits.add(new Qubit());
-        }
         gos = new LinkedList<>();
 
         mPath = new Path();
@@ -135,17 +128,16 @@ public class QuantumView extends View {
         for (int i = 0; i < gos.size(); i++) {
             VisualOperator v = gos.get(i);
             v.resetRect();
-            final int[] qubitids = v.getQubitIDs();
-            for (int j = 0; j < qubitids.length; j++) {
-                gatesNumber[qubitids[j]]++;
+            final int[] qubitIDs = v.getQubitIDs();
+            for (int j = 0; j < qubitIDs.length; j++) {
+                gatesNumber[qubitIDs[j]]++;
                 otherPaint.setColor(v.getColor());
 
-                Rect areaRect = new Rect((int) (mPadding + pxFromDp(super.getContext(), 2) + gatesNumber[qubitids[j]] * pxFromDp(super.getContext(), GATE_SIZE * 3)),
-                        ((int) (mPadding + pxFromDp(super.getContext(), 2) + (pxFromDp(super.getContext(), STEP) * (qubitids[j])))),
-                        ((int) (mPadding + pxFromDp(super.getContext(), 2) + pxFromDp(super.getContext(), GATE_SIZE * 2) + gatesNumber[qubitids[j]] * pxFromDp(super.getContext(), GATE_SIZE * 3))),
-                        ((int) (mPadding + (int) pxFromDp(super.getContext(), 20) + (pxFromDp(super.getContext(), STEP) * qubitids[j]) + pxFromDp(super.getContext(), GATE_SIZE))));
-                String symbol = "C";
-                symbol = v.getSymbols()[j];
+                Rect areaRect = new Rect((int) (mPadding + pxFromDp(super.getContext(), 2) + gatesNumber[qubitIDs[j]] * pxFromDp(super.getContext(), GATE_SIZE * 3)),
+                        ((int) (mPadding + pxFromDp(super.getContext(), 2) + (pxFromDp(super.getContext(), STEP) * (qubitIDs[j])))),
+                        ((int) (mPadding + pxFromDp(super.getContext(), 2) + pxFromDp(super.getContext(), GATE_SIZE * 2) + gatesNumber[qubitIDs[j]] * pxFromDp(super.getContext(), GATE_SIZE * 3))),
+                        ((int) (mPadding + (int) pxFromDp(super.getContext(), 20) + (pxFromDp(super.getContext(), STEP) * qubitIDs[j]) + pxFromDp(super.getContext(), GATE_SIZE))));
+                String symbol = v.getSymbols()[j];
                 if (symbol.length() > 2)
                     whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 18));
                 else
@@ -179,10 +171,10 @@ public class QuantumView extends View {
 
     public VisualOperator whichGate(float posx, float posy) {
         for (int i = 0; i < gos.size(); i++) {
-            List<Rect> rects = gos.get(i).getRect();
-            for (int j = 0; j < rects.size(); j++) {
-                if (posx <= rects.get(j).right && posx >= rects.get(j).left
-                        && posy <= rects.get(j).bottom && posy >= rects.get(j).top) {
+            List<Rect> rectList = gos.get(i).getRect();
+            for (int j = 0; j < rectList.size(); j++) {
+                if (posx <= rectList.get(j).right && posx >= rectList.get(j).left
+                        && posy <= rectList.get(j).bottom && posy >= rectList.get(j).top) {
                     return gos.get(i);
                 }
             }
@@ -192,10 +184,10 @@ public class QuantumView extends View {
 
     public boolean replaceGateAt(int[] qubits, VisualOperator visualOperator, float posx, float posy) {
         for (int i = 0; i < gos.size(); i++) {
-            List<Rect> rects = gos.get(i).getRect();
-            for (int j = 0; j < rects.size(); j++) {
-                if (posx <= rects.get(j).right && posx >= rects.get(j).left
-                        && posy <= rects.get(j).bottom && posy >= rects.get(j).top) {
+            List<Rect> rectList = gos.get(i).getRect();
+            for (int j = 0; j < rectList.size(); j++) {
+                if (posx <= rectList.get(j).right && posx >= rectList.get(j).left
+                        && posy <= rectList.get(j).bottom && posy >= rectList.get(j).top) {
                     for (int qubit : gos.get(i).getQubitIDs()) {
                         measuredQubits[qubit]--;
                     }
@@ -223,10 +215,10 @@ public class QuantumView extends View {
 
     public boolean deleteGateAt(float posx, float posy) {
         for (int i = 0; i < gos.size(); i++) {
-            List<Rect> rects = gos.get(i).getRect();
-            for (int j = 0; j < rects.size(); j++) {
-                if (posx <= rects.get(j).right && posx >= rects.get(j).left
-                        && posy <= rects.get(j).bottom && posy >= rects.get(j).top) {
+            List<Rect> rectList = gos.get(i).getRect();
+            for (int j = 0; j < rectList.size(); j++) {
+                if (posx <= rectList.get(j).right && posx >= rectList.get(j).left
+                        && posy <= rectList.get(j).bottom && posy >= rectList.get(j).top) {
                     for (int qubit : gos.get(i).getQubitIDs()) {
                         measuredQubits[qubit]--;
                     }
@@ -252,23 +244,23 @@ public class QuantumView extends View {
         invalidate();
     }
 
-    public boolean canAddGate(int qbit) {
-        if (qbit < 0 || qbit > getDisplayedQubits()) {
+    public boolean canAddGate(int qubit) {
+        if (qubit < 0 || qubit > getDisplayedQubits()) {
             return false;
         }
         int gateNumber = 0;
         DisplayMetrics displayMetrics = new DisplayMetrics();
         ((Activity) (getContext())).getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         int width = getWidth() < 1 ? displayMetrics.widthPixels : getWidth();
-        outerloop:
+        outerLoop:
         for (int i = 0; i <= gos.size() + 1; i++) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    if (IntStream.of(gos.get(i).getQubitIDs()).noneMatch(x -> x == qbit)) continue;
+                    if (IntStream.of(gos.get(i).getQubitIDs()).noneMatch(x -> x == qubit)) continue;
                 } else {
                     for (int k = 0; k < gos.size(); k++) {
-                        if (gos.get(i).getQubitIDs()[k] == qbit) break;
-                        if (k == gos.size() - 1) continue outerloop;
+                        if (gos.get(i).getQubitIDs()[k] == qubit) break;
+                        if (k == gos.size() - 1) continue outerLoop;
                     }
                 }
             } catch (IndexOutOfBoundsException e) {
@@ -280,8 +272,8 @@ public class QuantumView extends View {
         return true;
     }
 
-    public boolean canAddMultiQBitGate(int[] qbits) {
-        for (int q : qbits) {
+    public boolean canAddMultiQubitGate(int[] qubits) {
+        for (int q : qubits) {
             if (!canAddGate(q)) return false;
         }
         return true;
