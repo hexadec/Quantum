@@ -1,10 +1,8 @@
 package hu.hexadecimal.quantum;
 
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -23,9 +21,15 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import hu.hexadecimal.quantum.graphics.ContextMenuRecyclerView;
 
+import android.preference.PreferenceManager;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
@@ -40,6 +44,9 @@ public class MatrixEditorActivity extends AppCompatActivity {
 
     RecyclerViewAdapter adapter;
     private DocumentFile pickedDir;
+    private ArrayList<VisualOperator> operators;
+
+    static final String[] FILENAME_RESERVED_CHARS = {"/", "|", "\\", "?", "*", "<", "\"", ":", ">", "'", "~", "+", "[", "]"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +55,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ArrayList<VisualOperator> operators = new ArrayList<>();
+        operators = new ArrayList<>();
         try {
             Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
             pickedDir = DocumentFile.fromTreeUri(this, uri);
@@ -72,302 +79,274 @@ public class MatrixEditorActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MatrixEditorActivity.this);
+        int help_shown = pref.getInt("matrix_help_shown", 0);
+        if (help_shown < 5 && operators.size() > 0) {
+            Snackbar.make(findViewById(R.id.parent3), R.string.long_click_to_delete, Snackbar.LENGTH_LONG).show();
+            pref.edit().putInt("matrix_help_shown", ++help_shown).apply();
+        }
+
         final RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         adapter = new RecyclerViewAdapter(this, operators);
-        adapter.setClickListener(new RecyclerViewAdapter.ItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                VisualOperator vo = operators.get(position);
-                AlertDialog.Builder adb = new AlertDialog.Builder(MatrixEditorActivity.this);
-                adb.setTitle(R.string.select_action);
-                adb.setNeutralButton(R.string.cancel, null);
-                adb.setPositiveButton(R.string.delete_gate, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        try {
-                            DocumentFile gate = pickedDir.findFile(vo.getName() + VisualOperator.FILE_EXTENSION);
-                            Log.e("A", "" + gate.delete());
-                            recreate();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-                adb.setNegativeButton(R.string.copy_matrix, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                        ClipData clip = ClipData.newPlainText("Matrix", vo.toString());
-                        clipboard.setPrimaryClip(clip);
-                    }
-                });
-                adb.show();
-            }
+        registerForContextMenu(recyclerView);
+        adapter.setClickListener((View view, int position) -> {
+            VisualOperator vo = operators.get(position);
+            displayGateEditorDialog(operators, vo);
         });
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        recyclerView.setAdapter(adapter);
-                    }
-                });
-            }
-        }).start();
+        new Thread(() -> runOnUiThread(() -> recyclerView.setAdapter(adapter))).start();
 
         FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (getContentResolver().getPersistedUriPermissions().size() < 1) {
-                    Snackbar.make(view, R.string.choose_save_location, Snackbar.LENGTH_LONG)
-                            .setAction(R.string.select, new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-                                    startActivityForResult(intent, 42);
-                                }
-                            }).show();
-                    return;
-                }
-                AlertDialog.Builder adb = new AlertDialog.Builder(MatrixEditorActivity.this);
-                LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-                final View v = layoutInflater.inflate(R.layout.edit_matrix, null);
-                adb.setView(v);
-                adb.setPositiveButton(R.string.add_gate, null);
-                adb.setNegativeButton(R.string.cancel, null);
-                adb.setNeutralButton(R.string.check_matrix, null);
-                AlertDialog d = adb.create();
-                d.setOnShowListener(new DialogInterface.OnShowListener() {
-                    @Override
-                    public void onShow(DialogInterface dialogInterface) {
-                        final SeekBar seekBar = (SeekBar) v.findViewById(R.id.colorBar);
-                        seekBar.setMax(256 * 7 - 1);
-                        seekBar.setOnSeekBarChangeListener(stuff);
-                        seekBar.setProgress((int) (256 * 3.5));
-                        SeekBar qubits = v.findViewById(R.id.qbitsBar);
-                        TextInputEditText namee = v.findViewById(R.id.name0);
-                        TextInputEditText symbolse = v.findViewById(R.id.symbols0);
-                        TextInputEditText matrixe = v.findViewById(R.id.editText30);
-                        final Button okButton = d.getButton(DialogInterface.BUTTON_POSITIVE);
-                        okButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-
-                                int qs = qubits.getProgress() + 1;
-                                int DIM;
-                                switch (qs) {
-                                    case 1:
-                                        DIM = 2;
-                                        break;
-                                    case 2:
-                                        DIM = 4;
-                                        break;
-                                    case 3:
-                                        DIM = 8;
-                                        break;
-                                    case 4:
-                                        DIM = 16;
-                                        break;
-                                    default:
-                                        DIM = 2;
-                                        break;
-                                }
-                                int color = Color.DKGRAY;
-                                Drawable background = v.findViewById(R.id.color_stuff).getBackground();
-                                if (background instanceof ColorDrawable)
-                                    color = ((ColorDrawable) background).getColor();
-                                String name = namee.getText().toString();
-                                if (name.length() < 1) {
-                                    showErr(2);
-                                    return;
-                                } else {
-                                    disableErr(2);
-                                }
-                                for (int i = 0; i < operators.size(); i++) {
-                                    if (operators.get(i).getName().equals(name)) {
-                                        showErr(2);
-                                        return;
-                                    }
-                                }
-                                if (symbolse.getText().toString().replace(" ", "").length() < 1) {
-                                    showErr(1);
-                                    return;
-                                } else {
-                                    disableErr(1);
-                                }
-                                String[] symbols = symbolse.getText().toString().replace(" ", "").split(",");
-                                if (matrixe.getText().toString().replace(" ", "").length() < 1) {
-                                    showErr(0);
-                                    return;
-                                } else {
-                                    disableErr(0);
-                                }
-                                String[] tempm = matrixe.getText().toString().replace(" ", "").split("\n");
-                                String[][] strMatrix = new String[DIM][DIM];
-                                Log.e("D", "sym: " + symbols.length + " " + qs);
-                                if (symbols.length != qs) {
-                                    showErr(1);
-                                    return;
-                                }
-                                if (tempm.length != DIM) {
-                                    showErr(0);
-                                    return;
-                                }
-                                for (int i = 0; i < strMatrix[0].length; i++) {
-                                    String[] temp = tempm[i].split(",");
-                                    if (temp.length != strMatrix[0].length) {
-                                        showErr(0);
-                                        return;
-                                    }
-                                    strMatrix[i] = temp;
-                                }
-                                Complex[][] cmatrix = new Complex[DIM][DIM];
-                                try {
-                                    for (int i = 0; i < strMatrix[0].length; i++) {
-                                        for (int j = 0; j < strMatrix[0].length; j++) {
-                                            cmatrix[i][j] = Complex.parse(strMatrix[i][j]);
-                                        }
-                                    }
-                                } catch (NumberFormatException e) {
-                                    e.printStackTrace();
-                                    showErr(3);
-                                    return;
-                                }
-                                VisualOperator v = new VisualOperator(DIM, cmatrix, name, symbols, color);
-                                if (!v.isSpecial() || !v.isUnitary()) {
-                                    showErr(4);
-                                    return;
-                                }
-                                try {
-                                    DocumentFile newFile = pickedDir.createFile("application/octet-stream", name + VisualOperator.FILE_EXTENSION);
-                                    OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                                    ObjectOutputStream out2 = new ObjectOutputStream(out);
-                                    out2.writeObject(v);
-                                    out2.close();
-                                    out.close();
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                                d.cancel();
-                                recreate();
-                            }
-
-                        });
-                        final Button checkButton = d.getButton(DialogInterface.BUTTON_NEUTRAL);
-                        checkButton.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                int qs = qubits.getProgress() + 1;
-                                int DIM;
-                                switch (qs) {
-                                    case 1:
-                                        DIM = 2;
-                                        break;
-                                    case 2:
-                                        DIM = 4;
-                                        break;
-                                    case 3:
-                                        DIM = 8;
-                                        break;
-                                    case 4:
-                                        DIM = 16;
-                                        break;
-                                    default:
-                                        DIM = 2;
-                                        break;
-                                }
-                                if (matrixe.getText().toString().replace(" ", "").length() < 1) {
-                                    showErr(0);
-                                    return;
-                                } else {
-                                    disableErr(0);
-                                }
-                                String[] tempm = matrixe.getText().toString().replace(" ", "").split("\n");
-                                String[][] strMatrix = new String[DIM][DIM];
-                                if (tempm.length != DIM) {
-                                    showErr(0);
-                                    return;
-                                }
-                                for (int i = 0; i < strMatrix[0].length; i++) {
-                                    String[] temp = tempm[i].split(",");
-                                    if (temp.length != strMatrix[0].length) {
-                                        showErr(0);
-                                        return;
-                                    }
-                                    strMatrix[i] = temp;
-                                }
-                                Complex[][] cmatrix = new Complex[DIM][DIM];
-                                try {
-                                    for (int i = 0; i < strMatrix[0].length; i++) {
-                                        for (int j = 0; j < strMatrix[0].length; j++) {
-                                            cmatrix[i][j] = Complex.parse(strMatrix[i][j]);
-                                        }
-                                    }
-                                } catch (NumberFormatException e) {
-                                    e.printStackTrace();
-                                    showErr(3);
-                                    return;
-                                }
-                                VisualOperator vo = new VisualOperator(DIM, cmatrix);
-                                ((TextInputLayout) v.findViewById(R.id.editText3)).setErrorEnabled(true);
-                                ((TextInputLayout) v.findViewById(R.id.editText3))
-                                        .setErrorTextColor(ColorStateList.valueOf(!vo.isSpecial() || !vo.isUnitary() ? Color.RED : Color.GREEN));
-                                ((TextInputLayout) v.findViewById(R.id.editText3))
-                                        .setError(getString(R.string.determinant) + ": "
-                                                + new DecimalFormat("0.0###").format(vo.determinantMod()) + ". "
-                                                + getString(R.string.unitary) + ": "
-                                                + (vo.isUnitary() ? getString(R.string.yes) : getString(R.string.no)));
-
-                            }
-                        });
-                    }
-
-                    public void showErr(int which) {
-                        switch (which) {
-                            case 0:
-                                ((TextInputLayout) v.findViewById(R.id.editText3)).setErrorTextColor(ColorStateList.valueOf(Color.RED));
-                                ((TextInputLayout) v.findViewById(R.id.editText3)).setError(getString(R.string.invalid_dim));
-                                break;
-                            case 1:
-                                ((TextInputLayout) v.findViewById(R.id.symbols)).setError(getString(R.string.invalid_symbols));
-                                break;
-                            case 2:
-                                ((TextInputLayout) v.findViewById(R.id.name)).setError(getString(R.string.invalid_name));
-                                break;
-                            case 3:
-                                ((TextInputLayout) v.findViewById(R.id.editText3)).setError(getString(R.string.invalid_complex));
-                                break;
-                            case 4:
-                                ((TextInputLayout) v.findViewById(R.id.editText3)).setError(getString(R.string.invalid_matrix));
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-
-                    public void disableErr(int which) {
-                        switch (which) {
-                            case 0:
-                                ((TextInputLayout) v.findViewById(R.id.editText3)).setError(null);
-                                break;
-                            case 1:
-                                ((TextInputLayout) v.findViewById(R.id.symbols)).setError(null);
-                                break;
-                            case 2:
-                                ((TextInputLayout) v.findViewById(R.id.name)).setError(null);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                });
-                d.show();
+        fab.setOnClickListener((View view) -> {
+            if (getContentResolver().getPersistedUriPermissions().size() < 1) {
+                Snackbar.make(view, R.string.choose_save_location, Snackbar.LENGTH_LONG)
+                        .setAction(R.string.select, (View view2) ->
+                                startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), 42)).show();
+                return;
             }
+            displayGateEditorDialog(operators, null);
         });
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    private void displayGateEditorDialog(ArrayList<VisualOperator> operators, VisualOperator overridden) {
+        AlertDialog.Builder adb = new AlertDialog.Builder(MatrixEditorActivity.this);
+        LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        final View v = layoutInflater.inflate(R.layout.edit_matrix, null);
+        adb.setView(v);
+        adb.setPositiveButton(R.string.add_gate, null);
+        adb.setNegativeButton(R.string.cancel, null);
+        adb.setNeutralButton(R.string.check_matrix, null);
+        AlertDialog d = adb.create();
+        d.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialogInterface) {
+                final SeekBar seekBar = v.findViewById(R.id.colorBar);
+                seekBar.setMax(256 * 7 - 1);
+                seekBar.setOnSeekBarChangeListener(stuff);
+                seekBar.setProgress((int) (256 * 3.5));
+                SeekBar qubits = v.findViewById(R.id.qbitsBar);
+                TextInputEditText nameEditText = v.findViewById(R.id.name0);
+                TextInputEditText symbolsEditText = v.findViewById(R.id.symbols0);
+                TextInputEditText matrixEditText = v.findViewById(R.id.editText30);
+                final Button okButton = d.getButton(DialogInterface.BUTTON_POSITIVE);
+                View.OnClickListener onClickListener = (View view) -> {
+                    int qs = qubits.getProgress() + 1;
+                    int DIM;
+                    switch (qs) {
+                        case 2:
+                            DIM = 4;
+                            break;
+                        case 3:
+                            DIM = 8;
+                            break;
+                        case 4:
+                            DIM = 16;
+                            break;
+                        default:
+                            DIM = 2;
+                            break;
+                    }
+                    int color = Color.DKGRAY;
+                    Drawable background = v.findViewById(R.id.color_stuff).getBackground();
+                    if (background instanceof ColorDrawable)
+                        color = ((ColorDrawable) background).getColor();
+                    String name = nameEditText.getText().toString();
+                    if (name.length() < 1) {
+                        showErr(2);
+                        return;
+                    } else {
+                        disableErr(2);
+                    }
+                    for (String s : FILENAME_RESERVED_CHARS)
+                        name = name.replace(s, "_");
+
+                    if (overridden == null) {
+                        for (int i = 0; i < operators.size(); i++) {
+                            if (operators.get(i).getName().equals(name)) {
+                                showErr(2);
+                                return;
+                            }
+                        }
+                    }
+                    if (symbolsEditText.getText().toString().replace(" ", "").length() < 1) {
+                        showErr(1);
+                        return;
+                    } else {
+                        disableErr(1);
+                    }
+                    String[] symbols = symbolsEditText.getText().toString().replace(" ", "").split(",");
+                    if (matrixEditText.getText().toString().replace(" ", "").length() < 1) {
+                        showErr(0);
+                        return;
+                    } else {
+                        disableErr(0);
+                    }
+                    String[] tempMatrix = matrixEditText.getText().toString().replace(" ", "").split("\n");
+                    String[][] strMatrix = new String[DIM][DIM];
+                    if (symbols.length != qs) {
+                        showErr(1);
+                        return;
+                    }
+                    if (tempMatrix.length != DIM) {
+                        showErr(0);
+                        return;
+                    }
+                    for (int i = 0; i < strMatrix[0].length; i++) {
+                        String[] temp = tempMatrix[i].split(",");
+                        if (temp.length != strMatrix[0].length) {
+                            showErr(0);
+                            return;
+                        }
+                        strMatrix[i] = temp;
+                    }
+                    Complex[][] cMatrix = new Complex[DIM][DIM];
+                    try {
+                        for (int i = 0; i < strMatrix[0].length; i++) {
+                            for (int j = 0; j < strMatrix[0].length; j++) {
+                                cMatrix[i][j] = Complex.parse(strMatrix[i][j]);
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                        showErr(3);
+                        return;
+                    }
+                    VisualOperator v = new VisualOperator(DIM, cMatrix, name, symbols, color);
+                    if (!v.isSpecial() || !v.isUnitary()) {
+                        showErr(4);
+                        return;
+                    }
+                    try {
+                        DocumentFile newFile = overridden == null ? pickedDir.createFile("application/octet-stream", name + VisualOperator.FILE_EXTENSION) : pickedDir.findFile(name + VisualOperator.FILE_EXTENSION);
+                        OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
+                        ObjectOutputStream out2 = new ObjectOutputStream(out);
+                        out2.writeObject(v);
+                        out2.close();
+                        out.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Snackbar snackbar = Snackbar.make(findViewById(R.id.parent3), R.string.unknown_error, Snackbar.LENGTH_LONG);
+                        snackbar.getView().setBackgroundColor(0xffD81010);
+                        snackbar.show();
+                        d.cancel();
+                        return;
+                    }
+                    d.cancel();
+                    recreate();
+                };
+                okButton.setOnClickListener(onClickListener);
+                final Button checkButton = d.getButton(DialogInterface.BUTTON_NEUTRAL);
+                checkButton.setOnClickListener((View view) -> {
+                    int qs = qubits.getProgress() + 1;
+                    int DIM;
+                    switch (qs) {
+                        case 2:
+                            DIM = 4;
+                            break;
+                        case 3:
+                            DIM = 8;
+                            break;
+                        case 4:
+                            DIM = 16;
+                            break;
+                        default:
+                            DIM = 2;
+                            break;
+                    }
+                    if (matrixEditText.getText().toString().replace(" ", "").length() < 1) {
+                        showErr(0);
+                        return;
+                    } else {
+                        disableErr(0);
+                    }
+                    String[] tempMatrix = matrixEditText.getText().toString().replace(" ", "").split("\n");
+                    String[][] strMatrix = new String[DIM][DIM];
+                    if (tempMatrix.length != DIM) {
+                        showErr(0);
+                        return;
+                    }
+                    for (int i = 0; i < strMatrix[0].length; i++) {
+                        String[] temp = tempMatrix[i].split(",");
+                        if (temp.length != strMatrix[0].length) {
+                            showErr(0);
+                            return;
+                        }
+                        strMatrix[i] = temp;
+                    }
+                    Complex[][] cMatrix = new Complex[DIM][DIM];
+                    try {
+                        for (int i = 0; i < strMatrix[0].length; i++) {
+                            for (int j = 0; j < strMatrix[0].length; j++) {
+                                cMatrix[i][j] = Complex.parse(strMatrix[i][j]);
+                            }
+                        }
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                        showErr(3);
+                        return;
+                    }
+                    VisualOperator vo = new VisualOperator(DIM, cMatrix);
+                    ((TextInputLayout) v.findViewById(R.id.editText3)).setErrorEnabled(true);
+                    ((TextInputLayout) v.findViewById(R.id.editText3))
+                            .setErrorTextColor(ColorStateList.valueOf(!vo.isSpecial() || !vo.isUnitary() ? Color.RED : Color.GREEN));
+                    ((TextInputLayout) v.findViewById(R.id.editText3))
+                            .setError(getString(R.string.determinant) + ": "
+                                    + new DecimalFormat("0.0###").format(vo.determinantMod()) + ". "
+                                    + getString(R.string.unitary) + ": "
+                                    + (vo.isUnitary() ? getString(R.string.yes) : getString(R.string.no)));
+
+                });
+                if (overridden != null) {
+                    qubits.setProgress(overridden.getQubits() - 1);
+                    v.findViewById(R.id.color_stuff).setBackground(new ColorDrawable(overridden.getColor()));
+                    nameEditText.setText(overridden.getName());
+                    nameEditText.setEnabled(false);
+                    symbolsEditText.setText(TextUtils.join(",", overridden.getSymbols()));
+                    matrixEditText.setText(overridden.toString5Decimals());
+                }
+            }
+
+            public void showErr(int which) {
+                switch (which) {
+                    case 0:
+                        ((TextInputLayout) v.findViewById(R.id.editText3)).setErrorTextColor(ColorStateList.valueOf(Color.RED));
+                        ((TextInputLayout) v.findViewById(R.id.editText3)).setError(getString(R.string.invalid_dim));
+                        break;
+                    case 1:
+                        ((TextInputLayout) v.findViewById(R.id.symbols)).setError(getString(R.string.invalid_symbols));
+                        break;
+                    case 2:
+                        ((TextInputLayout) v.findViewById(R.id.name)).setError(getString(R.string.invalid_name));
+                        break;
+                    case 3:
+                        ((TextInputLayout) v.findViewById(R.id.editText3)).setError(getString(R.string.invalid_complex));
+                        break;
+                    case 4:
+                        ((TextInputLayout) v.findViewById(R.id.editText3)).setError(getString(R.string.invalid_matrix));
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            public void disableErr(int which) {
+                switch (which) {
+                    case 0:
+                        ((TextInputLayout) v.findViewById(R.id.editText3)).setError(null);
+                        break;
+                    case 1:
+                        ((TextInputLayout) v.findViewById(R.id.symbols)).setError(null);
+                        break;
+                    case 2:
+                        ((TextInputLayout) v.findViewById(R.id.name)).setError(null);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
+        d.show();
     }
 
     private final SeekBar.OnSeekBarChangeListener stuff = new SeekBar.OnSeekBarChangeListener() {
@@ -428,6 +407,30 @@ public class MatrixEditorActivity extends AppCompatActivity {
             pickedDir = DocumentFile.fromTreeUri(this, treeUri);
             recreate();
         }
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, view, menuInfo);
+        menu.add(Menu.NONE, view.getId(), Menu.NONE, getString(R.string.delete_gate));
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        ContextMenuRecyclerView.RecyclerContextMenuInfo info = (ContextMenuRecyclerView.RecyclerContextMenuInfo) item.getMenuInfo();
+        VisualOperator vo = operators.get(info.position);
+        String name = vo.getName();
+        for (String s : FILENAME_RESERVED_CHARS)
+            name = name.replace(s, "_");
+        try {
+            DocumentFile gate = pickedDir.findFile(name + VisualOperator.FILE_EXTENSION);
+            Log.e("X", name + VisualOperator.FILE_EXTENSION);
+            gate.delete();
+            recreate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
 }

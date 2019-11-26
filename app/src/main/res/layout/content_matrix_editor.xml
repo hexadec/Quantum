@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/parent3"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -9,7 +10,7 @@
     android:background="#eeeeee"
     tools:showIn="@layout/activity_matrix_editor">
 
-    <androidx.recyclerview.widget.RecyclerView
+    <hu.hexadecimal.quantum.graphics.ContextMenuRecyclerView
 
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"

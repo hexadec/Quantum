@@ -17,6 +17,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private List<VisualOperator> operators;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
+    private ItemLongClickListener mLongClickListener;
 
     // data is passed into the constructor
     RecyclerViewAdapter(Context context, List<VisualOperator> data) {
@@ -45,6 +46,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             symbol.append("</b>:\u2002");
             symbol.append(operator.getSymbols()[i]);
         }
+        holder.itemView.setLongClickable(true);
         holder.gateSymbols.setText(Html.fromHtml(symbol.toString()));
         holder.gateMatrix.loadData(operator.toStringHtmlTable(), "text/html", "UTF-8");
     }
@@ -57,7 +59,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
 
     // stores and recycles views as they are scrolled off screen
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
         TextView gateName;
         TextView gateSymbols;
         WebView gateMatrix;
@@ -76,6 +78,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public void onClick(View view) {
             if (mClickListener != null) mClickListener.onItemClick(view, getAdapterPosition());
         }
+
+        @Override
+        public boolean onLongClick(View view) {
+            if (mLongClickListener != null) return mLongClickListener.onItemLongClick(view, getAdapterPosition());
+            return false;
+        }
     }
 
     // convenience method for getting data at click position
@@ -88,8 +96,16 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         this.mClickListener = itemClickListener;
     }
 
+    void setLongClickListener(ItemLongClickListener itemLongClickListener) {
+        this.mLongClickListener = itemLongClickListener;
+    }
+
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+    }
+
+    public interface ItemLongClickListener {
+        boolean onItemLongClick(View view, int position);
     }
 }

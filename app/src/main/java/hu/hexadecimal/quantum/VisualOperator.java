@@ -330,9 +330,22 @@ public class VisualOperator implements Serializable {
                 sb.append(z.toString3Decimals());
                 sb.append(", ");
             }
-            sb.deleteCharAt(sb.length() - 2);
+            sb.deleteCharAt(sb.length() - 1);
             sb.append('\n');
         }
+        return sb.toString();
+    }
+    public String toString5Decimals() {
+        StringBuilder sb = new StringBuilder();
+        for (Complex[] c : matrix) {
+            for (Complex z : c) {
+                sb.append(z.toString5Decimals());
+                sb.append(",");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            sb.append('\n');
+        }
+        sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
     }
 
