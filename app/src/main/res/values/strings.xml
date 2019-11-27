@@ -30,7 +30,6 @@
     <string name="symbols_hint">Symbols, eg: S,X,D</string>
     <string name="matrix">Matrix</string>
     <string name="choose_qubit_number">Number of qubits 1&#8211;4</string>
-    <string name="add_gate">Add gate</string>
     <string name="edit_gate">Edit gate</string>
     <string name="choose_save_location">Please select where to save the files. You can change it later in the settings</string>
     <string name="choose_save_location_settings">Couldn\'t save file! \nChoose a folder in settings</string>
@@ -74,4 +73,5 @@
     <string name="next_qubit">Next qubit</string>
     <string name="previous_qubit">Prev. qubit</string>
     <string name="long_click_to_delete">Long click on gates to delete them</string>
+    <string name="save">Save</string>
 </resources>

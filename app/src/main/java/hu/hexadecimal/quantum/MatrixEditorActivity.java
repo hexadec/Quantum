@@ -54,47 +54,49 @@ public class MatrixEditorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_matrix_editor);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        new Thread(() -> {
 
-        operators = new ArrayList<>();
-        try {
-            Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
-            pickedDir = DocumentFile.fromTreeUri(this, uri);
-            if (!pickedDir.exists()) {
-                getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                pickedDir = null;
-            }
-
-            for (DocumentFile file : pickedDir.listFiles()) {
-                try {
-                    if (file.getName().endsWith(VisualOperator.FILE_EXTENSION)) {
-                        VisualOperator m = (VisualOperator) new ObjectInputStream(getContentResolver().openInputStream(file.getUri())).readObject();
-                        operators.add(m);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+            operators = new ArrayList<>();
+            try {
+                Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
+                pickedDir = DocumentFile.fromTreeUri(this, uri);
+                if (!pickedDir.exists()) {
+                    getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                    pickedDir = null;
                 }
+
+                for (DocumentFile file : pickedDir.listFiles()) {
+                    try {
+                        if (file.getName().endsWith(VisualOperator.FILE_EXTENSION)) {
+                            VisualOperator m = (VisualOperator) new ObjectInputStream(getContentResolver().openInputStream(file.getUri())).readObject();
+                            operators.add(m);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MatrixEditorActivity.this);
-        int help_shown = pref.getInt("matrix_help_shown", 0);
-        if (help_shown < 5 && operators.size() > 0) {
-            Snackbar.make(findViewById(R.id.parent3), R.string.long_click_to_delete, Snackbar.LENGTH_LONG).show();
-            pref.edit().putInt("matrix_help_shown", ++help_shown).apply();
-        }
-
-        final RecyclerView recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new RecyclerViewAdapter(this, operators);
-        registerForContextMenu(recyclerView);
-        adapter.setClickListener((View view, int position) -> {
-            VisualOperator vo = operators.get(position);
-            displayGateEditorDialog(operators, vo);
-        });
-        new Thread(() -> runOnUiThread(() -> recyclerView.setAdapter(adapter))).start();
+            runOnUiThread(() -> {
+                final RecyclerView recyclerView = findViewById(R.id.recyclerView);
+                recyclerView.setLayoutManager(new LinearLayoutManager(this));
+                adapter = new RecyclerViewAdapter(this, operators);
+                registerForContextMenu(recyclerView);
+                adapter.setClickListener((View view, int position) -> {
+                    VisualOperator vo = operators.get(position);
+                    displayGateEditorDialog(operators, vo);
+                });
+                recyclerView.setAdapter(adapter);
+                SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MatrixEditorActivity.this);
+                int help_shown = pref.getInt("matrix_help_shown", 0);
+                if (help_shown < 5 && operators.size() > 0) {
+                    Snackbar.make(findViewById(R.id.parent3), R.string.long_click_to_delete, Snackbar.LENGTH_LONG).show();
+                    pref.edit().putInt("matrix_help_shown", ++help_shown).apply();
+                }
+            });
+        }).start();
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener((View view) -> {
@@ -114,7 +116,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
         LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         final View v = layoutInflater.inflate(R.layout.edit_matrix, null);
         adb.setView(v);
-        adb.setPositiveButton(R.string.add_gate, null);
+        adb.setPositiveButton(R.string.save, null);
         adb.setNegativeButton(R.string.cancel, null);
         adb.setNeutralButton(R.string.check_matrix, null);
         AlertDialog d = adb.create();
