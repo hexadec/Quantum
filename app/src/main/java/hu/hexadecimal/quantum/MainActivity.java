@@ -704,6 +704,12 @@ public class MainActivity extends AppCompatActivity {
                         out.flush();
                         out.close();
                         Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + filename, Snackbar.LENGTH_LONG).show();
+                    } catch (IndexOutOfBoundsException iout) {
+                        iout.printStackTrace();
+                        Snackbar.make(findViewById(R.id.parent2), R.string.choose_save_location, Snackbar.LENGTH_LONG)
+                                .setAction(R.string.select, (View view2) ->
+                                        startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), 43)).show();
+
                     } catch (Exception e) {
                         e.printStackTrace();
                         Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
@@ -740,6 +746,28 @@ public class MainActivity extends AppCompatActivity {
                     snackbar.getView().setBackgroundColor(0xffD81010);
                     snackbar.show();
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
+                snackbar.getView().setBackgroundColor(0xffD81010);
+                snackbar.show();
+            }
+        } else if (resultCode == RESULT_OK && requestCode == 43) {
+            Uri treeUri = resultData.getData();
+            getContentResolver().takePersistableUriPermission(treeUri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            DocumentFile pickedDir = DocumentFile.fromTreeUri(this, treeUri);
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat("'experiment'_yyyy-MM-dd_HH-mm-ss'" + QuantumView.FILE_EXTENSION + "'", Locale.UK);
+                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                String filename = sdf.format(new Date());
+                DocumentFile newFile = pickedDir.createFile("application/octet-stream", filename);
+                OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
+                out.write(qv.exportGates());
+                out.flush();
+                out.close();
+                Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + filename, Snackbar.LENGTH_LONG).show();
             } catch (Exception e) {
                 e.printStackTrace();
                 Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);

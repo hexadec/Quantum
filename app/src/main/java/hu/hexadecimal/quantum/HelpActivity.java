@@ -22,11 +22,7 @@ public class HelpActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_help);
-        WebView webView;
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP_MR1)
-            webView = new WebView(createConfigurationContext(new Configuration()));
-        else
-            webView = new WebView(HelpActivity.this);
+        WebView webView = new WebView(HelpActivity.this);
         ((ConstraintLayout) findViewById(R.id.help_parent)).addView(webView);
 
         webView.postDelayed(() ->
@@ -90,5 +86,19 @@ public class HelpActivity extends AppCompatActivity {
                         runOnUiThread(() -> webView.loadUrl("file:///android_res/raw/info.html"));
                     }
                 }).start(), 100);
+    }
+
+
+
+    /**
+     * Source: https://stackoverflow.com/questions/41025200/android-view-inflateexception-error-inflating-class-android-webkit-webview
+     * @param overrideConfiguration
+     */
+    @Override
+    public void applyOverrideConfiguration(Configuration overrideConfiguration) {
+        if (Build.VERSION.SDK_INT >= 21 && Build.VERSION.SDK_INT <= 22) {
+            return;
+        }
+        super.applyOverrideConfiguration(overrideConfiguration);
     }
 }
