@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 public class VisualOperator implements Serializable {
 
     public static final long serialVersionUID = 2L;
+    public static final transient long helpVersion = 3L;
     private Complex[][] matrix;
     private String[] symbols;
     private Random random;
@@ -382,8 +383,8 @@ public class VisualOperator implements Serializable {
         sb.append("<table align=\"center\">\n");
         if ((MODE & HTML_MODE_CAPTION) > 0) {
             sb.append("<caption>");
-            sb.append(name);
-            sb.append("</caption>");
+            sb.append(name.replace("π", "&pi;"));
+            sb.append("</caption>\n");
         }
         for (int i = 0; i < MATRIX_DIM; i++) {
             sb.append("<tr>\n");
@@ -391,14 +392,17 @@ public class VisualOperator implements Serializable {
                 sb.append("<td>");
                 String matrixString = matrix[i][j].toString3Decimals();
                 if ((MODE & HTML_MODE_FAT) > 0 && matrixString.length() < 3)
-                    sb.append("\u2002").append(matrixString).append("\u2002");
+                    sb.append("&ensp;").append(matrixString).append("&ensp;");
                 else
                     sb.append(matrixString);
                 sb.append("</td>\n");
             }
             sb.append("</tr>\n");
         }
-        sb.append("</table>\n</body>");
+        sb.append("</table>\n");
+        if ((MODE & HTML_MODE_BODY) > 0) {
+            sb.append("</body>\n");
+        }
         return sb.toString();
     }
 

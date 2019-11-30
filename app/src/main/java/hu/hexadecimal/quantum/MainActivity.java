@@ -1,12 +1,15 @@
 package hu.hexadecimal.quantum;
 
+import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,6 +27,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -36,11 +40,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -50,10 +54,14 @@ import java.util.LinkedList;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
+import androidx.core.view.GravityCompat;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.drawerlayout.widget.DrawerLayout;
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
 import hu.hexadecimal.quantum.graphics.QuantumView;
 
@@ -61,10 +69,13 @@ public class MainActivity extends AppCompatActivity {
 
     QuantumView qv;
     private ProgressDialog progressDialog;
-    private Menu menu;
     private boolean probabilityMode;
     private boolean saved;
     private int blochSpherePos = 0;
+
+    private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle toggle;
+    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +85,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar2);
         setSupportActionBar(toolbar);
+
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#171717")));
+        Window window = getWindow();
+        window.setStatusBarColor(Color.parseColor("#171717"));
 
         LinearLayout relativeLayout = findViewById(R.id.linearLayout);
         qv = new QuantumView(this);
@@ -226,6 +241,106 @@ public class MainActivity extends AppCompatActivity {
             Snackbar.make(findViewById(R.id.parent2), R.string.click_to_start, Snackbar.LENGTH_LONG).show();
             pref.edit().putInt("help_shown", ++help_shown).apply();
         }
+
+        drawerLayout = findViewById(R.id.activity_main2);
+        toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.yes, R.string.no);
+
+        drawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        navigationView = findViewById(R.id.nv);
+        View v = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.navigation_header, null, false);
+        try {
+            ((TextView) v.findViewById(R.id.version)).setText(getPackageManager()
+                    .getPackageInfo(getPackageName(), 0).versionName);
+        } catch (Exception e) {
+            e.printStackTrace();
+            ((TextView) v.findViewById(R.id.version)).setText("?.?.?");
+        }
+        navigationView.addHeaderView(v);
+        drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull View drawerView) {
+                tintSystemBars(Color.parseColor("#171717"),
+                        ContextCompat.getColor(MainActivity.this, R.color.ic_launcher_background));
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull View drawerView) {
+                tintSystemBars(ContextCompat.getColor(MainActivity.this, R.color.ic_launcher_background),
+                        Color.parseColor("#171717"));
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+            }
+
+            private void tintSystemBars(int initial, int fin) {
+
+                ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+                anim.addUpdateListener((ValueAnimator animation) -> {
+                    float position = animation.getAnimatedFraction();
+                    int blended = blendColors(initial, fin, position);
+                    getWindow().setStatusBarColor(blended);
+                    blended = blendColors(initial, fin, position);
+                    ColorDrawable background = new ColorDrawable(blended);
+                    getSupportActionBar().setBackgroundDrawable(background);
+                });
+
+                anim.setDuration(500).start();
+            }
+
+            private int blendColors(int from, int to, float ratio) {
+                final float inverseRatio = 1f - ratio;
+
+                final float r = Color.red(to) * ratio + Color.red(from) * inverseRatio;
+                final float g = Color.green(to) * ratio + Color.green(from) * inverseRatio;
+                final float b = Color.blue(to) * ratio + Color.blue(from) * inverseRatio;
+
+                return Color.rgb((int) r, (int) g, (int) b);
+            }
+        });
+        navigationView.setNavigationItemSelectedListener((MenuItem item) -> {
+            new Handler().postDelayed(() -> {
+                switch (item.getItemId()) {
+                    case R.id.probability:
+                        navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setIcon(ContextCompat.getDrawable(MainActivity.this, probabilityMode ? R.drawable.alpha_p_circle_outline : R.drawable.alpha_p_circle));
+                        probabilityMode = !probabilityMode;
+                        break;
+                    case R.id.prefs:
+                        startActivity(new Intent(MainActivity.this, PreferenceActivity.class));
+                        break;
+                    case R.id.help:
+                        startActivity(new Intent(MainActivity.this, HelpActivity.class));
+                        break;
+                    case R.id.clear:
+                        saved = true;
+                        qv.clearScreen();
+                        break;
+                    case R.id.matrix:
+                        startActivity(new Intent(MainActivity.this, MatrixEditorActivity.class));
+                        break;
+                    default:
+                }
+            }, 200);
+            drawerLayout.closeDrawer(GravityCompat.START);
+            switch (item.getItemId()) {
+                case R.id.probability:
+                case R.id.prefs:
+                case R.id.help:
+                case R.id.clear:
+                case R.id.matrix:
+                    return true;
+                default:
+                    return false;
+            }
+        });
     }
 
     public void displayBlochSphere() {
@@ -553,85 +668,56 @@ public class MainActivity extends AppCompatActivity {
 
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.mainmenu, menu);
-        this.menu = menu;
+        inflater.inflate(R.menu.menu_main_action, menu);
         return true;
     }
 
-    protected boolean onPrepareOptionsPanel(View view, Menu menu) {
-        if (menu != null) {
-            if (menu.getClass().getSimpleName().equals("MenuBuilder")) {
-                try {
-                    Method m = menu.getClass().getDeclaredMethod(
-                            "setOptionalIconsVisible", Boolean.TYPE);
-                    m.setAccessible(true);
-                    m.invoke(menu, true);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return super.onPrepareOptionsPanel(view, menu);
-    }
-
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.probability:
-                menu.getItem(menu.size() - 2).setIcon(ContextCompat.getDrawable(this, probabilityMode ? R.drawable.alpha_p_circle_outline : R.drawable.alpha_p_circle));
-                probabilityMode = !probabilityMode;
-                break;
-            case R.id.save:
-                if (qv.getOperators().size() < 1) {
-                    Snackbar.make(findViewById(R.id.parent2), getString(R.string.no_gates), Snackbar.LENGTH_LONG).show();
-                    return true;
-                }
-                try {
-                    Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
-                    DocumentFile pickedDir = DocumentFile.fromTreeUri(MainActivity.this, uri);
-                    if (!pickedDir.exists()) {
-                        getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                                Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                        pickedDir = null;
-                    }
-                    SimpleDateFormat sdf = new SimpleDateFormat("'experiment'_yyyy-MM-dd_HH-mm-ss'" + QuantumView.FILE_EXTENSION + "'", Locale.UK);
-                    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-                    String filename = sdf.format(new Date());
-                    DocumentFile newFile = pickedDir.createFile("application/octet-stream", filename);
-                    OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                    out.write(qv.exportGates());
-                    out.flush();
-                    out.close();
-                    Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + filename, Snackbar.LENGTH_LONG).show();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
-                    snackbar.getView().setBackgroundColor(0xffD81010);
-                    snackbar.show();
-                }
-                saved = true;
-                break;
-            case R.id.prefs:
-                Intent intent = new Intent(MainActivity.this, PreferenceActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.help:
-                Intent intent1 = new Intent(MainActivity.this, HelpActivity.class);
-                startActivity(intent1);
-                break;
-            case R.id.clear:
-                saved = true;
-                qv.clearScreen();
-                break;
-            case R.id.matrix:
-                startActivity(new Intent(MainActivity.this, MatrixEditorActivity.class));
-                break;
-            case R.id.bloch:
-                displayBlochSphere();
-                break;
-            default:
 
+        if (toggle.onOptionsItemSelected(item))
+            return true;
+        else {
+            switch (item.getItemId()) {
+                case R.id.bloch:
+                    displayBlochSphere();
+                    break;
+                case R.id.save:
+                    if (qv.getOperators().size() < 1) {
+                        Snackbar.make(findViewById(R.id.parent2), getString(R.string.no_gates), Snackbar.LENGTH_LONG).show();
+                        return true;
+                    }
+                    try {
+                        Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
+                        DocumentFile pickedDir = DocumentFile.fromTreeUri(MainActivity.this, uri);
+                        if (!pickedDir.exists()) {
+                            getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                            pickedDir = null;
+                        }
+                        SimpleDateFormat sdf = new SimpleDateFormat("'experiment'_yyyy-MM-dd_HH-mm-ss'" + QuantumView.FILE_EXTENSION + "'", Locale.UK);
+                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        String filename = sdf.format(new Date());
+                        DocumentFile newFile = pickedDir.createFile("application/octet-stream", filename);
+                        OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
+                        out.write(qv.exportGates());
+                        out.flush();
+                        out.close();
+                        Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + filename, Snackbar.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
+                        snackbar.getView().setBackgroundColor(0xffD81010);
+                        snackbar.show();
+                    }
+                    saved = true;
+                    break;
+                default:
+
+            }
+
+            return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

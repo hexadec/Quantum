@@ -6,8 +6,8 @@ android {
         applicationId "hu.hexadecimal.quantum"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 27
-        versionName "honiedhazelnut-alpha." + versionCode
+        versionCode 700
+        versionName getVersionNameString(versionCode)
     }
     buildTypes {
         release {
@@ -31,4 +31,12 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.0.0'
     implementation 'com.google.android.material:material:1.0.0'
+}
+
+def static getDate() {
+    return new Date().format('yyMMdd')
+}
+
+def static getVersionNameString(int versionCode) {
+    return ((int)(versionCode / 10000)) + "." + (((int)(versionCode / 100)) % 10000) + "." + (((int)versionCode) % 100) + "\u2013" + getDate()
 }

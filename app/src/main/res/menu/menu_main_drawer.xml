@@ -3,13 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/save"
-        android:icon="@drawable/content_save"
-        android:orderInCategory="0"
-        android:title="@string/save_experiment"
-        app:showAsAction="always" />
-
-    <item
         android:id="@+id/help"
         android:icon="@drawable/book_information_variant"
         android:orderInCategory="1"
@@ -21,12 +14,6 @@
         android:icon="@drawable/settings"
         android:orderInCategory="2"
         android:title="@string/preferences"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/bloch"
-        android:icon="@drawable/axis_arrow"
-        android:orderInCategory="3"
-        android:title="@string/bloch_sphere"
         app:showAsAction="ifRoom" />
 
     <item
