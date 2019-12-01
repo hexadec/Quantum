@@ -73,7 +73,6 @@ public class ExperimentRunner {
                 });
                 t[i].start();
             }
-            Log.i("ExperimentRunner", "threads: " + t.length);
             for (int i = 0; i < threads; i++) {
                 try {
                     t[i].join();

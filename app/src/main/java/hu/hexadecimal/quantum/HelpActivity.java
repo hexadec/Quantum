@@ -6,7 +6,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.webkit.WebView;
 
 import java.io.BufferedReader;
@@ -34,12 +33,10 @@ public class HelpActivity extends AppCompatActivity {
                         if (!f.exists()) {
                             BufferedReader in = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.info)));
                             StringBuilder total = new StringBuilder();
-                            Log.e("1", "X");
                             for (String line; (line = in.readLine()) != null; ) {
                                 total.append(line).append('\n');
                             }
                             String html = total.toString();
-                            Log.e("2", "X");
                             html = html.replace("&lt;Hmatrix&gt;", VisualOperator.HADAMARD.toStringHtmlTable(VisualOperator.HTML_MODE_BASIC));
                             html = html.replace("&lt;CSmatrix&gt;", VisualOperator.CS.toStringHtmlTable(VisualOperator.HTML_MODE_BASIC));
                             html = html.replace("&lt;CTmatrix&gt;", VisualOperator.CT.toStringHtmlTable(VisualOperator.HTML_MODE_BASIC));
@@ -61,26 +58,21 @@ public class HelpActivity extends AppCompatActivity {
                             html = html.replace("&lt;CCXmatrix&gt;", VisualOperator.TOFFOLI.toStringHtmlTable(VisualOperator.HTML_MODE_BASIC));
                             html = html.replace("&lt;CHmatrix&gt;", VisualOperator.CH.toStringHtmlTable(VisualOperator.HTML_MODE_BASIC));
                             final String finalHtml = html;
-                            Log.e("3", "X");
                             runOnUiThread(() -> webView.loadData(finalHtml, "text/html", "UTF-8"));
                             FileOutputStream fileOutputStream = new FileOutputStream(f);
                             fileOutputStream.write(html.getBytes(StandardCharsets.UTF_8));
                             fileOutputStream.flush();
                             fileOutputStream.close();
-                            Log.e("4", "X");
                         } else {
                             BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
                             StringBuilder total = new StringBuilder();
-                            Log.e("10", "X");
                             for (String line; (line = bufferedReader.readLine()) != null; ) {
                                 total.append(line).append('\n');
                             }
                             String html = total.toString();
                             runOnUiThread(() -> webView.loadData(html, "text/html", "UTF-8"));
                             bufferedReader.close();
-                            Log.e("20", "X");
                         }
-                        Log.e("5", "X");
                     } catch (Exception e) {
                         e.printStackTrace();
                         runOnUiThread(() -> webView.loadUrl("file:///android_res/raw/info.html"));

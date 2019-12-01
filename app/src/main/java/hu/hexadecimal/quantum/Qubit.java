@@ -37,8 +37,6 @@ public class Qubit {
         if (prob0 + prob1 < 0.9999 || prob0 + prob1 > 1.0001) {
             Log.e("QBIT Error", "Too HIGH/low probability sum:\t" + (prob0 + prob1));
         }
-        //Log.i("Qubit Info", "Prob0: " + prob0 + "  Prob1: " + prob1);
-        //Log.i("Qubit Info", "Matrix[0]: " + matrix[0].toString3Decimals() + "    Matrix[1]: " + matrix[1].toString3Decimals());
         double rand = random.nextDouble();
         boolean value = rand > prob0;
         prepare(value);

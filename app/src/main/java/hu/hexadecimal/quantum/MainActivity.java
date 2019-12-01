@@ -437,8 +437,10 @@ public class MainActivity extends AppCompatActivity {
                             e.printStackTrace();
                         }
                     }
+                } catch (IndexOutOfBoundsException ie) {
+                    Log.i("GateAdder", "Probably no home selected");
                 } catch (Exception e) {
-                    Log.e("QubitAdder", "Some error has happened :(");
+                    Log.e("GateAdder", "Some error has happened :(");
                     e.printStackTrace();
                 }
             }).start();

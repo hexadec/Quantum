@@ -27,7 +27,6 @@ import hu.hexadecimal.quantum.graphics.ContextMenuRecyclerView;
 
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -428,7 +427,6 @@ public class MatrixEditorActivity extends AppCompatActivity {
             name = name.replace(s, "_");
         try {
             DocumentFile gate = pickedDir.findFile(name + VisualOperator.FILE_EXTENSION);
-            Log.e("X", name + VisualOperator.FILE_EXTENSION);
             gate.delete();
             recreate();
         } catch (Exception e) {

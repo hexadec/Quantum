@@ -565,9 +565,7 @@ public class VisualOperator implements Serializable {
 
     public static float[] measureProbabilities(final Complex[] qubitArray) {
         float[] probs = new float[qubitArray.length];
-        Log.w("STATE", "The statevector of the system is the following");
         for (int i = 0; i < qubitArray.length; i++) {
-            if (!qubitArray[i].isZero()) Log.w("STATE" + i, qubitArray[i].toString3Decimals());
             probs[i] = (float) Complex.multiply(Complex.conjugate(qubitArray[i]), qubitArray[i]).real;
         }
         return probs;
@@ -768,9 +766,6 @@ public class VisualOperator implements Serializable {
             Complex[] b2 = toQubitArray(qb);
             Complex[] b3 = toQubitArray(qc);
             for (int i = 0; i < a1.length; i++) {
-                Log.e("1", b1[i] + "--" + o1[i]);
-                Log.e("2", b2[i] + "--" + o2[i]);
-                Log.e("3", b3[i] + "--" + o3[i]);
                 if (!b1[i].equals3Decimals(o1[i])) return false;
                 if (!b2[i].equals3Decimals(o2[i])) return false;
                 if (!b3[i].equals3Decimals(o3[i])) return false;
