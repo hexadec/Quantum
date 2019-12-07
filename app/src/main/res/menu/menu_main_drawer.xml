@@ -30,13 +30,6 @@
         android:title="@string/clear_screen"
         app:showAsAction="never" />
 
-    <!--<item
-        android:id="@+id/run"
-        android:icon="@drawable/play_pause"
-        android:title="@string/run"
-        android:orderInCategory="1"
-        app:showAsAction="always" />-->
-
     <item
         android:id="@+id/probability"
         android:icon="@drawable/alpha_p_circle_outline"

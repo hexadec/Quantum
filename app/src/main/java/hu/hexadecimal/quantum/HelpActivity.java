@@ -80,8 +80,6 @@ public class HelpActivity extends AppCompatActivity {
                 }).start(), 100);
     }
 
-
-
     /**
      * Source: https://stackoverflow.com/questions/41025200/android-view-inflateexception-error-inflating-class-android-webkit-webview
      * @param overrideConfiguration

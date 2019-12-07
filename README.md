@@ -36,12 +36,15 @@ A software for Android that emulates the actions of a quantum computer
 - CNOT/CY/CZ (Controlled Pauli)
 - Controlled T-gate
 - Controlled S-gate
+- Controlled Hadamard
 - SWAP
 - Toffoli
 - Fredkin
 - 2 & 3 Qubit Identity
 
 ###### Planned features
-Create and run algorithms with loops and conditions
+Create and run algorithms with loops and conditions  
+Apply rotation gates with custom angles more easily  
+Display the final state-vector of the system
 
 (C) All rights reserved! (for now)

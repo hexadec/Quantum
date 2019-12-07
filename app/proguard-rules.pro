@@ -9,15 +9,21 @@
 # and specify the fully qualified class name to the JavaScript interface
 # class:
 
--keepclassmembers class hu.hexadecimal.quantum.VisualOperator {
-   public *;
+-keepclassmembers class hu.hexadecimal.quantum.* {
+    public *;
 }
 
--keep class **.MenuBuilder {*;}
+-keepclassmembers class hu.hexadecimal.quantum.graphics* {
+    public *;
+}
+
+-keep class hu.hexadecimal.quantum.*
+-keep class hu.hexadecimal.quantum.graphics.*
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
+-dontobfuscate
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.

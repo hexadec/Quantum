@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
     QuantumView qv;
     private ProgressDialog progressDialog;
-    private boolean probabilityMode;
+    private int probabilityMode;
     private boolean saved;
     private int blochSpherePos = 0;
 
@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         saved = true;
-        probabilityMode = false;
+        probabilityMode = 0;
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar2);
         setSupportActionBar(toolbar);
@@ -135,8 +135,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         FloatingActionButton execute = findViewById(R.id.fab_matrix);
+        final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         execute.setOnClickListener((View view) -> {
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
             final int shots = Integer.valueOf(pref.getString("shots", "1024"));
             final int threads = Integer.valueOf(pref.getString("threads", "8"));
             final Handler handler = new Handler((Message message) -> {
@@ -157,9 +157,9 @@ public class MainActivity extends AppCompatActivity {
             new Thread(() -> {
                 ExperimentRunner experimentRunner = new ExperimentRunner(qv.getOperators());
                 long startTime = System.currentTimeMillis();
-                float[] probabilities = experimentRunner.runExperiment(shots, threads, handler, probabilityMode);
+                float[] probabilities = experimentRunner.runExperiment(shots, threads, handler, probabilityMode > 0);
                 Complex[] tempStateVector = null;
-                if (shots == 0 || probabilityMode) {
+                if (shots == 0 || probabilityMode > 0) {
                     tempStateVector = experimentRunner.getStateVector();
                 }
                 final Complex[] stateVector = tempStateVector;
@@ -235,7 +235,6 @@ public class MainActivity extends AppCompatActivity {
             }).start();
         });
 
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         int help_shown = pref.getInt("help_shown", 0);
         if (help_shown < 5) {
             Snackbar.make(findViewById(R.id.parent2), R.string.click_to_start, Snackbar.LENGTH_LONG).show();
@@ -310,8 +309,8 @@ public class MainActivity extends AppCompatActivity {
             new Handler().postDelayed(() -> {
                 switch (item.getItemId()) {
                     case R.id.probability:
-                        navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setIcon(ContextCompat.getDrawable(MainActivity.this, probabilityMode ? R.drawable.alpha_p_circle_outline : R.drawable.alpha_p_circle));
-                        probabilityMode = !probabilityMode;
+                        navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setIcon(ContextCompat.getDrawable(MainActivity.this, probabilityMode > 0 ? R.drawable.alpha_p_circle_outline : R.drawable.alpha_p_circle));
+                        probabilityMode = 1 - probabilityMode;
                         break;
                     case R.id.prefs:
                         startActivity(new Intent(MainActivity.this, PreferenceActivity.class));
@@ -794,5 +793,14 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        if (probabilityMode != 1)
+            probabilityMode = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("shots", "1024").equals("0") ? 2 : 0;
+        navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setIcon(ContextCompat.getDrawable(MainActivity.this, probabilityMode == 0 ? R.drawable.alpha_p_circle_outline : R.drawable.alpha_p_circle));
+        navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setEnabled(probabilityMode != 2);
+        super.onResume();
     }
 }
