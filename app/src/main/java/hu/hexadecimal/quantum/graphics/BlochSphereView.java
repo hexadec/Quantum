@@ -13,8 +13,7 @@ import hu.hexadecimal.quantum.Qubit;
 
 public class BlochSphereView extends View {
 
-    Paint mPaint, otherPaint, textPaint;
-    int mPadding;
+    final Paint mPaint, otherPaint, textPaint;
 
     Qubit qb;
 
@@ -35,8 +34,6 @@ public class BlochSphereView extends View {
 
         otherPaint = new Paint();
         otherPaint.setStyle(Paint.Style.STROKE);
-
-        mPadding = (int) pxFromDp(context, 32);
     }
 
     public void setQBit(Qubit qb) {

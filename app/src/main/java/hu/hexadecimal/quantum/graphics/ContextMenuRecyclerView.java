@@ -1,5 +1,5 @@
-/**
- * Source: https://stackoverflow.com/questions/30078344/handle-on-item-long-click-on-recycler-view
+/*
+  Source: https://stackoverflow.com/questions/30078344/handle-on-item-long-click-on-recycler-view
  */
 package hu.hexadecimal.quantum.graphics;
 

@@ -27,9 +27,9 @@ import hu.hexadecimal.quantum.VisualOperator;
 
 public class QuantumView extends View {
 
-    Paint mPaint, otherPaint, outerPaint, mTextPaint, whiteTextPaint;
-    int mPadding;
-    Path mPath;
+    final Paint mPaint, otherPaint, outerPaint, mTextPaint, whiteTextPaint;
+    final int mPadding;
+    final Path mPath;
 
     private LinkedList<VisualOperator> gos;
     private short[] measuredQubits;

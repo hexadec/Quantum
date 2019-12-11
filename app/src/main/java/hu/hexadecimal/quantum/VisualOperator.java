@@ -23,11 +23,11 @@ public class VisualOperator implements Serializable {
      * Visual Quantum Gate
      */
     public static final String FILE_EXTENSION = ".vqg";
-    private int NQBITS;
+    private final int NQBITS;
     public int color = 0xff000000;
     public String name;
     private transient LinkedList<Rect> rectangle;
-    private int MATRIX_DIM;
+    private final int MATRIX_DIM;
     private int[] qubit_ids;
 
     public static final int HTML_MODE_BODY = 0b1;
@@ -225,11 +225,10 @@ public class VisualOperator implements Serializable {
 
     public VisualOperator() {
         random = new Random();
-        qubit_ids = new int[NQBITS];
+        qubit_ids = new int[NQBITS = 2];
         rectangle = new LinkedList<>();
         MATRIX_DIM = 4;
         name = "";
-        NQBITS = 2;
     }
 
     public String[] getSymbols() {
@@ -353,7 +352,7 @@ public class VisualOperator implements Serializable {
     /**
      * Default behaviour, using HTML_MODE_BODY
      *
-     * @return
+     * @return Matrix formatted to a table in HTML style
      */
     public String toStringHtmlTable() {
         return toStringHtmlTable(HTML_MODE_BODY);
@@ -616,7 +615,7 @@ public class VisualOperator implements Serializable {
     }
 
     public static String[] generateSymbols(int DIM) {
-        int NQBITS = 0;
+        int NQBITS;
         switch (DIM) {
             case 2:
                 NQBITS = 1;

@@ -503,7 +503,7 @@ public class MainActivity extends AppCompatActivity {
                                         filter.setEnabled(true);
                                         if (filter.getSelectedItemPosition() == 0) {
                                             ArrayAdapter<String> gateAdapter =
-                                                    new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
+                                                    new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
 
                                             gateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                             gateName.setAdapter(gateAdapter);
@@ -511,7 +511,7 @@ public class MainActivity extends AppCompatActivity {
                                             LinkedList<String> mGates = VisualOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
                                             Collections.sort(mGates);
                                             ArrayAdapter<String> gateAdapter =
-                                                    new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
+                                                    new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
 
                                             gateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                             gateName.setAdapter(gateAdapter);
@@ -571,7 +571,7 @@ public class MainActivity extends AppCompatActivity {
                             LinkedList<String> gates = VisualOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
                             Collections.sort(gates);
                             ArrayAdapter<String> adapter =
-                                    new ArrayAdapter<String>(MainActivity.this, android.R.layout.simple_spinner_item, filter.getSelectedItemPosition() == 0 ? mGates : gates);
+                                    new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, filter.getSelectedItemPosition() == 0 ? mGates : gates);
 
                             int qubits = gateType.getSelectedItemPosition() == 0 ? VisualOperator.findGateByName(adapter.getItem(i)).getQubits() : operators.get(i).getQubits();
                             switch (qubits) {

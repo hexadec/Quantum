@@ -14,8 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
-    private List<VisualOperator> operators;
-    private LayoutInflater mInflater;
+    private final List<VisualOperator> operators;
+    private final LayoutInflater mInflater;
     private ItemClickListener mClickListener;
     private ItemLongClickListener mLongClickListener;
 
@@ -60,10 +60,10 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // stores and recycles views as they are scrolled off screen
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener {
-        TextView gateName;
-        TextView gateSymbols;
-        WebView gateMatrix;
-        View color;
+        final TextView gateName;
+        final TextView gateSymbols;
+        final WebView gateMatrix;
+        final View color;
 
         ViewHolder(View itemView) {
             super(itemView);

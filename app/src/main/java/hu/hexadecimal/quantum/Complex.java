@@ -167,7 +167,7 @@ public class Complex implements Serializable {
     /**
      * Converts the complex number to a string with a precision of at most 8 decimal places
      *
-     * @return
+     * @return number as a string
      */
     @Override
     public String toString() {
@@ -182,7 +182,7 @@ public class Complex implements Serializable {
     /**
      * Converts the complex number to a string with a precision of 3 decimal places
      *
-     * @return
+     * @return number as a string
      */
     public String toString3Decimals() {
         StringBuilder sb = new StringBuilder();
@@ -206,7 +206,7 @@ public class Complex implements Serializable {
     /**
      * Converts the complex number to a string with a precision of 5 decimal places
      *
-     * @return
+     * @return number as a string
      */
     public String toString5Decimals() {
         StringBuilder sb = new StringBuilder();
@@ -230,7 +230,7 @@ public class Complex implements Serializable {
     /**
      * Converts the complex number to a string in modulus-argument form with a precision of 8 decimal places
      *
-     * @return
+     * @return number as a string
      */
     public String toStringModArg() {
         StringBuilder sb = new StringBuilder();
@@ -244,7 +244,7 @@ public class Complex implements Serializable {
     /**
      * Converts the complex number to a string in modulus-argument form with a precision of 3 decimal places
      *
-     * @return
+     * @return number as a string
      */
     public String toStringModArg3Decimals() {
         StringBuilder sb = new StringBuilder();
