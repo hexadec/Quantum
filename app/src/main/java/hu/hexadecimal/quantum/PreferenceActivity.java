@@ -1,10 +1,12 @@
 package hu.hexadecimal.quantum;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.text.Html;
+import android.view.Window;
 
 import androidx.documentfile.provider.DocumentFile;
 
@@ -14,6 +16,10 @@ public class PreferenceActivity extends android.preference.PreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.preferences);
+
+        Window window = getWindow();
+        window.setStatusBarColor(Color.parseColor("#171717"));
+
         Preference saveLoc = findPreference("save_loc");
         Preference halp = findPreference("help");
         halp.setSummary(Html.fromHtml(getString(R.string.settings_help_long)));

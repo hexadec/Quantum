@@ -32,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.Button;
 import android.widget.SeekBar;
 
@@ -55,6 +56,11 @@ public class MatrixEditorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_matrix_editor);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#171717")));
+        Window window = getWindow();
+        window.setStatusBarColor(Color.parseColor("#171717"));
+
         new Thread(() -> {
 
             operators = new ArrayList<>();

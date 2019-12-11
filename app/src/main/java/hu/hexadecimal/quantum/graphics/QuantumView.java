@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import androidx.core.graphics.PaintCompat;
+import hu.hexadecimal.quantum.GateSequence;
 import hu.hexadecimal.quantum.VisualOperator;
 
 public class QuantumView extends View {
@@ -45,6 +46,7 @@ public class QuantumView extends View {
     public final float UNIT;
     public final float START_Y;
 
+    public String name = "";
 
     public QuantumView(Context context) {
         super(context);
@@ -327,11 +329,12 @@ public class QuantumView extends View {
         return dp * context.getResources().getDisplayMetrics().density;
     }
 
-    public byte[] exportGates() {
+    public byte[] exportGates(String name) {
+        this.name = name;
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ObjectOutput output = new ObjectOutputStream(byteArrayOutputStream);
-            output.writeObject(gos);
+            output.writeObject(new GateSequence(gos, name));
             output.flush();
             return byteArrayOutputStream.toByteArray();
         } catch (Exception e) {
@@ -342,6 +345,9 @@ public class QuantumView extends View {
 
     public boolean importGates(Object input) {
         try {
+            if (input instanceof GateSequence && ((GateSequence<Object>) input).getFirst() instanceof VisualOperator) {
+                this.name = ((GateSequence<Object>) input).getName();
+            }
             if (input instanceof LinkedList && ((LinkedList<Object>) input).getFirst() instanceof VisualOperator) {
                 gos = new LinkedList<>();
                 measuredQubits = new short[MAX_QUBITS];

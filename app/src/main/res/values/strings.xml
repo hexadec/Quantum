@@ -75,4 +75,5 @@
     <string name="previous_qubit">Prev. qubit</string>
     <string name="long_click_to_delete">Long click on gates to delete them</string>
     <string name="save">Save</string>
+    <string name="select_filename">Choose a filename</string>
 </resources>

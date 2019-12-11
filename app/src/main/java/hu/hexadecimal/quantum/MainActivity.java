@@ -16,6 +16,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -32,6 +35,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
@@ -688,36 +692,64 @@ public class MainActivity extends AppCompatActivity {
                         Snackbar.make(findViewById(R.id.parent2), getString(R.string.no_gates), Snackbar.LENGTH_LONG).show();
                         return true;
                     }
-                    try {
-                        Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
-                        DocumentFile pickedDir = DocumentFile.fromTreeUri(MainActivity.this, uri);
-                        if (!pickedDir.exists()) {
-                            getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                            pickedDir = null;
+                    SimpleDateFormat sdf = new SimpleDateFormat("'exp'_yyyy-MM-dd_HHmmss'" + QuantumView.FILE_EXTENSION + "'", Locale.UK);
+                    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    String filename = sdf.format(new Date());
+                    AlertDialog.Builder adb = new AlertDialog.Builder(this);
+                    adb.setTitle(R.string.select_filename);
+                    LinearLayout container = new LinearLayout(this);
+                    container.setOrientation(LinearLayout.VERTICAL);
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+                    params.setMargins((int) QuantumView.pxFromDp(this, 20), 0, (int) QuantumView.pxFromDp(this, 20), 0);
+                    EditText editText = new EditText(this);
+                    InputFilter[] filterArray = new InputFilter[]{new InputFilter.LengthFilter(32), (CharSequence source, int start, int end, Spanned dest, int sta, int en) -> {
+                            if (source != null && "/\\:?;!~\'\",^ˇ|+<>[]{}".contains(("" + source))) {
+                                return "";
+                            }
+                            return null;
                         }
-                        SimpleDateFormat sdf = new SimpleDateFormat("'experiment'_yyyy-MM-dd_HH-mm-ss'" + QuantumView.FILE_EXTENSION + "'", Locale.UK);
-                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-                        String filename = sdf.format(new Date());
-                        DocumentFile newFile = pickedDir.createFile("application/octet-stream", filename);
-                        OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                        out.write(qv.exportGates());
-                        out.flush();
-                        out.close();
-                        Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + filename, Snackbar.LENGTH_LONG).show();
-                    } catch (IndexOutOfBoundsException iout) {
-                        iout.printStackTrace();
-                        Snackbar.make(findViewById(R.id.parent2), R.string.choose_save_location, Snackbar.LENGTH_LONG)
-                                .setAction(R.string.select, (View view2) ->
-                                        startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), 43)).show();
+                    };
+                    editText.setText(qv.name);
+                    editText.setFilters(filterArray);
+                    editText.setHint(filename);
+                    editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_CLASS_TEXT);
+                    container.addView(editText, params);
+                    adb.setView(container);
+                    adb.setPositiveButton(R.string.save, (DialogInterface dialogInterface, int i) -> {
+                        try {
+                            qv.name = editText.getText().toString().length() < 1 ? filename : editText.getText().toString();
+                            if (!qv.name.endsWith(QuantumView.FILE_EXTENSION)) {
+                                qv.name += QuantumView.FILE_EXTENSION;
+                            }
+                            Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
+                            DocumentFile pickedDir = DocumentFile.fromTreeUri(MainActivity.this, uri);
+                            if (!pickedDir.exists()) {
+                                getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                pickedDir = null;
+                            }
+                            DocumentFile newFile = pickedDir.findFile(qv.name) == null ? pickedDir.createFile("application/octet-stream", qv.name) : pickedDir.findFile(qv.name);
+                            OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
+                            out.write(qv.exportGates(qv.name));
+                            out.flush();
+                            out.close();
+                            Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG).show();
+                        } catch (IndexOutOfBoundsException iout) {
+                            iout.printStackTrace();
+                            Snackbar.make(findViewById(R.id.parent2), R.string.choose_save_location, Snackbar.LENGTH_LONG)
+                                    .setAction(R.string.select, (View view2) ->
+                                            startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), 43)).show();
 
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
-                        snackbar.getView().setBackgroundColor(0xffD81010);
-                        snackbar.show();
-                    }
-                    saved = true;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
+                            snackbar.getView().setBackgroundColor(0xffD81010);
+                            snackbar.show();
+                        }
+                        saved = true;
+                    });
+                    adb.setNeutralButton(R.string.cancel, null);
+                    adb.show();
                     break;
                 default:
 
@@ -765,7 +797,7 @@ public class MainActivity extends AppCompatActivity {
                 String filename = sdf.format(new Date());
                 DocumentFile newFile = pickedDir.createFile("application/octet-stream", filename);
                 OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                out.write(qv.exportGates());
+                out.write(qv.exportGates(qv.name));
                 out.flush();
                 out.close();
                 Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + filename, Snackbar.LENGTH_LONG).show();

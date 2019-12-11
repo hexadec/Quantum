@@ -4,8 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Window;
 import android.webkit.WebView;
 
 import java.io.BufferedReader;
@@ -23,6 +26,10 @@ public class HelpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_help);
         WebView webView = new WebView(HelpActivity.this);
         ((ConstraintLayout) findViewById(R.id.help_parent)).addView(webView);
+
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#171717")));
+        Window window = getWindow();
+        window.setStatusBarColor(Color.parseColor("#171717"));
 
         webView.postDelayed(() ->
                 new Thread(() ->
