@@ -40,6 +40,8 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -141,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton execute = findViewById(R.id.fab_matrix);
         final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         execute.setOnClickListener((View view) -> {
-            final int shots = Integer.valueOf(pref.getString("shots", "1024"));
+            final int shots = Integer.valueOf(pref.getString("shots", "4096"));
             final int threads = Integer.valueOf(pref.getString("threads", "8"));
             final Handler handler = new Handler((Message message) -> {
                 try {
@@ -213,20 +215,43 @@ public class MainActivity extends AppCompatActivity {
                     });
                     adb.setTitle(getString(R.string.results) + ": \t" + t);
                     ScrollView scrollView = new ScrollView(MainActivity.this);
-                    TextView textView = new TextView(MainActivity.this);
-                    textView.setTypeface(Typeface.MONOSPACE);
+                    TableLayout tableLayout = new TableLayout(MainActivity.this);
+                    float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+                    int decimalPoints = dpWidth < 330 ? 3 : dpWidth < 350 ? 4 : dpWidth > 385 ? 6 : 5;
+                    String decimals = new String(new char[decimalPoints]).replace("\0", "#");
+                    tableLayout.setPadding(0, (int) QuantumView.pxFromDp(this, 10), 0, (int) QuantumView.pxFromDp(this, 10));
                     short[] measuredQubits = qv.getMeasuredQubits();
-                    DecimalFormat df = new DecimalFormat(stateVector == null ? "0.0########" : "0.00000");
+                    DecimalFormat df = new DecimalFormat(stateVector == null ? "0.########" : "0." + decimals);
                     outerFor:
                     for (int i = 0; i < probabilities.length; i++) {
+                        TableRow tr = new TableRow(MainActivity.this);
                         for (int j = 0; j < measuredQubits.length; j++) {
                             if (measuredQubits[j] < 1 && (i >> j) % 2 == 1) {
                                 continue outerFor;
                             }
                         }
-                        textView.setText(textView.getText() + "\n\u2003" + String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + ": " + df.format(probabilities[i]) + (stateVector != null ? "\u2003\u2003" + stateVector[i].toString5Decimals() : ""));
+                        TableRow.LayoutParams params = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
+                        params.setMargins((int) QuantumView.pxFromDp(this, 12), 0, 0, 0);
+                        TextView[] textView = new TextView[]{
+                                new TextView(MainActivity.this),
+                                new TextView(MainActivity.this),
+                                new TextView(MainActivity.this)};
+                        textView[0].setTypeface(Typeface.DEFAULT_BOLD);
+                        textView[0].setText(String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0'));
+                        textView[0].setLayoutParams(params);
+                        textView[1].setTypeface(Typeface.MONOSPACE);
+                        textView[1].setText(df.format(probabilities[i]));
+                        textView[1].setLayoutParams(params);
+                        textView[2].setTypeface(Typeface.MONOSPACE);
+                        textView[2].setText((stateVector != null ? stateVector[i].toString(decimalPoints) : ""));
+                        textView[2].setLayoutParams(params);
+                        tr.addView(textView[0]);
+                        tr.addView(textView[1]);
+                        tr.addView(textView[2]);
+                        tableLayout.addView(tr);
+                        //textView.setText(textView.getText() + "\n\u2003" + String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + "\u2003" + df.format(probabilities[i]) + (stateVector != null ? "\u2003\u2003" + stateVector[i].toString5Decimals() : ""));
                     }
-                    scrollView.addView(textView);
+                    scrollView.addView(tableLayout);
                     adb.setView(scrollView);
                     adb.show();
                     try {
@@ -699,15 +724,15 @@ public class MainActivity extends AppCompatActivity {
                     adb.setTitle(R.string.select_filename);
                     LinearLayout container = new LinearLayout(this);
                     container.setOrientation(LinearLayout.VERTICAL);
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,LinearLayout.LayoutParams.WRAP_CONTENT);
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                     params.setMargins((int) QuantumView.pxFromDp(this, 20), 0, (int) QuantumView.pxFromDp(this, 20), 0);
                     EditText editText = new EditText(this);
                     InputFilter[] filterArray = new InputFilter[]{new InputFilter.LengthFilter(32), (CharSequence source, int start, int end, Spanned dest, int sta, int en) -> {
-                            if (source != null && "/\\:?;!~\'\",^ˇ|+<>[]{}".contains(("" + source))) {
-                                return "";
-                            }
-                            return null;
+                        if (source != null && "/\\:?;!~\'\",^ˇ|+<>[]{}".contains(("" + source))) {
+                            return "";
                         }
+                        return null;
+                    }
                     };
                     editText.setText(qv.name);
                     editText.setFilters(filterArray);
@@ -830,7 +855,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         if (probabilityMode != 1)
-            probabilityMode = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("shots", "1024").equals("0") ? 2 : 0;
+            probabilityMode = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("shots", "4096").equals("0") ? 2 : 0;
         navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setIcon(ContextCompat.getDrawable(MainActivity.this, probabilityMode == 0 ? R.drawable.alpha_p_circle_outline : R.drawable.alpha_p_circle));
         navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setEnabled(probabilityMode != 2);
         super.onResume();

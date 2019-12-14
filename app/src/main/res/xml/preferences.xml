@@ -3,7 +3,7 @@
 
     <PreferenceCategory android:title="@string/execution_settings">
         <ListPreference
-            android:defaultValue="1024"
+            android:defaultValue="4096"
             android:entries="@array/shots"
             android:entryValues="@array/shots_values"
             android:icon="@drawable/counter"

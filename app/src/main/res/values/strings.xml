@@ -29,6 +29,7 @@
     <string name="matrix_editor_detailed">Create and edit custom gates</string>
     <string name="gate_name">Gate name</string>
     <string name="symbols_hint">Symbols, eg: S,X,D</string>
+    <string name="invalid_symbol">A symbol must be 1&#8211;3 characters</string>
     <string name="matrix">Matrix</string>
     <string name="choose_qubit_number">Number of qubits 1&#8211;4</string>
     <string name="edit_gate">Edit gate</string>

@@ -191,6 +191,13 @@ public class MatrixEditorActivity extends AppCompatActivity {
                     } else {
                         disableErr(0);
                     }
+                    for (String symbol : symbols) {
+                        if (symbol.length() == 0 || symbol.length() > 3) {
+                            showErr(5);
+                            return;
+                        }
+                    }
+                    disableErr(1);
                     String[] tempMatrix = matrixEditText.getText().toString().replace(" ", "").split("\n");
                     String[][] strMatrix = new String[DIM][DIM];
                     if (symbols.length != qs) {
@@ -312,7 +319,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                     nameEditText.setText(overridden.getName());
                     nameEditText.setEnabled(false);
                     symbolsEditText.setText(TextUtils.join(",", overridden.getSymbols()));
-                    matrixEditText.setText(overridden.toString5Decimals());
+                    matrixEditText.setText(overridden.toString(6));
                 }
             }
 
@@ -333,6 +340,9 @@ public class MatrixEditorActivity extends AppCompatActivity {
                         break;
                     case 4:
                         ((TextInputLayout) v.findViewById(R.id.editText3)).setError(getString(R.string.invalid_matrix));
+                        break;
+                    case 5:
+                        ((TextInputLayout) v.findViewById(R.id.symbols)).setError(getString(R.string.invalid_symbol));
                         break;
                     default:
                         break;

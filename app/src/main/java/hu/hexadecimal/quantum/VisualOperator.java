@@ -335,11 +335,12 @@ public class VisualOperator implements Serializable {
         }
         return sb.toString();
     }
-    public String toString5Decimals() {
+
+    public String toString(int decimals) {
         StringBuilder sb = new StringBuilder();
         for (Complex[] c : matrix) {
             for (Complex z : c) {
-                sb.append(z.toString5Decimals());
+                sb.append(z.toString(decimals));
                 sb.append(",");
             }
             sb.deleteCharAt(sb.length() - 1);

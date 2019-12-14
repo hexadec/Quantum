@@ -204,19 +204,20 @@ public class Complex implements Serializable {
     }
 
     /**
-     * Converts the complex number to a string with a precision of 5 decimal places
-     *
-     * @return number as a string
+     * Converts the Complex number to a string
+     * @param decimals how many decimal places should the re and im parts have
+     * @return the Complex number formatted as x+yi
      */
-    public String toString5Decimals() {
+    public String toString(int decimals) {
+        String decimalChars = new String(new char[decimals]).replace("\0", "#");
         StringBuilder sb = new StringBuilder();
-        if (Math.abs(real) >= 0.000005) {
+        if (Math.abs(real) >= Math.pow(10, -1 * (decimals + 1)) * 5) {
             if (real >= 0) sb.append('+');
-            sb.append(new DecimalFormat("0.00###", new DecimalFormatSymbols(Locale.UK)).format(real));
+            sb.append(new DecimalFormat("0." + decimalChars, new DecimalFormatSymbols(Locale.UK)).format(real));
         }
-        if (Math.abs(imaginary) >= 0.000005) {
+        if (Math.abs(imaginary) >= Math.pow(10, -1 * (decimals + 1)) * 5) {
             sb.append(imaginary < 0 ? "-" : sb.length() > 0 ? "+" : "");
-            String im = new DecimalFormat("0.00###", new DecimalFormatSymbols(Locale.UK)).format(Math.abs(imaginary));
+            String im = new DecimalFormat("0." + decimalChars, new DecimalFormatSymbols(Locale.UK)).format(Math.abs(imaginary));
             if (!im.equals("1"))
                 sb.append(im);
             sb.append('i');

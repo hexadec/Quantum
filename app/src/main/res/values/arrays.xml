@@ -3,19 +3,18 @@
     <string-array name="shots">
         <item>Always use probability mode</item>
         <item>Pick a single outcome</item>
-        <item>128</item>
         <item>512</item>
         <item>1K</item>
-        <item>4K</item>
+        <item>4K (default)</item>
         <item>16K</item>
         <item>64K</item>
         <item>256K</item>
         <item>1M</item>
+        <item>8M (really slow)</item>
     </string-array>
     <string-array name="shots_values">
         <item>0</item>
         <item>1</item>
-        <item>128</item>
         <item>512</item>
         <item>1024</item>
         <item>4096</item>
@@ -23,6 +22,7 @@
         <item>65536</item>
         <item>262144</item>
         <item>1048576</item>
+        <item>8388608</item>
     </string-array>
     <string-array name="threads">
         <item>Single thread (not recommended)</item>

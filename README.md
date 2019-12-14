@@ -21,6 +21,7 @@ A software for Android that emulates the actions of a quantum computer
 - Export results
 - Import / Export gate sequence
 - Show bloch sphere
+- Display the final state-vector of the system
 
 ### Predefined Gates
 ##### Single Qubit
@@ -45,6 +46,6 @@ A software for Android that emulates the actions of a quantum computer
 ###### Planned features
 Create and run algorithms with loops and conditions  
 Apply rotation gates with custom angles more easily  
-Display the final state-vector of the system
+Display the final unitary matrix of the system
 
 (C) All rights reserved! (for now)
