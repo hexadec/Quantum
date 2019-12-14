@@ -12,15 +12,34 @@
         td {
             text-align: center;
         }
-
         </style>
     </head>
     <body>
-        <h3>
+        <p style="font-size:20px">
             <strong>Quantum Computing for Android</strong>
-        </h3>
-        <p>
-            <em>Single Qubit gates</em>
+        </p>
+        <h4>
+            <strong>Quantum Logic Gates</strong>
+        </h4>
+        <p style="text-align: justify;">
+            Quantum logic gates (QLGs) &ndash; similarly to classical logic gates &ndash; perform
+            some operation on one or more qubits that changes their value. These logic gates can
+            be divided into two main groups,
+            based on how many qubits are involved in the operation. An important property of QLGs
+            is that they are reversible, which means that no information is lost when we use them.
+            From this, it follows that they have an equal number of inputs and outputs.
+            <br />
+            In order to use these gates on your virtual qubits
+            in this app, you need to choose first a gate then select which qubits should be affected
+            by it.
+            <br />
+            Please note that for now, these gates are ideal, in contrast with real quantum gates
+            that have some noise (a certain probability that they will
+            <i>not</i>
+            work as intended).
+        </p>
+        <p style="font-size:18px">
+            <i>Single Qubit Gates</i>
         </p>
         <p style="text-align: justify;">
             <strong>Hadamard</strong>
@@ -62,10 +81,12 @@
             <br />The identity matrix keeps the qubit in its current state (i.e does nothing).
         </p>
         <p>&lt;Imatrix&gt;</p>
+        <br />
+        <p style="font-size:18px">
+            <i>Multi Qubit Gates</i>
+        </p>
         <p style="text-align: justify;">
-            <br />
-            <em>Multi Qubit gates</em>
-            <br />Multi qubit gates act on a pair or more qubits, and usually they have one or more
+            Multi qubit gates act on a pair or more qubits, and usually they have one or more
             control and target qubits. A control qubit influences how the gate will act on the
             target
             qubit. Sometimes, however, both qubits are equal, eg. in the SWAP gate.

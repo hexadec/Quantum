@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 public class VisualOperator implements Serializable {
 
     public static final long serialVersionUID = 2L;
-    public static final transient long helpVersion = 3L;
+    public static final transient long helpVersion = 9L;
     private Complex[][] matrix;
     private String[] symbols;
     private Random random;
@@ -540,7 +540,7 @@ public class VisualOperator implements Serializable {
         double[] probs = new double[qubitArray.length];
         double subtrahend = 0;
         for (int i = 0; i < qubitArray.length; i++) {
-            probs[i] = Complex.multiply(Complex.conjugate(qubitArray[i]), qubitArray[i]).real;
+            probs[i] = Math.pow(qubitArray[i].mod(), 2);
         }
         for (int i = 0; i < qubitArray.length; i++) {
             double prob = random.nextDouble();
@@ -565,7 +565,7 @@ public class VisualOperator implements Serializable {
     public static float[] measureProbabilities(final Complex[] qubitArray) {
         float[] probs = new float[qubitArray.length];
         for (int i = 0; i < qubitArray.length; i++) {
-            probs[i] = (float) Complex.multiply(Complex.conjugate(qubitArray[i]), qubitArray[i]).real;
+            probs[i] = (float) Math.pow(qubitArray[i].mod(), 2);
         }
         return probs;
     }

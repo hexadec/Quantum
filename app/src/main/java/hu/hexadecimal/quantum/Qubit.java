@@ -43,6 +43,10 @@ public class Qubit {
         return value;
     }
 
+    public boolean dirtyStateCheck() {
+        return matrix[1].real == 1;
+    }
+
     public void applyOperator(VisualOperator visualOperator) throws IllegalArgumentException {
         if (visualOperator.isMultiQubit()) throw new IllegalArgumentException("Only SQG are allowed here!");
         matrix = visualOperator.operateOn(new Qubit[]{this})[0].copy().matrix;

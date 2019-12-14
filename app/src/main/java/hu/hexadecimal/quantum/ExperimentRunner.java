@@ -62,13 +62,10 @@ public class ExperimentRunner {
                         qubits = vm.measure(quArray, qubits.length);
                         int cprob = 0;
                         for (int k = 0; k < qubits.length; k++) {
-                            cprob += qubits[k].measureZ() ? 1 << (qubits.length - k - 1) : 0;
-                        }
-                        for (int k = 0; k < qubits.length; k++) {
-                            qubits[k] = new Qubit();
+                            cprob += qubits[k].dirtyStateCheck() ? 1 << (qubits.length - k - 1) : 0;
                         }
                         sprobs[cprob][t_id]++;
-                        status++;
+                        if ((j + 1) % 10 == 0) status += 10;
                     }
                 });
                 t[i].start();
