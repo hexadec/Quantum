@@ -49,6 +49,10 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.snackbar.Snackbar;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
@@ -140,9 +144,10 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(intent, 42);
         });
 
+
         FloatingActionButton execute = findViewById(R.id.fab_matrix);
         final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
-        execute.setOnClickListener((View view) -> {
+        execute.postDelayed(() -> execute.setOnClickListener((View view) -> {
             final int shots = Integer.valueOf(pref.getString("shots", "4096"));
             final int threads = Integer.valueOf(pref.getString("threads", "8"));
             final Handler handler = new Handler((Message message) -> {
@@ -262,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
             }).start();
-        });
+        }), 200);
 
         int help_shown = pref.getInt("help_shown", 0);
         if (help_shown < 5) {
@@ -454,12 +459,22 @@ public class MainActivity extends AppCompatActivity {
 
                     for (DocumentFile file : pickedDir.listFiles()) {
                         try {
-                            if (file.getName().endsWith(VisualOperator.FILE_EXTENSION)) {
+                            if (file.getName().endsWith(VisualOperator.FILE_EXTENSION_LEGACY)) {
                                 ObjectInputStream oi = new ObjectInputStream(getContentResolver().openInputStream(file.getUri()));
                                 VisualOperator m = (VisualOperator) oi.readObject();
                                 oi.close();
-                                operators.add(m);
                                 operatorNames.add(m.getName());
+                                operators.add(m);
+                            } else if (file.getName().endsWith(VisualOperator.FILE_EXTENSION)) {
+                                BufferedReader in = new BufferedReader(new InputStreamReader(getContentResolver().openInputStream(file.getUri())));
+                                StringBuilder total = new StringBuilder();
+                                for (String line; (line = in.readLine()) != null; ) {
+                                    total.append(line).append('\n');
+                                }
+                                String json = total.toString();
+                                VisualOperator m = VisualOperator.fromJSON(new JSONObject(json));
+                                operatorNames.add(m.getName());
+                                operators.add(m);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -755,7 +770,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                             DocumentFile newFile = pickedDir.findFile(qv.name) == null ? pickedDir.createFile("application/octet-stream", qv.name) : pickedDir.findFile(qv.name);
                             OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                            out.write(qv.exportGates(qv.name));
+                            out.write(qv.exportGates(qv.name).toString().getBytes());
                             out.flush();
                             out.close();
                             Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG).show();
@@ -791,9 +806,22 @@ public class MainActivity extends AppCompatActivity {
             Uri uri = resultData.getData();
             DocumentFile pickedFile = DocumentFile.fromSingleUri(this, uri);
             try {
-                if (pickedFile.getName().endsWith(QuantumView.FILE_EXTENSION)) {
+                if (pickedFile.getName().endsWith(QuantumView.FILE_EXTENSION_LEGACY)) {
                     Object obj = new ObjectInputStream(getContentResolver().openInputStream(pickedFile.getUri())).readObject();
-                    if (!qv.importGates(obj)) {
+                    if (!qv.importGatesLegacy(obj)) {
+                        throw new Exception("Maybe empty gate sequence?");
+                    } else {
+                        saved = true;
+                        Snackbar.make(findViewById(R.id.parent2), R.string.successfully_imported, Snackbar.LENGTH_LONG).show();
+                    }
+                } else if (pickedFile.getName().endsWith(QuantumView.FILE_EXTENSION)) {
+                    BufferedReader in = new BufferedReader(new InputStreamReader(getContentResolver().openInputStream(pickedFile.getUri())));
+                    StringBuilder total = new StringBuilder();
+                    for (String line; (line = in.readLine()) != null; ) {
+                        total.append(line).append('\n');
+                    }
+                    String json = total.toString();
+                    if (!qv.importGates(new JSONObject(json))) {
                         throw new Exception("Maybe empty gate sequence?");
                     } else {
                         saved = true;
@@ -817,15 +845,12 @@ public class MainActivity extends AppCompatActivity {
                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             DocumentFile pickedDir = DocumentFile.fromTreeUri(this, treeUri);
             try {
-                SimpleDateFormat sdf = new SimpleDateFormat("'experiment'_yyyy-MM-dd_HH-mm-ss'" + QuantumView.FILE_EXTENSION + "'", Locale.UK);
-                sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-                String filename = sdf.format(new Date());
-                DocumentFile newFile = pickedDir.createFile("application/octet-stream", filename);
+                DocumentFile newFile = pickedDir.createFile("application/octet-stream", qv.name);
                 OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                out.write(qv.exportGates(qv.name));
+                out.write(qv.exportGates(qv.name).toString().getBytes());
                 out.flush();
                 out.close();
-                Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + filename, Snackbar.LENGTH_LONG).show();
+                Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG).show();
             } catch (Exception e) {
                 e.printStackTrace();
                 Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);

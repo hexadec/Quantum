@@ -36,8 +36,11 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.SeekBar;
 
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -75,9 +78,17 @@ public class MatrixEditorActivity extends AppCompatActivity {
 
                 for (DocumentFile file : pickedDir.listFiles()) {
                     try {
-                        if (file.getName().endsWith(VisualOperator.FILE_EXTENSION)) {
+                        if (file.getName().endsWith(VisualOperator.FILE_EXTENSION_LEGACY)) {
                             VisualOperator m = (VisualOperator) new ObjectInputStream(getContentResolver().openInputStream(file.getUri())).readObject();
                             operators.add(m);
+                        } else if (file.getName().endsWith(VisualOperator.FILE_EXTENSION)) {
+                            BufferedReader in = new BufferedReader(new InputStreamReader(getContentResolver().openInputStream(file.getUri())));
+                            StringBuilder total = new StringBuilder();
+                            for (String line; (line = in.readLine()) != null; ) {
+                                total.append(line).append('\n');
+                            }
+                            String json = total.toString();
+                            operators.add(VisualOperator.fromJSON(new JSONObject(json)));
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -234,11 +245,21 @@ public class MatrixEditorActivity extends AppCompatActivity {
                         return;
                     }
                     try {
-                        DocumentFile newFile = overridden == null ? pickedDir.createFile("application/octet-stream", name + VisualOperator.FILE_EXTENSION) : pickedDir.findFile(name + VisualOperator.FILE_EXTENSION);
+                        DocumentFile newFile;
+                        if (overridden == null) {
+                            newFile = pickedDir.createFile("application/json", name + VisualOperator.FILE_EXTENSION);
+                        } else {
+                            DocumentFile df = pickedDir.findFile(name + VisualOperator.FILE_EXTENSION);
+                            if (df == null) {
+                                newFile = pickedDir.createFile("application/json", name + VisualOperator.FILE_EXTENSION);
+                                pickedDir.findFile(name + VisualOperator.FILE_EXTENSION_LEGACY).delete();
+                            } else {
+                                newFile = df;
+                            }
+                        }
                         OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                        ObjectOutputStream out2 = new ObjectOutputStream(out);
-                        out2.writeObject(v);
-                        out2.close();
+                        out.write(v.toJSON().toString().getBytes());
+                        out.flush();
                         out.close();
                     } catch (Exception e) {
                         e.printStackTrace();

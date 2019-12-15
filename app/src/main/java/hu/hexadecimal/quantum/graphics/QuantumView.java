@@ -15,6 +15,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import org.json.JSONObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
@@ -38,7 +40,11 @@ public class QuantumView extends View {
     /**
      * VIsual QUantum-gate Sequence
      */
-    public static final String FILE_EXTENSION = ".viqus";
+    public static final String FILE_EXTENSION_LEGACY = ".viqus";
+    /**
+     * Quantum Sequence File
+     */
+    public static final String FILE_EXTENSION = ".qsf";
 
     public static final int STEP = 70;
     public static final int MAX_QUBITS = 8;
@@ -329,12 +335,12 @@ public class QuantumView extends View {
         return dp * context.getResources().getDisplayMetrics().density;
     }
 
-    public byte[] exportGates(String name) {
+    public byte[] exportGatesLegacy(String name) {
         this.name = name;
         try {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             ObjectOutput output = new ObjectOutputStream(byteArrayOutputStream);
-            output.writeObject(new GateSequence(gos, name));
+            output.writeObject(new GateSequence<VisualOperator>(gos, name));
             output.flush();
             return byteArrayOutputStream.toByteArray();
         } catch (Exception e) {
@@ -343,7 +349,33 @@ public class QuantumView extends View {
         }
     }
 
-    public boolean importGates(Object input) {
+    public JSONObject exportGates(String name) {
+        try {
+            return new GateSequence<VisualOperator>(gos, name).toJSON();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public boolean importGates(JSONObject input) {
+        try {
+            GateSequence<VisualOperator> visualOperators = GateSequence.fromJSON(input);
+            this.name = visualOperators.getName();
+            gos = new LinkedList<>();
+            measuredQubits = new short[MAX_QUBITS];
+            for (VisualOperator vo : ((LinkedList<VisualOperator>) visualOperators)) {
+                addGate(vo.getQubitIDs(), vo);
+            }
+            invalidate();
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean importGatesLegacy(Object input) {
         try {
             if (input instanceof GateSequence && ((GateSequence<Object>) input).getFirst() instanceof VisualOperator) {
                 this.name = ((GateSequence<Object>) input).getName();

@@ -3,6 +3,10 @@ package hu.hexadecimal.quantum;
 import android.graphics.Rect;
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.LinkedList;
@@ -22,7 +26,11 @@ public class VisualOperator implements Serializable {
     /**
      * Visual Quantum Gate
      */
-    public static final String FILE_EXTENSION = ".vqg";
+    public static final String FILE_EXTENSION_LEGACY = ".vqg";
+    /**
+     * Quantum Gate File
+     */
+    public static final transient String FILE_EXTENSION = ".qgf";
     private final int NQBITS;
     public int color = 0xff000000;
     public String name;
@@ -348,6 +356,60 @@ public class VisualOperator implements Serializable {
         }
         sb.deleteCharAt(sb.length() - 1);
         return sb.toString();
+    }
+
+    public JSONObject toJSON() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", name);
+        jsonObject.put("matrix_dim", MATRIX_DIM);
+        jsonObject.put("color", color);
+        jsonObject.put("qubit_count", NQBITS);
+        JSONArray qubits = new JSONArray();
+        JSONArray symbols = new JSONArray();
+        for (int i = 0; i < qubit_ids.length; i++) {
+            qubits.put(qubit_ids[i]);
+            symbols.put(this.symbols[i]);
+        }
+        jsonObject.put("qubits", qubits);
+        jsonObject.put("symbols", symbols);
+        for (int i = 0; i < matrix.length; i++) {
+            JSONArray jsonArray = new JSONArray();
+            for (int j = 0; j < matrix.length; j++) {
+                jsonArray.put(matrix[i][j].toString());
+            }
+            jsonObject.put("matrix_" + i, jsonArray);
+        }
+        return jsonObject;
+    }
+
+    public static VisualOperator fromJSON(JSONObject jsonObject) {
+        try {
+            String name = jsonObject.getString("name");
+            int matrix_dim = jsonObject.getInt("matrix_dim");
+            int color = jsonObject.getInt("color");
+            int qubit_count = jsonObject.getInt("qubit_count");
+            int[] qubits = new int[qubit_count];
+            String[] symbols = new String[qubit_count];
+            JSONArray qubitsJson = jsonObject.getJSONArray("qubits");
+            JSONArray symbolsJson = jsonObject.getJSONArray("symbols");
+            for (int i = 0; i < qubitsJson.length(); i++) {
+                qubits[i] = qubitsJson.getInt(i);
+                symbols[i] = symbolsJson.getString(i);
+            }
+            Complex[][] matrix = new Complex[matrix_dim][matrix_dim];
+            for (int i = 0; i < matrix_dim; i++) {
+                JSONArray row = jsonObject.getJSONArray("matrix_" + i);
+                for (int j = 0; j < matrix_dim; j++) {
+                    matrix[i][j] = Complex.parse(row.getString(j));
+                }
+            }
+            VisualOperator visualOperator = new VisualOperator(matrix_dim, matrix, name, symbols, color);
+            visualOperator.qubit_ids = qubits;
+            return visualOperator;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
