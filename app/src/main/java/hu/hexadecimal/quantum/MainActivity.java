@@ -780,7 +780,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                             DocumentFile newFile = pickedDir.findFile(qv.name) == null ? pickedDir.createFile("application/octet-stream", qv.name) : pickedDir.findFile(qv.name);
                             OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                            out.write(qv.exportGates(qv.name).toString().getBytes());
+                            out.write(qv.exportGates(qv.name).toString(2).getBytes());
                             out.flush();
                             out.close();
                             Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG).show();
@@ -818,7 +818,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 if (pickedFile.getName().endsWith(QuantumView.FILE_EXTENSION_LEGACY)) {
                     Object obj = new ObjectInputStream(getContentResolver().openInputStream(pickedFile.getUri())).readObject();
-                    if (!qv.importGatesLegacy(obj)) {
+                    if (!qv.importGatesLegacy(obj, pickedFile.getName())) {
                         throw new Exception("Maybe empty gate sequence?");
                     } else {
                         saved = true;
@@ -857,7 +857,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 DocumentFile newFile = pickedDir.createFile("application/octet-stream", qv.name);
                 OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                out.write(qv.exportGates(qv.name).toString().getBytes());
+                out.write(qv.exportGates(qv.name).toString(2).getBytes());
                 out.flush();
                 out.close();
                 Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG).show();

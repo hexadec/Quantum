@@ -395,15 +395,13 @@ public class QuantumView extends View {
         }
     }
 
-    public boolean importGatesLegacy(Object input) {
+    public boolean importGatesLegacy(Object input, String name) {
         try {
-            if (input instanceof GateSequence && ((GateSequence<Object>) input).getFirst() instanceof VisualOperator) {
-                this.name = ((GateSequence<Object>) input).getName();
-            }
             if (input instanceof LinkedList && ((LinkedList<Object>) input).getFirst() instanceof VisualOperator) {
                 gos = new LinkedList<>();
                 measuredQubits = new short[MAX_QUBITS];
                 invalidate();
+                this.name = name.substring(0, name.lastIndexOf('.') < 1 ? name.length() : name.lastIndexOf('.'));
             } else return false;
             for (VisualOperator vo : ((LinkedList<VisualOperator>) input)) {
                 addGate(vo.getQubitIDs(), vo);

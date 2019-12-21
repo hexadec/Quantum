@@ -259,7 +259,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                             }
                         }
                         OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                        out.write(v.toJSON().toString().getBytes());
+                        out.write(v.toJSON().toString(2).getBytes());
                         out.flush();
                         out.close();
                     } catch (Exception e) {

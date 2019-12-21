@@ -620,6 +620,22 @@ public class VisualOperator implements Serializable {
         return ret;
     }
 
+    public int measureFromProbabilities(final float[] probabilities) {
+        double subtrahend = 0;
+        for (int i = 0; i < probabilities.length; i++) {
+            double prob = random.nextDouble();
+            if (probabilities[i] > prob * (1 - subtrahend)) {
+                return i;
+            } else {
+                subtrahend += probabilities[i];
+                if (i == probabilities.length - 2) {
+                    subtrahend = 2;
+                }
+            }
+        }
+        return -1;
+    }
+
     public Qubit[] measure(final Complex[] qubitArray, int qubits) {
         double[] probs = new double[qubitArray.length];
         double subtrahend = 0;
