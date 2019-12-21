@@ -21,9 +21,9 @@
             android:title="@string/threads" />
 
         <Preference
-            android:key="save_loc"
             android:enabled="true"
             android:icon="@drawable/folder_home"
+            android:key="save_loc"
             android:title="@string/save_location" />
 
         <hu.hexadecimal.quantum.graphics.BigPreference
@@ -31,6 +31,25 @@
             android:key="help"
             android:summary="@string/settings_help_long"
             android:title="@string/settings_help" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/csv_settings">
+        <SwitchPreference
+            android:defaultValue="false"
+            android:enabled="true"
+            android:key="sci_form"
+            android:summary="@string/csv_number_format_long"
+            android:title="@string/csv_number_format" />
+
+        <ListPreference
+            android:defaultValue=","
+            android:enabled="true"
+            android:entries="@array/separator"
+            android:entryValues="@array/separator_value"
+            android:key="separator"
+            android:summary="%s"
+            android:title="@string/csv_separator" />
 
     </PreferenceCategory>
 </PreferenceScreen>

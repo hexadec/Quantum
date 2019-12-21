@@ -49,4 +49,14 @@
         <item>Single qubit gates only</item>
         <item>Multi qubit gates only</item>
     </string-array>
+    <string-array name="separator">
+        <item>Tab</item>
+        <item>Semicolon</item>
+        <item>Comma (default)</item>
+    </string-array>
+    <string-array name="separator_value">
+        <item>\t</item>
+        <item>;</item>
+        <item>,</item>
+    </string-array>
 </resources>

@@ -77,6 +77,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                 }
 
                 for (DocumentFile file : pickedDir.listFiles()) {
+                    if (file.isDirectory()) continue;
                     try {
                         if (file.getName().endsWith(VisualOperator.FILE_EXTENSION_LEGACY)) {
                             VisualOperator m = (VisualOperator) new ObjectInputStream(getContentResolver().openInputStream(file.getUri())).readObject();
@@ -247,11 +248,11 @@ public class MatrixEditorActivity extends AppCompatActivity {
                     try {
                         DocumentFile newFile;
                         if (overridden == null) {
-                            newFile = pickedDir.createFile("application/json", name + VisualOperator.FILE_EXTENSION);
+                            newFile = pickedDir.createFile("application/octet-stream", name + VisualOperator.FILE_EXTENSION);
                         } else {
                             DocumentFile df = pickedDir.findFile(name + VisualOperator.FILE_EXTENSION);
-                            if (df == null) {
-                                newFile = pickedDir.createFile("application/json", name + VisualOperator.FILE_EXTENSION);
+                            if (df == null || df.isDirectory()) {
+                                newFile = pickedDir.createFile("application/octet-stream", name + VisualOperator.FILE_EXTENSION);
                                 pickedDir.findFile(name + VisualOperator.FILE_EXTENSION_LEGACY).delete();
                             } else {
                                 newFile = df;

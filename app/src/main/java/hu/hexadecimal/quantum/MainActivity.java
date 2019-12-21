@@ -150,6 +150,8 @@ public class MainActivity extends AppCompatActivity {
         execute.postDelayed(() -> execute.setOnClickListener((View view) -> {
             final int shots = Integer.valueOf(pref.getString("shots", "4096"));
             final int threads = Integer.valueOf(pref.getString("threads", "8"));
+            final String separator = pref.getString("separator", ",");
+            final boolean scientific = pref.getBoolean("sci_form", false);
             final Handler handler = new Handler((Message message) -> {
                 try {
                     progressDialog.setMessage(MainActivity.this.getString(R.string.wait) + "\n" + message.what + "/" + shots);
@@ -166,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                 progressDialog = null;
             }
             new Thread(() -> {
-                ExperimentRunner experimentRunner = new ExperimentRunner(qv.getOperators());
+                ExperimentRunner experimentRunner = new ExperimentRunner(qv);
                 long startTime = System.currentTimeMillis();
                 float[] probabilities = experimentRunner.runExperiment(shots, threads, handler, probabilityMode > 0);
                 Complex[] tempStateVector = null;
@@ -190,17 +192,17 @@ public class MainActivity extends AppCompatActivity {
                                 pickedDir = null;
                             }
                             StringBuilder sb = new StringBuilder();
-                            DecimalFormat df = new DecimalFormat("0.########", new DecimalFormatSymbols(Locale.UK));
+                            DecimalFormat df = new DecimalFormat(scientific ? "0.########E0" : "0.##########", new DecimalFormatSymbols(Locale.UK));
                             for (int k = 0; k < probabilities.length; k++) {
                                 if (k != 0) sb.append("\r\n");
                                 sb.append(k);
-                                sb.append(',');
+                                sb.append(separator);
                                 sb.append(String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(k)).replace(' ', '0'));
-                                sb.append(',');
+                                sb.append(separator);
                                 sb.append(df.format(probabilities[k]));
                                 if (stateVector != null) {
-                                    sb.append(',');
-                                    sb.append(stateVector[k].toString());
+                                    sb.append(separator);
+                                    sb.append(stateVector[k].toString(10));
                                 }
                             }
                             SimpleDateFormat sdf = new SimpleDateFormat("'results'_yyyy-MM-dd_HH-mm-ss'.csv'", Locale.UK);
@@ -221,50 +223,58 @@ public class MainActivity extends AppCompatActivity {
                     adb.setTitle(getString(R.string.results) + ": \t" + t);
                     ScrollView scrollView = new ScrollView(MainActivity.this);
                     TableLayout tableLayout = new TableLayout(MainActivity.this);
-                    float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
-                    int decimalPoints = dpWidth < 330 ? 3 : dpWidth < 350 ? 4 : dpWidth > 385 ? 6 : 5;
-                    String decimals = new String(new char[decimalPoints]).replace("\0", "#");
                     tableLayout.setPadding(0, (int) QuantumView.pxFromDp(this, 10), 0, (int) QuantumView.pxFromDp(this, 10));
                     short[] measuredQubits = qv.getMeasuredQubits();
-                    DecimalFormat df = new DecimalFormat(stateVector == null ? "0.########" : "0." + decimals);
-                    outerFor:
-                    for (int i = 0; i < probabilities.length; i++) {
-                        TableRow tr = new TableRow(MainActivity.this);
-                        for (int j = 0; j < measuredQubits.length; j++) {
-                            if (measuredQubits[j] < 1 && (i >> j) % 2 == 1) {
-                                continue outerFor;
-                            }
-                        }
-                        TableRow.LayoutParams params = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
-                        params.setMargins((int) QuantumView.pxFromDp(this, 12), 0, 0, 0);
-                        TextView[] textView = new TextView[]{
-                                new TextView(MainActivity.this),
-                                new TextView(MainActivity.this),
-                                new TextView(MainActivity.this)};
-                        textView[0].setTypeface(Typeface.DEFAULT_BOLD);
-                        textView[0].setText(String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0'));
-                        textView[0].setLayoutParams(params);
-                        textView[1].setTypeface(Typeface.MONOSPACE);
-                        textView[1].setText(df.format(probabilities[i]));
-                        textView[1].setLayoutParams(params);
-                        textView[2].setTypeface(Typeface.MONOSPACE);
-                        textView[2].setText((stateVector != null ? stateVector[i].toString(decimalPoints) : ""));
-                        textView[2].setLayoutParams(params);
-                        tr.addView(textView[0]);
-                        tr.addView(textView[1]);
-                        tr.addView(textView[2]);
-                        tableLayout.addView(tr);
-                        //textView.setText(textView.getText() + "\n\u2003" + String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0') + "\u2003" + df.format(probabilities[i]) + (stateVector != null ? "\u2003\u2003" + stateVector[i].toString5Decimals() : ""));
-                    }
                     scrollView.addView(tableLayout);
                     adb.setView(scrollView);
-                    adb.show();
-                    try {
-                        progressDialog.cancel();
-                    } catch (Exception e) {
-                        progressDialog = null;
-                        e.printStackTrace();
-                    }
+                    AlertDialog ad = adb.create();
+                    ad.setOnShowListener((DialogInterface dialogInterface) -> {
+                        float dpWidth = ad.getWindow().getDecorView().getWidth() / displayMetrics.density;
+                        Log.e("TAG", "dpwidth: " + dpWidth);
+                        int decimalPoints = dpWidth > 310 ? dpWidth > 340 ? dpWidth > 365 ? dpWidth > 420 ? dpWidth > 450 ? dpWidth > 520 ? 10 : 8 : 7 : 6 : 5 : 4 : 3;
+                        String decimals = new String(new char[decimalPoints]).replace("\0", "#");
+                        DecimalFormat df = new DecimalFormat(stateVector == null ? "0.########" : "0." + decimals);
+                        DecimalFormat sf = new DecimalFormat(stateVector == null ? "0.########" : "0." + decimals.substring(3) + "E0");
+                        outerFor:
+                        for (int i = 0; i < probabilities.length; i++) {
+                            TableRow tr = new TableRow(MainActivity.this);
+                            for (int j = 0; j < measuredQubits.length; j++) {
+                                if (measuredQubits[j] < 1 && (i >> j) % 2 == 1) {
+                                    continue outerFor;
+                                }
+                            }
+                            TableRow.LayoutParams params = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
+                            params.setMargins((int) QuantumView.pxFromDp(this, 12), 0, 0, 0);
+                            TextView[] textView = new TextView[]{
+                                    new TextView(MainActivity.this),
+                                    new TextView(MainActivity.this),
+                                    new TextView(MainActivity.this)};
+                            textView[0].setTypeface(Typeface.DEFAULT_BOLD);
+                            textView[0].setText(String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0'));
+                            textView[0].setLayoutParams(params);
+                            textView[1].setTypeface(Typeface.MONOSPACE);
+                            if (probabilities[i] * Math.pow(10, decimalPoints) < 1 && probabilities[i] != 0)
+                                textView[1].setText(sf.format(probabilities[i]));
+                            else
+                                textView[1].setText(df.format(probabilities[i]));
+                            textView[1].setLayoutParams(params);
+                            textView[2].setTypeface(Typeface.MONOSPACE);
+                            textView[2].setText((stateVector != null ? stateVector[i].toString(decimalPoints) : ""));
+                            textView[2].setLayoutParams(params);
+                            tr.addView(textView[0]);
+                            tr.addView(textView[1]);
+                            tr.addView(textView[2]);
+                            tableLayout.addView(tr);
+
+                            try {
+                                progressDialog.cancel();
+                            } catch (Exception e) {
+                                progressDialog = null;
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+                    ad.show();
                 });
             }).start();
         }), 200);

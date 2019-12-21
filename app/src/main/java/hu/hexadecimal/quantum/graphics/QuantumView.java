@@ -68,7 +68,7 @@ public class QuantumView extends View {
 
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setColor(Color.BLUE);
-        mPaint.setStrokeWidth(5);
+        mPaint.setStrokeWidth(pxFromDp(context, 2.5f));
 
         measuredQubits = new short[MAX_QUBITS];
 
@@ -329,6 +329,26 @@ public class QuantumView extends View {
         measuredQubits = null;
         measuredQubits = new short[MAX_QUBITS];
         invalidate();
+    }
+
+    public int getLastUsedQubit() {
+        int last = 0;
+        for (int i = 0; i < measuredQubits.length; i++) {
+            if (measuredQubits[i] > 0) {
+                last = i;
+            }
+        }
+        return last;
+    }
+
+    public int getUsedQubitsCount() {
+        int count = 0;
+        for (int i = 0; i < measuredQubits.length; i++) {
+            if (measuredQubits[i] > 0) {
+                count++;
+            }
+        }
+        return count;
     }
 
     public static float pxFromDp(final Context context, final float dp) {

@@ -487,8 +487,8 @@ public class VisualOperator implements Serializable {
     }
 
     public static Complex[] toQubitArray(final Qubit[] qs) {
-        Complex[] inputMatrix = new Complex[(int) Math.pow(2, qs.length)];
-        for (int i = 0; i < (int) Math.pow(2, qs.length); i++)
+        Complex[] inputMatrix = new Complex[1 << qs.length];
+        for (int i = 0; i < (1 << qs.length); i++)
             for (int k = 0; k < qs.length; k++) {
                 if (k == 0) {
                     inputMatrix[i] = Complex.multiply(qs[1].matrix[(i >> 1) % 2], qs[0].matrix[i % 2]);
@@ -554,6 +554,27 @@ public class VisualOperator implements Serializable {
                 if (result[i][j] == null) result[i][j] = new Complex(0);
 
         return result;
+    }
+
+    private static Complex[][] matrixProduct(Complex[][] first, Complex[][] second) {
+        int dim1c = first.length;
+        int dim2c = second.length;
+        if (dim1c != dim2c || dim1c == 0)
+            return null;
+        int dim1r = first[0].length;
+        int dim2r = second[0].length;
+        if (dim1r != dim2r || dim1r != dim2c)
+            return null;
+        Complex[][] output = new Complex[dim1r][dim1r];
+        for(int i = 0; i < dim1r; i++) {
+            for (int j = 0; j < dim1r; j++) {
+                output[i][j] = new Complex(0);
+                for (int m = 0; m < dim1r; m++) {
+                    output[i][j].add(Complex.multiply(first[i][m], second[m][j]));
+                }
+            }
+        }
+        return output;
     }
 
     private static Complex[] operateOn(final Complex[] qubitArray, final Complex[][] gateTensor) {

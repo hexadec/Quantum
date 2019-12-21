@@ -77,4 +77,8 @@
     <string name="long_click_to_delete">Long click on gates to delete them</string>
     <string name="save">Save</string>
     <string name="select_filename">Choose a filename</string>
+    <string name="csv_settings">CSV settings</string>
+    <string name="csv_separator">Separator</string>
+    <string name="csv_number_format">Scientific form</string>
+    <string name="csv_number_format_long">In scientific form more significant digits can be displayed, however, some programs may not support it</string>
 </resources>

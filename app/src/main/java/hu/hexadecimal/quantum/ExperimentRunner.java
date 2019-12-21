@@ -10,11 +10,13 @@ import hu.hexadecimal.quantum.graphics.QuantumView;
 
 public class ExperimentRunner {
     private final LinkedList<VisualOperator> v;
+    private final QuantumView quantumView;
     private int status;
     private boolean finished = false;
 
-    public ExperimentRunner(LinkedList<VisualOperator> visualOperators) {
-        v = visualOperators;
+    public ExperimentRunner(QuantumView quantumView) {
+        v = quantumView.getOperators();
+        this.quantumView = quantumView;
     }
 
     public float[] runExperiment(int shots, int threads, Handler handler, boolean probabilityMode) {
@@ -28,7 +30,7 @@ public class ExperimentRunner {
         final int shots2 = shots;
         status = 0;
         finished = false;
-        int[][] sprobs = new int[(int) Math.pow(2, QuantumView.MAX_QUBITS)][threads];
+        int[][] sprobs = new int[1 << QuantumView.MAX_QUBITS][threads];
         if (!probabilityMode) {
             new Thread(() -> {
                 while (status < shots2 && !finished) {
@@ -123,11 +125,18 @@ public class ExperimentRunner {
     }
 
     public Complex[] getStateVector() {
+        return getStateVector(-1);
+    }
+
+    private Complex[] getStateVector(int which) {
         Qubit[] qubits = new Qubit[QuantumView.MAX_QUBITS];
         for (int k = 0; k < qubits.length; k++) {
             qubits[k] = new Qubit();
         }
         Complex[] quArray = VisualOperator.toQubitArray(qubits);
+        if (which >= 0 && which < quArray.length) {
+            quArray[which] = new Complex(1);
+        }
         for (int m = 0; m < v.size(); m++) {
             quArray = v.get(m).operateOn(quArray, qubits.length);
         }
@@ -144,5 +153,18 @@ public class ExperimentRunner {
             orderedQuArray[m] = quArray[ret];
         }
         return orderedQuArray;
+    }
+
+    public Complex[][] getFinalUnitaryMatrix() {
+        final int DIM = 1 << QuantumView.MAX_QUBITS;
+        Complex[][] matrix = new Complex[DIM][DIM];
+        for (int i = 0; i < DIM; i++) {
+            Complex[] state = getStateVector(i);
+            for (int j = 0; j < DIM; j++) {
+                matrix[j][i] = state[j];
+                Log.w(i + "-" + j, state[j].toString(2));
+            }
+        }
+        return matrix;
     }
 }
