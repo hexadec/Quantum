@@ -21,6 +21,7 @@ import android.text.InputType;
 import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -47,6 +48,7 @@ import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.resources.TextAppearance;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONObject;
@@ -67,9 +69,11 @@ import java.util.TimeZone;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
+import androidx.core.widget.TextViewCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.drawerlayout.widget.DrawerLayout;
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
@@ -108,6 +112,9 @@ public class MainActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         qv.setLayoutParams(new LinearLayout.LayoutParams(displayMetrics.widthPixels * 2, ViewGroup.LayoutParams.MATCH_PARENT));
 
+        FloatingActionButton fab = findViewById(R.id.fab_main);
+        FloatingActionButton execute = findViewById(R.id.fab_matrix);
+
         GestureDetector gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
 
             @Override
@@ -129,6 +136,11 @@ public class MainActivity extends AppCompatActivity {
             public boolean onSingleTapUp(MotionEvent e) {
                 float x = e.getX();
                 float y = e.getY();
+                float rx = e.getRawX();
+                float ry = e.getRawY();
+                int[] loc = new int[2];
+                execute.getLocationOnScreen(loc);
+                if (loc[0] < rx && loc[1] < ry) return false;
                 showAddGateDialog(x, y);
                 return true;
             }
@@ -136,7 +148,6 @@ public class MainActivity extends AppCompatActivity {
 
         qv.setOnTouchListener((View view, MotionEvent motionEvent) -> gestureDetector.onTouchEvent(motionEvent));
 
-        FloatingActionButton fab = findViewById(R.id.fab_main);
         fab.setOnClickListener((View view) -> {
             Toast.makeText(MainActivity.this, R.string.choose_experiment, Toast.LENGTH_SHORT).show();
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -145,9 +156,11 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        FloatingActionButton execute = findViewById(R.id.fab_matrix);
         final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(MainActivity.this);
         execute.postDelayed(() -> execute.setOnClickListener((View view) -> {
+            //To prevent double clicking
+            execute.setClickable(false);
+            new Handler().postDelayed(() -> execute.setClickable(true), 500);
             final int shots = Integer.valueOf(pref.getString("shots", "4096"));
             final int threads = Integer.valueOf(pref.getString("threads", "8"));
             final String separator = pref.getString("separator", ",");
@@ -231,10 +244,10 @@ public class MainActivity extends AppCompatActivity {
                     ad.setOnShowListener((DialogInterface dialogInterface) -> {
                         float dpWidth = ad.getWindow().getDecorView().getWidth() / displayMetrics.density;
                         Log.e("TAG", "dpwidth: " + dpWidth);
-                        int decimalPoints = dpWidth > 310 ? dpWidth > 340 ? dpWidth > 365 ? dpWidth > 420 ? dpWidth > 450 ? dpWidth > 520 ? 10 : 8 : 7 : 6 : 5 : 4 : 3;
+                        int decimalPoints = dpWidth > 280 ? dpWidth > 300 ? dpWidth > 365 ? dpWidth > 420 ? dpWidth > 450 ? dpWidth > 520 ? 10 : 8 : 7 : 6 : 5 : 4 : 3;
                         String decimals = new String(new char[decimalPoints]).replace("\0", "#");
                         DecimalFormat df = new DecimalFormat(stateVector == null ? "0.########" : "0." + decimals);
-                        DecimalFormat sf = new DecimalFormat(stateVector == null ? "0.########" : "0." + decimals.substring(3) + "E0");
+                        DecimalFormat sf = new DecimalFormat(stateVector == null ? "0.########" : "0." + (decimalPoints < 4 ? decimals.substring(2) : decimals.substring(3)) + "E0");
                         outerFor:
                         for (int i = 0; i < probabilities.length; i++) {
                             TableRow tr = new TableRow(MainActivity.this);
@@ -244,11 +257,11 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                             TableRow.LayoutParams params = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
-                            params.setMargins((int) QuantumView.pxFromDp(this, 12), 0, 0, 0);
-                            TextView[] textView = new TextView[]{
-                                    new TextView(MainActivity.this),
-                                    new TextView(MainActivity.this),
-                                    new TextView(MainActivity.this)};
+                            params.setMargins((int) QuantumView.pxFromDp(this, dpWidth < 330 ? 8 : 12), 0, 0, 0);
+                            AppCompatTextView[] textView = new AppCompatTextView[]{
+                                    new AppCompatTextView(MainActivity.this),
+                                    new AppCompatTextView(MainActivity.this),
+                                    new AppCompatTextView(MainActivity.this)};
                             textView[0].setTypeface(Typeface.DEFAULT_BOLD);
                             textView[0].setText(String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0'));
                             textView[0].setLayoutParams(params);
@@ -261,6 +274,11 @@ public class MainActivity extends AppCompatActivity {
                             textView[2].setTypeface(Typeface.MONOSPACE);
                             textView[2].setText((stateVector != null ? stateVector[i].toString(decimalPoints) : ""));
                             textView[2].setLayoutParams(params);
+                            if (dpWidth < 330 && stateVector != null) {
+                                textView[0].setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+                                textView[1].setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+                                textView[2].setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
+                            }
                             tr.addView(textView[0]);
                             tr.addView(textView[1]);
                             tr.addView(textView[2]);

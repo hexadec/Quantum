@@ -73,7 +73,7 @@ public class ExperimentRunner {
                     float[] probs = VisualOperator.measureProbabilities(quArray);
                     for (int j = 0; j < timestorun; j++) {
                         int cprob = vm.measureFromProbabilities(probs);
-                        sprobs[Integer.reverse(cprob << 24) & 0xFFFF][t_id]++;
+                        sprobs[cprob][t_id]++;
                         if ((j + 1) % 10 == 0) status += 10;
                     }
                 });
@@ -117,18 +117,19 @@ public class ExperimentRunner {
             finished = true;
             return nprobs;
         }
-        float[] nprobs = new float[sprobs.length];
+        float[] ordered_probs = new float[sprobs.length];
         for (int o = 0; o < sprobs.length; o++) {
-            for (int j = 1; j < threads; j++) {
-                sprobs[o][0] += sprobs[o][j];
+            int correct_position = Integer.reverse(o << 24) & 0xFF;
+            for (int j = 0; j < threads; j++) {
+                ordered_probs[correct_position] += sprobs[o][j];
             }
-            nprobs[o] = sprobs[o][0] / (float) shots;
+            ordered_probs[correct_position] /= (float) shots;
             if (shots == 1) {
-                nprobs[o] /= threads;
+                ordered_probs[correct_position] /= threads;
             }
         }
         finished = true;
-        return nprobs;
+        return ordered_probs;
     }
 
     public Complex[] getStateVector() {
