@@ -88,15 +88,6 @@ public class QuantumView extends View {
         outerPaint.setColor(Color.YELLOW);
 
         mPadding = (int) pxFromDp(context, 32);
-
-
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-
-        ((Activity) getContext()).getWindowManager()
-                .getDefaultDisplay()
-                .getMetrics(displayMetrics);
-
-
     }
 
     public double getLimit() {
@@ -133,6 +124,7 @@ public class QuantumView extends View {
             qubitPos++;
         }
         int[] gatesNumber = new int[MAX_QUBITS];
+        RectF bounds = new RectF();
         for (int i = 0; i < gos.size(); i++) {
             VisualOperator v = gos.get(i);
             v.resetRect();
@@ -140,18 +132,28 @@ public class QuantumView extends View {
             for (int j = 0; j < qubitIDs.length; j++) {
                 gatesNumber[qubitIDs[j]]++;
                 otherPaint.setColor(v.getColor());
-
-                Rect areaRect = new Rect((int) (mPadding + pxFromDp(super.getContext(), 2) + gatesNumber[qubitIDs[j]] * pxFromDp(super.getContext(), GATE_SIZE * 3)),
-                        ((int) (mPadding + pxFromDp(super.getContext(), 2) + (pxFromDp(super.getContext(), STEP) * (qubitIDs[j])))),
-                        ((int) (mPadding + pxFromDp(super.getContext(), 2) + pxFromDp(super.getContext(), GATE_SIZE * 2) + gatesNumber[qubitIDs[j]] * pxFromDp(super.getContext(), GATE_SIZE * 3))),
-                        ((int) (mPadding + (int) pxFromDp(super.getContext(), 20) + (pxFromDp(super.getContext(), STEP) * qubitIDs[j]) + pxFromDp(super.getContext(), GATE_SIZE))));
+                bounds.left = (mPadding + pxFromDp(super.getContext(), 2) + gatesNumber[qubitIDs[j]] * pxFromDp(super.getContext(), GATE_SIZE * 3));
+                bounds.top = (mPadding + pxFromDp(super.getContext(), 2) + (pxFromDp(super.getContext(), STEP) * (qubitIDs[j])));
+                RectF areaRect = new RectF(bounds.left,
+                        bounds.top,
+                        bounds.left + pxFromDp(super.getContext(), GATE_SIZE * 2),
+                        bounds.top + pxFromDp(super.getContext(), GATE_SIZE * 2));
                 String symbol = v.getSymbols()[j];
-                if (symbol.length() > 2)
-                    whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 18));
-                else
-                    whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 24));
+                switch (symbol.length()) {
+                    case 1:
+                    case 2:
+                        whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 24));
+                        break;
+                    case 3:
+                        whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 18));
+                        break;
+                    case 4:
+                        whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 14));
+                        break;
+                    default:
+                        whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 12));
+                }
                 v.addRect(areaRect);
-                RectF bounds = new RectF(areaRect);
                 bounds.right = whiteTextPaint.measureText(symbol, 0, symbol.length());
                 bounds.bottom = whiteTextPaint.descent() - whiteTextPaint.ascent();
                 bounds.left += (areaRect.width() - bounds.right) / 2.0f;
@@ -160,11 +162,11 @@ public class QuantumView extends View {
                 canvas.drawRect(areaRect, otherPaint);
                 if (j != 0) {
                     mPaint.setColor(v.getColor());
-                    float center1x = (areaRect.left + areaRect.right) / 2;
-                    float center1y = (areaRect.top + areaRect.bottom) / 2;
-                    Rect a = v.getRect().get(j - 1);
-                    float center2x = (a.left + a.right) / 2;
-                    float center2y = (a.top + a.bottom) / 2;
+                    float center1x = areaRect.centerX();
+                    float center1y = areaRect.centerY();
+                    RectF a = v.getRect().get(j - 1);
+                    float center2x = a.centerX();
+                    float center2y = a.centerY();
                     center2x += (pxFromDp(super.getContext(), GATE_SIZE / 2) * (center2x - center1x) / (center2y - center1y)) / 2;
                     center2y += pxFromDp(super.getContext(), GATE_SIZE / 1.7f) * (center2y > center1y ? -1 : 1);
                     canvas.drawLine(center1x, center1y, center2x, center2y, mPaint);
@@ -179,10 +181,9 @@ public class QuantumView extends View {
 
     public VisualOperator whichGate(float posx, float posy) {
         for (int i = 0; i < gos.size(); i++) {
-            List<Rect> rectList = gos.get(i).getRect();
+            List<RectF> rectList = gos.get(i).getRect();
             for (int j = 0; j < rectList.size(); j++) {
-                if (posx <= rectList.get(j).right && posx >= rectList.get(j).left
-                        && posy <= rectList.get(j).bottom && posy >= rectList.get(j).top) {
+                if (rectList.get(j).contains(posx, posy)) {
                     return gos.get(i);
                 }
             }
@@ -192,10 +193,9 @@ public class QuantumView extends View {
 
     public boolean replaceGateAt(int[] qubits, VisualOperator visualOperator, float posx, float posy) {
         for (int i = 0; i < gos.size(); i++) {
-            List<Rect> rectList = gos.get(i).getRect();
+            List<RectF> rectList = gos.get(i).getRect();
             for (int j = 0; j < rectList.size(); j++) {
-                if (posx <= rectList.get(j).right && posx >= rectList.get(j).left
-                        && posy <= rectList.get(j).bottom && posy >= rectList.get(j).top) {
+                if (rectList.get(j).contains(posx, posy)) {
                     for (int qubit : gos.get(i).getQubitIDs()) {
                         measuredQubits[qubit]--;
                     }
@@ -223,10 +223,9 @@ public class QuantumView extends View {
 
     public boolean deleteGateAt(float posx, float posy) {
         for (int i = 0; i < gos.size(); i++) {
-            List<Rect> rectList = gos.get(i).getRect();
+            List<RectF> rectList = gos.get(i).getRect();
             for (int j = 0; j < rectList.size(); j++) {
-                if (posx <= rectList.get(j).right && posx >= rectList.get(j).left
-                        && posy <= rectList.get(j).bottom && posy >= rectList.get(j).top) {
+                if (rectList.get(j).contains(posx, posy)) {
                     for (int qubit : gos.get(i).getQubitIDs()) {
                         measuredQubits[qubit]--;
                     }

@@ -39,6 +39,20 @@
             work as intended).
         </p>
         <p style="font-size:18px">
+            <i>Rotation Gates</i>
+        </p>
+        <p style="text-align: justify;">
+            Rotation gates as their name suggests, rotate the state-vector of the selected qubit
+            along a selected axis.
+            Using the standard parametrization of the sphere, we can easily describe these
+            operations. Let's denote &theta; the angle of rotation around the X-axis of the bloch
+            sphere, and &phi; the angle of rotation around the Z-axis, where &theta;&nbsp;&isin;&nbsp;[0,&nbsp;&pi;]
+            and &phi;&nbsp;&isin;&nbsp;[0,&nbsp;2&pi;[. The rotation around the Z-axis is also
+            called phase-shift. When you create a rotation gate using the
+            app, always the rotation around the X-axis will be performed followed by the rotation
+            around the Z-axis.
+        </p>
+        <p style="font-size:18px">
             <i>Single Qubit Gates</i>
         </p>
         <p style="text-align: justify;">
@@ -57,7 +71,7 @@
         <p>&lt;Ymatrix&gt;</p>
         <p>&lt;Zmatrix&gt;</p>
         <p style="text-align: justify;">
-            <strong>S, T and &pi;/6 phase-shift gates</strong>
+            <strong>S and T (phase-shift) gates</strong>
             <br />These gates change the phase of the qubits (along the Z axis). The S gate is a
             &pi;/2
             phase-shift and the T is a &pi;/4 phase-shift. In order to make use of them, the qubit
@@ -66,7 +80,6 @@
         </p>
         <p>&lt;Smatrix&gt;</p>
         <p>&lt;Tmatrix&gt;</p>
-        <p>&lt;P6matrix&gt;</p>
         <p style="text-align: justify;">
             <strong>&radic;NOT</strong>
             <br />Similarly to the Hadamard gate, the square root of the NOT gate brings the qubit

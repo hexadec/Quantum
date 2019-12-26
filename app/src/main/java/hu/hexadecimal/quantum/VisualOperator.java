@@ -1,6 +1,6 @@
 package hu.hexadecimal.quantum;
 
-import android.graphics.Rect;
+import android.graphics.RectF;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 public class VisualOperator implements Serializable {
 
     public static final long serialVersionUID = 2L;
-    public static final transient long helpVersion = 9L;
+    public static final transient long helpVersion = 11L;
     private Complex[][] matrix;
     private String[] symbols;
     private Random random;
@@ -34,9 +34,11 @@ public class VisualOperator implements Serializable {
     private final int NQBITS;
     public int color = 0xff000000;
     public String name;
-    private transient LinkedList<Rect> rectangle;
+    private transient LinkedList<RectF> rectangle;
     private final int MATRIX_DIM;
     private int[] qubit_ids;
+    private transient double theta;
+    private transient double phi;
 
     public static final int HTML_MODE_BODY = 0b1;
     public static final int HTML_MODE_CAPTION = 0b10;
@@ -169,11 +171,11 @@ public class VisualOperator implements Serializable {
                     new Complex[]{new Complex(0), new Complex(0, 1)}
             }, "π/2 Phase-shift", new String[]{"S"}, 0xff21BAAB);
 
-    public static final transient VisualOperator PI6_GATE =
+    /*public static final transient VisualOperator PI6_GATE =
             new VisualOperator(2, new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(Math.PI / 6)}
-            }, "π/6 Phase-shift", new String[]{"π6"}, 0xffDCE117);
+            }, "π/6 Phase-shift", new String[]{"π6"}, 0xffDCE117);*/
 
     public static final transient VisualOperator SQRT_NOT =
             VisualOperator.multiply(new VisualOperator(2, new Complex[][]{
@@ -239,6 +241,28 @@ public class VisualOperator implements Serializable {
         name = "";
     }
 
+    public VisualOperator(double theta, double phi) {
+        if (theta < -Math.PI || theta > Math.PI || phi < -Math.PI * 2 || phi > Math.PI * 2)
+            throw new IllegalArgumentException("Invalid angle size! theta: " + theta + ", phi: " + phi);
+        Complex[][] matrixTheta = new Complex[][]{
+                new Complex[]{new Complex(Math.cos(theta / 2), 0), new Complex(0, -Math.sin(theta / 2))},
+                new Complex[]{new Complex(0, -Math.sin(theta / 2)), new Complex(Math.cos(theta / 2), 0)}
+        };
+        Complex[][] matrixPhi = new Complex[][]{
+                new Complex[]{new Complex(1), new Complex(0)},
+                new Complex[]{new Complex(0), new Complex(phi)}
+        };
+        matrix = matrixProduct(matrixPhi, matrixTheta);
+        MATRIX_DIM = 2;
+        qubit_ids = new int[NQBITS = 1];
+        rectangle = new LinkedList<>();
+        color = 0xffDEAC38;
+        symbols = new String[]{"R" + (theta == 0 ? "" : "\u03B8") + (phi == 0 ? "" : "\u03C6")};
+        name = "CustRot";
+        this.theta = theta;
+        this.phi = phi;
+    }
+
     public String[] getSymbols() {
         return symbols;
     }
@@ -292,6 +316,8 @@ public class VisualOperator implements Serializable {
         for (int i = 0; i < NQBITS; i++) {
             symbols[i] += "†";
         }
+        theta = -theta;
+        phi = -phi;
     }
 
     public static VisualOperator hermitianConjugate(VisualOperator visualOperator) {
@@ -320,6 +346,14 @@ public class VisualOperator implements Serializable {
         return visualOperator;
     }
 
+    public boolean isRotation() {
+        return theta != 0 || phi != 0;
+    }
+
+    public double[] getAngles() {
+        return new double[]{theta, phi};
+    }
+
     public VisualOperator copy() {
         Complex[][] complex = new Complex[MATRIX_DIM][MATRIX_DIM];
         for (int i = 0; i < MATRIX_DIM; i++) {
@@ -328,7 +362,10 @@ public class VisualOperator implements Serializable {
                 complex[i][j] = matrix[i][j].copy();
             }
         }
-        return new VisualOperator(MATRIX_DIM, complex, name, symbols, color);
+        VisualOperator v = new VisualOperator(MATRIX_DIM, complex, name, symbols, color);
+        v.theta = theta;
+        v.phi = phi;
+        return v;
     }
 
     public String toString() {
@@ -370,6 +407,10 @@ public class VisualOperator implements Serializable {
             qubits.put(qubit_ids[i]);
             symbols.put(this.symbols[i]);
         }
+        JSONObject angles = new JSONObject();
+        angles.put("theta", theta);
+        angles.put("phi", phi);
+        jsonObject.put("angles", angles);
         jsonObject.put("qubits", qubits);
         jsonObject.put("symbols", symbols);
         for (int i = 0; i < matrix.length; i++) {
@@ -388,6 +429,16 @@ public class VisualOperator implements Serializable {
             int matrix_dim = jsonObject.getInt("matrix_dim");
             int color = jsonObject.getInt("color");
             int qubit_count = jsonObject.getInt("qubit_count");
+            double theta = 0;
+            double phi = 0;
+            try {
+                JSONObject angles = jsonObject.getJSONObject("angles");
+                theta = angles.getDouble("theta");
+                phi = angles.getDouble("phi");
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.w("VisualOperator fromJSON", "No angles?");
+            }
             int[] qubits = new int[qubit_count];
             String[] symbols = new String[qubit_count];
             JSONArray qubitsJson = jsonObject.getJSONArray("qubits");
@@ -405,6 +456,8 @@ public class VisualOperator implements Serializable {
             }
             VisualOperator visualOperator = new VisualOperator(matrix_dim, matrix, name, symbols, color);
             visualOperator.qubit_ids = qubits;
+            visualOperator.theta = theta;
+            visualOperator.phi = phi;
             return visualOperator;
         } catch (Exception e) {
             e.printStackTrace();
@@ -566,7 +619,7 @@ public class VisualOperator implements Serializable {
         if (dim1r != dim2r || dim1r != dim2c)
             return null;
         Complex[][] output = new Complex[dim1r][dim1r];
-        for(int i = 0; i < dim1r; i++) {
+        for (int i = 0; i < dim1r; i++) {
             for (int j = 0; j < dim1r; j++) {
                 output[i][j] = new Complex(0);
                 for (int m = 0; m < dim1r; m++) {
@@ -890,7 +943,7 @@ public class VisualOperator implements Serializable {
         return color;
     }
 
-    public void addRect(@NonNull Rect rect) {
+    public void addRect(@NonNull RectF rect) {
         if (rectangle == null) rectangle = new LinkedList<>();
         rectangle.add(rect);
     }
@@ -900,7 +953,7 @@ public class VisualOperator implements Serializable {
         rectangle.clear();
     }
 
-    public List<Rect> getRect() {
+    public List<RectF> getRect() {
         if (rectangle == null) rectangle = new LinkedList<>();
         return rectangle;
     }

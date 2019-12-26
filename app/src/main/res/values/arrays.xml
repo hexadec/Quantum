@@ -43,8 +43,9 @@
         <item>64</item>
     </string-array>
     <string-array name="gate_types">
-        <item>Predefined gates</item>
-        <item>User defined gates</item>
+        <item>Predefined</item>
+        <item>User defined</item>
+        <item>Rotation</item>
     </string-array>
     <string-array name="filter_gates">
         <item>All gates</item>

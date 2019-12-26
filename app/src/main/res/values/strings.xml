@@ -49,7 +49,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="delete_gate_question">Delete selected gate?</string>
-    <string name="gate_type">Gate source</string>
+    <string name="gate_type">Gate type</string>
     <string name="filter">Filter</string>
     <string name="select_action">Select action</string>
     <string name="delete_gate">Delete gate</string>
@@ -81,4 +81,6 @@
     <string name="csv_separator">Separator</string>
     <string name="csv_number_format">Scientific form</string>
     <string name="csv_number_format_long">In scientific form more significant digits can be displayed, however, some programs may not support it</string>
+    <string name="custom_rotation">Custom rotation gate</string>
+    <string name="fixed_values">Important angles only</string>
 </resources>

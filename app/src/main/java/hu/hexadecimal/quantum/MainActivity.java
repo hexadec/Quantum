@@ -36,6 +36,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -48,7 +49,6 @@ import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.resources.TextAppearance;
 import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONObject;
@@ -71,13 +71,16 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
-import androidx.core.widget.TextViewCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.drawerlayout.widget.DrawerLayout;
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
 import hu.hexadecimal.quantum.graphics.QuantumView;
+
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -90,6 +93,14 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle toggle;
     private NavigationView navigationView;
+
+    private double[] importantAngles = new double[]{0, Math.PI / 8, Math.PI / 6, Math.PI / 4, Math.PI / 3, Math.PI / 2, Math.PI / 3 * 2, Math.PI / 4 * 3, Math.PI};
+    private String[] importantAngleNames = new String[]{"0", "π/8", "π/6", "π/4", "π/3", "π/2", "2π/3", "3π/4", "π"};
+
+    private double[] importantAngles2PI = new double[]{0, Math.PI / 8, Math.PI / 6, Math.PI / 4, Math.PI / 3, Math.PI / 2, Math.PI / 3 * 2, Math.PI / 4 * 3, Math.PI,
+            Math.PI / 5 * 4, Math.PI / 3 * 4, Math.PI / 2 * 3, Math.PI / 3 * 5, Math.PI / 4 * 7};
+    private String[] importantAngleNames2PI = new String[]{"0", "π/8", "π/6", "π/4", "π/3", "π/2", "2π/3", "3π/4", "π",
+            "5π/4", "4π/3", "3π/2", "5π/3", "7π/4"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -522,6 +533,13 @@ public class MainActivity extends AppCompatActivity {
                 final Spinner gateType = mainView.findViewById(R.id.type_spinner);
                 final Spinner filter = mainView.findViewById(R.id.filter_spinner);
                 final Spinner gateName = mainView.findViewById(R.id.gate_name_spinner);
+                final ConstraintLayout subLayout = mainView.findViewById(R.id.sub_layout);
+                final ConstraintLayout rotLayout = mainView.findViewById(R.id.rot_layout);
+                final SeekBar rx = mainView.findViewById(R.id.rx);
+                final SeekBar rz = mainView.findViewById(R.id.rz);
+                final TextView rxText = mainView.findViewById(R.id.rx_text);
+                final TextView rzText = mainView.findViewById(R.id.rz_text);
+                final CheckBox fixedValues = mainView.findViewById(R.id.fixed_values);
                 final SeekBar[] qX = new SeekBar[]{
                         mainView.findViewById(R.id.order_first),
                         mainView.findViewById(R.id.order_second),
@@ -559,10 +577,12 @@ public class MainActivity extends AppCompatActivity {
                         });
                     }
                     if (v != null) {
-                        for (int i = 0; i < v.getQubitIDs().length; i++) {
-                            qX[i].setProgress(v.getQubitIDs()[i]);
-                            int pos = mGates.indexOf(v.getName());
-                            if (pos >= 0) gateName.setSelection(pos);
+                        if (!v.isRotation()) {
+                            for (int i = 0; i < v.getQubitIDs().length; i++) {
+                                qX[i].setProgress(v.getQubitIDs()[i]);
+                                int pos = mGates.indexOf(v.getName());
+                                if (pos >= 0) gateName.setSelection(pos);
+                            }
                         }
                     } else {
                         qX[0].setProgress(qv.whichQubit(posy));
@@ -573,6 +593,8 @@ public class MainActivity extends AppCompatActivity {
                                 public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                                     if (i == 0) {
                                         filter.setEnabled(true);
+                                        subLayout.setVisibility(VISIBLE);
+                                        rotLayout.setVisibility(GONE);
                                         if (filter.getSelectedItemPosition() == 0) {
                                             ArrayAdapter<String> gateAdapter =
                                                     new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, mGates);
@@ -588,10 +610,12 @@ public class MainActivity extends AppCompatActivity {
                                             gateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                             gateName.setAdapter(gateAdapter);
                                         }
-                                    } else {
+                                    } else if (i == 1) {
                                         if (operators.size() > 0) {
                                             filter.setEnabled(false);
                                             filter.setSelection(0);
+                                            subLayout.setVisibility(VISIBLE);
+                                            rotLayout.setVisibility(GONE);
                                             ArrayAdapter<String> gateAdapter =
                                                     new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, operatorNames);
                                             gateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -602,6 +626,14 @@ public class MainActivity extends AppCompatActivity {
                                             t.setGravity(Gravity.CENTER, 0, 0);
                                             t.show();
                                         }
+                                    } else if (i == 2) {
+                                        for (int k = 1; k < qX.length; k++) {
+                                            qX[k].setVisibility(GONE);
+                                            tX[k].setVisibility(GONE);
+                                        }
+                                        subLayout.setVisibility(GONE);
+                                        rotLayout.setVisibility(VISIBLE);
+                                        filter.setSelection(0);
                                     }
                                 }
 
@@ -637,86 +669,166 @@ public class MainActivity extends AppCompatActivity {
 
                                 }
                             }));
-                    gateName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                            LinkedList<String> gates = VisualOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
-                            Collections.sort(gates);
-                            ArrayAdapter<String> adapter =
-                                    new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, filter.getSelectedItemPosition() == 0 ? mGates : gates);
-
-                            int qubits = gateType.getSelectedItemPosition() == 0 ? VisualOperator.findGateByName(adapter.getItem(i)).getQubits() : operators.get(i).getQubits();
-                            switch (qubits) {
-                                case 4:
-                                    qX[3].setVisibility(View.VISIBLE);
-                                    tX[3].setVisibility(View.VISIBLE);
-                                case 3:
-                                    qX[2].setVisibility(View.VISIBLE);
-                                    tX[2].setVisibility(View.VISIBLE);
-                                case 2:
-                                    qX[1].setVisibility(View.VISIBLE);
-                                    tX[1].setVisibility(View.VISIBLE);
-                                default:
-                            }
-                            switch (qubits) {
-                                case 1:
-                                    qX[1].setVisibility(View.INVISIBLE);
-                                    tX[1].setVisibility(View.INVISIBLE);
-                                case 2:
-                                    qX[2].setVisibility(View.GONE);
-                                    tX[2].setVisibility(View.GONE);
-                                case 3:
-                                    qX[3].setVisibility(View.GONE);
-                                    tX[3].setVisibility(View.GONE);
-                                default:
-                            }
-                        }
-
-                        @Override
-                        public void onNothingSelected(AdapterView<?> adapterView) {
-                        }
-                    });
-
-                    mainView.findViewById(R.id.cancel).setOnClickListener((View view) -> d.cancel());
-                    mainView.findViewById(R.id.ok).setOnClickListener((View view) -> {
-                        if (operators.size() == 0 && gateType.getSelectedItemPosition() != 0) {
-                            return;
-                        }
-                        LinkedList<String> gates = VisualOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
-                        Collections.sort(gates);
-                        ArrayAdapter<String> adapter =
-                                new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, filter.getSelectedItemPosition() == 0 ? mGates : gates);
-
-                        int qubits = gateType.getSelectedItemPosition() == 0
-                                ? VisualOperator.findGateByName(adapter.getItem(gateName.getSelectedItemPosition())).getQubits()
-                                : operators.get(gateName.getSelectedItemPosition()).getQubits();
-                        int[] quids = new int[qubits];
-                        for (int i = 0; i < qubits; i++) {
-                            quids[i] = qX[i].getProgress();
-                        }
-                        for (int i = 0; i < qubits; i++) {
-                            for (int j = i + 1; j < qubits; j++) {
-                                if (quids[i] == quids[j]) {
-                                    d.cancel();
-                                    Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.use_different_qubits, Snackbar.LENGTH_LONG);
-                                    snackbar.getView().setBackgroundColor(0xffD81010);
-                                    snackbar.show();
-                                    return;
+                    mainView.postDelayed(() -> {
+                        fixedValues.setOnCheckedChangeListener((CompoundButton compoundButton, boolean b) ->
+                                new Handler().postDelayed(() -> {
+                                    if (b) {
+                                        rx.setMax(importantAngles.length - 1);
+                                        rz.setMax(importantAngles2PI.length - 1);
+                                        rx.setProgress(0);
+                                        rz.setProgress(0);
+                                    } else {
+                                        rx.setMax(3141);
+                                        rz.setMax(6282);
+                                        rx.setProgress(0);
+                                        rz.setProgress(0);
+                                    }
+                                }, 100));
+                        DecimalFormat df = new DecimalFormat("0.000");
+                        rx.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                            @Override
+                            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                                if (fixedValues.isChecked()) {
+                                    rxText.setText(String.format("\u03B8 %-4s", importantAngleNames[i]));
+                                } else {
+                                    rxText.setText("\u03B8 " + df.format(i / 1000f));
                                 }
                             }
+
+                            @Override
+                            public void onStartTrackingTouch(SeekBar seekBar) {
+
+                            }
+
+                            @Override
+                            public void onStopTrackingTouch(SeekBar seekBar) {
+
+                            }
+                        });
+                        rz.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                            @Override
+                            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                                if (fixedValues.isChecked()) {
+                                    rzText.setText(String.format("\u03C6 %-4s", importantAngleNames2PI[i]));
+                                } else {
+                                    rzText.setText("\u03C6 " + df.format(i / 1000f));
+                                }
+                            }
+
+                            @Override
+                            public void onStartTrackingTouch(SeekBar seekBar) {
+
+                            }
+
+                            @Override
+                            public void onStopTrackingTouch(SeekBar seekBar) {
+
+                            }
+                        });
+                        if (v != null && v.isRotation()) {
+                            gateType.setSelection(2);
+                            qX[0].setProgress(v.getQubitIDs()[0]);
+                            rx.setProgress((int) Math.abs(v.getAngles()[0] * 1000));
+                            rz.setProgress((int) Math.abs(v.getAngles()[1] * 1000));
+                            if (v.getAngles()[0] < 0 || v.getAngles()[1] < 0) {
+                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(true);
+                            }
+                        } else {
+                            subLayout.setVisibility(VISIBLE);
                         }
-                        saved = false;
-                        VisualOperator gate = gateType.getSelectedItemPosition() == 0
-                                ? VisualOperator.findGateByName((String) gateName.getSelectedItem()).copy()
-                                : operators.get(gateName.getSelectedItemPosition()).copy();
-                        if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
-                            gate.hermitianConjugate();
-                        if (v == null)
-                            qv.addGate(quids, gate);
-                        else
-                            qv.replaceGateAt(quids, gate, posx, posy);
-                        d.cancel();
-                    });
+                        gateName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                                LinkedList<String> gates = VisualOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
+                                Collections.sort(gates);
+                                ArrayAdapter<String> adapter =
+                                        new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, filter.getSelectedItemPosition() == 0 ? mGates : gates);
+
+                                int qubits = gateType.getSelectedItemPosition() == 0 ? VisualOperator.findGateByName(adapter.getItem(i)).getQubits() : operators.get(i).getQubits();
+                                switch (qubits) {
+                                    case 4:
+                                        qX[3].setVisibility(View.VISIBLE);
+                                        tX[3].setVisibility(View.VISIBLE);
+                                    case 3:
+                                        qX[2].setVisibility(View.VISIBLE);
+                                        tX[2].setVisibility(View.VISIBLE);
+                                    case 2:
+                                        qX[1].setVisibility(View.VISIBLE);
+                                        tX[1].setVisibility(View.VISIBLE);
+                                    default:
+                                }
+                                switch (qubits) {
+                                    case 1:
+                                        qX[1].setVisibility(View.INVISIBLE);
+                                        tX[1].setVisibility(View.INVISIBLE);
+                                    case 2:
+                                        qX[2].setVisibility(GONE);
+                                        tX[2].setVisibility(GONE);
+                                    case 3:
+                                        qX[3].setVisibility(GONE);
+                                        tX[3].setVisibility(GONE);
+                                    default:
+                                }
+                            }
+
+                            @Override
+                            public void onNothingSelected(AdapterView<?> adapterView) {
+                            }
+                        });
+                        mainView.findViewById(R.id.cancel).setOnClickListener((View view) -> d.cancel());
+                        mainView.findViewById(R.id.ok).setOnClickListener((View view) -> {
+                            if (gateType.getSelectedItemPosition() != 2) {
+                                if (operators.size() == 0 && gateType.getSelectedItemPosition() != 0) {
+                                    return;
+                                }
+                                LinkedList<String> gates = VisualOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
+                                Collections.sort(gates);
+                                ArrayAdapter<String> adapter =
+                                        new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_spinner_item, filter.getSelectedItemPosition() == 0 ? mGates : gates);
+
+                                int qubits = gateType.getSelectedItemPosition() == 0
+                                        ? VisualOperator.findGateByName(adapter.getItem(gateName.getSelectedItemPosition())).getQubits()
+                                        : operators.get(gateName.getSelectedItemPosition()).getQubits();
+                                int[] quids = new int[qubits];
+                                for (int i = 0; i < qubits; i++) {
+                                    quids[i] = qX[i].getProgress();
+                                }
+                                for (int i = 0; i < qubits; i++) {
+                                    for (int j = i + 1; j < qubits; j++) {
+                                        if (quids[i] == quids[j]) {
+                                            d.cancel();
+                                            Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.use_different_qubits, Snackbar.LENGTH_LONG);
+                                            snackbar.getView().setBackgroundColor(0xffD81010);
+                                            snackbar.show();
+                                            return;
+                                        }
+                                    }
+                                }
+                                saved = false;
+                                VisualOperator gate = gateType.getSelectedItemPosition() == 0
+                                        ? VisualOperator.findGateByName((String) gateName.getSelectedItem()).copy()
+                                        : operators.get(gateName.getSelectedItemPosition()).copy();
+                                if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
+                                    gate.hermitianConjugate();
+                                if (v == null)
+                                    qv.addGate(quids, gate);
+                                else
+                                    qv.replaceGateAt(quids, gate, posx, posy);
+                                d.cancel();
+                            } else {
+                                double theta = fixedValues.isChecked() ? importantAngles[rx.getProgress()] : rx.getProgress() / 1000f;
+                                double phi = fixedValues.isChecked() ? importantAngles2PI[rz.getProgress()] : rz.getProgress() / 1000f;
+                                VisualOperator gate = new VisualOperator(theta, phi);
+                                if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
+                                    gate.hermitianConjugate();
+                                if (v == null)
+                                    qv.addGate(new int[]{qX[0].getProgress()}, gate);
+                                else
+                                    qv.replaceGateAt(new int[]{qX[0].getProgress()}, gate, posx, posy);
+                                d.cancel();
+                            }
+                        });
+                    }, 100);
                     d.setTitle(R.string.select_gate);
                     try {
                         d.setView(mainView);

@@ -138,6 +138,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
         adb.setPositiveButton(R.string.save, null);
         adb.setNegativeButton(R.string.cancel, null);
         adb.setNeutralButton(R.string.check_matrix, null);
+        adb.setCancelable(false);
         AlertDialog d = adb.create();
         d.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override

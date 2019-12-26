@@ -57,7 +57,7 @@ public class HelpActivity extends AppCompatActivity {
                             html = html.replace("&lt;Zmatrix&gt;", VisualOperator.PAULI_Z.toStringHtmlTable(VisualOperator.HTML_MODE_CAPTION | VisualOperator.HTML_MODE_FAT));
                             html = html.replace("&lt;Smatrix&gt;", VisualOperator.S_GATE.toStringHtmlTable(VisualOperator.HTML_MODE_CAPTION | VisualOperator.HTML_MODE_FAT));
                             html = html.replace("&lt;Tmatrix&gt;", VisualOperator.T_GATE.toStringHtmlTable(VisualOperator.HTML_MODE_CAPTION | VisualOperator.HTML_MODE_FAT));
-                            html = html.replace("&lt;P6matrix&gt;", VisualOperator.PI6_GATE.toStringHtmlTable(VisualOperator.HTML_MODE_CAPTION | VisualOperator.HTML_MODE_FAT));
+                            //html = html.replace("&lt;P6matrix&gt;", VisualOperator.PI6_GATE.toStringHtmlTable(VisualOperator.HTML_MODE_CAPTION | VisualOperator.HTML_MODE_FAT));
 
                             html = html.replace("&lt;CNOTmatrix&gt;", VisualOperator.CNOT.toStringHtmlTable(VisualOperator.HTML_MODE_BASIC));
                             html = html.replace("&lt;SWAPmatrix&gt;", VisualOperator.SWAP.toStringHtmlTable(VisualOperator.HTML_MODE_BASIC));
