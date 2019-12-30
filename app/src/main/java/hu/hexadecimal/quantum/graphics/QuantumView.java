@@ -47,10 +47,11 @@ public class QuantumView extends View {
     public static final String FILE_EXTENSION = ".qsf";
 
     public static final int STEP = 70;
-    public static final int MAX_QUBITS = 8;
+    public static final int MAX_QUBITS = 10;
     public static final int GATE_SIZE = 18;
     public final float UNIT;
     public final float START_Y;
+    public final float START_X;
 
     public String name = "";
 
@@ -58,6 +59,7 @@ public class QuantumView extends View {
         super(context);
         UNIT = pxFromDp(super.getContext(), 1);
         START_Y = pxFromDp(super.getContext(), 20);
+        START_X = pxFromDp(super.getContext(), 40);
         gos = new LinkedList<>();
 
         mPath = new Path();
@@ -104,7 +106,7 @@ public class QuantumView extends View {
         int qubitPos = 0;
         char verticalBar = PaintCompat.hasGlyph(whiteTextPaint, "⎥") ? '⎥' : '|';
         for (int i = (int) START_Y; i < getLimit() && i <= pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
-            canvas.drawLine(mPadding, mPadding + i, getWidth() - mPadding, mPadding + i, mPaint);
+            canvas.drawLine(START_X, mPadding + i, getWidth() - mPadding, mPadding + i, mPaint);
 
             mPath.reset();
             mPath.moveTo(getWidth() - mPadding - pxFromDp(super.getContext(), 5), mPadding + i - pxFromDp(super.getContext(), 5));
@@ -114,13 +116,14 @@ public class QuantumView extends View {
             canvas.drawPath(mPath, mPaint);
 
             otherPaint.setColor(measuredQubits[qubitPos] > 0 ? 0xffBA2121 : 0xff555555);
-            canvas.drawRect(mPadding,
+            canvas.drawRect(START_X,
                     mPadding + i - pxFromDp(super.getContext(), GATE_SIZE),
-                    mPadding + pxFromDp(super.getContext(), GATE_SIZE * 2),
+                    START_X + pxFromDp(super.getContext(), GATE_SIZE * 2),
                     mPadding + i + pxFromDp(super.getContext(), GATE_SIZE),
                     otherPaint);
-            canvas.drawText("q" + Math.round((i + START_Y) / pxFromDp(super.getContext(), STEP)), mPadding - pxFromDp(super.getContext(), 30), mPadding + i + pxFromDp(super.getContext(), 6), mTextPaint);
-            canvas.drawText(verticalBar + "0⟩", mPadding + (verticalBar == '|' ? -pxFromDp(super.getContext(), 2.8f) : pxFromDp(super.getContext(), 2f)), mPadding + i + pxFromDp(super.getContext(), 8f), whiteTextPaint);
+            String qText = "q" + Math.round((i + START_Y) / pxFromDp(super.getContext(), STEP));
+            canvas.drawText(qText, (START_X - mTextPaint.measureText(qText)) / 2, mPadding + i + pxFromDp(super.getContext(), 6), mTextPaint);
+            canvas.drawText(verticalBar + "0⟩", START_X + (verticalBar == '|' ? -pxFromDp(super.getContext(), 2.8f) : pxFromDp(super.getContext(), 2f)), mPadding + i + pxFromDp(super.getContext(), 8f), whiteTextPaint);
             qubitPos++;
         }
         int[] gatesNumber = new int[MAX_QUBITS];
@@ -132,7 +135,7 @@ public class QuantumView extends View {
             for (int j = 0; j < qubitIDs.length; j++) {
                 gatesNumber[qubitIDs[j]]++;
                 otherPaint.setColor(v.getColor());
-                bounds.left = (mPadding + pxFromDp(super.getContext(), 2) + gatesNumber[qubitIDs[j]] * pxFromDp(super.getContext(), GATE_SIZE * 3));
+                bounds.left = (START_X + pxFromDp(super.getContext(), 2) + gatesNumber[qubitIDs[j]] * pxFromDp(super.getContext(), GATE_SIZE * 3));
                 bounds.top = (mPadding + pxFromDp(super.getContext(), 2) + (pxFromDp(super.getContext(), STEP) * (qubitIDs[j])));
                 RectF areaRect = new RectF(bounds.left,
                         bounds.top,
@@ -273,7 +276,7 @@ public class QuantumView extends View {
             } catch (IndexOutOfBoundsException e) {
             }
             gateNumber++;
-            if (mPadding + pxFromDp(super.getContext(), 2) + pxFromDp(super.getContext(), GATE_SIZE * 2) + gateNumber * pxFromDp(super.getContext(), GATE_SIZE * 3) > width)
+            if (START_X + pxFromDp(super.getContext(), 2) + pxFromDp(super.getContext(), GATE_SIZE * 2) + gateNumber * pxFromDp(super.getContext(), GATE_SIZE * 3) > width)
                 return false;
         }
         return true;
@@ -411,6 +414,28 @@ public class QuantumView extends View {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public int optimizeCircuit() {
+        if (gos.size() == 0) return 0;
+        int counter = MAX_QUBITS;
+        for (int i = 0; i < MAX_QUBITS; i++) {
+            if (measuredQubits[i] == 0) {
+                counter--;
+                for (int j = 0; j < gos.size(); j++) {
+                    VisualOperator operator = gos.get(j);
+                    int[] quids = operator.getQubitIDs();
+                    for (int k = 0; k < quids.length; k++) {
+                        if (quids[k] <= i) continue;
+                        measuredQubits[quids[k] - 1]++;
+                        measuredQubits[quids[k]]--;
+                        quids[k]--;
+                    }
+                }
+            }
+        }
+        invalidate();
+        return counter;
     }
 
 }

@@ -26,6 +26,12 @@
             android:key="save_loc"
             android:title="@string/save_location" />
 
+        <CheckBoxPreference
+            android:key="optimize"
+            android:defaultValue="false"
+            android:title="@string/optimize_circuit"
+            android:summary="@string/optimize_circuit_long" />
+
         <hu.hexadecimal.quantum.graphics.BigPreference
             android:enabled="true"
             android:key="help"

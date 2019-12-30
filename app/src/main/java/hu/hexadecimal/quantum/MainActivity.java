@@ -184,6 +184,10 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return true;
             });
+            if (pref.getBoolean("optimize", false)) {
+                qv.optimizeCircuit();
+            }
+            final int MAX_QUBITS = qv.getLastUsedQubit() + 1;
             try {
                 progressDialog = ProgressDialog.show(
                         MainActivity.this, "", MainActivity.this.getString(R.string.wait), true);
@@ -221,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
                                 if (k != 0) sb.append("\r\n");
                                 sb.append(k);
                                 sb.append(separator);
-                                sb.append(String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(k)).replace(' ', '0'));
+                                sb.append(String.format("%" + MAX_QUBITS + "s", Integer.toBinaryString(k)).replace(' ', '0'));
                                 sb.append(separator);
                                 sb.append(df.format(probabilities[k]));
                                 if (stateVector != null) {
@@ -274,7 +278,7 @@ public class MainActivity extends AppCompatActivity {
                                     new AppCompatTextView(MainActivity.this),
                                     new AppCompatTextView(MainActivity.this)};
                             textView[0].setTypeface(Typeface.DEFAULT_BOLD);
-                            textView[0].setText(String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0'));
+                            textView[0].setText(String.format("%" + MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0'));
                             textView[0].setLayoutParams(params);
                             textView[1].setTypeface(Typeface.MONOSPACE);
                             if (probabilities[i] * Math.pow(10, decimalPoints) < 1 && probabilities[i] != 0)

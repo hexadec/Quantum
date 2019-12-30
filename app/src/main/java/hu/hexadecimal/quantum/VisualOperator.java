@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 public class VisualOperator implements Serializable {
 
     public static final long serialVersionUID = 2L;
-    public static final transient long helpVersion = 11L;
+    public static final transient long helpVersion = 12L;
     private Complex[][] matrix;
     private String[] symbols;
     private Random random;

@@ -11,6 +11,7 @@ import hu.hexadecimal.quantum.graphics.QuantumView;
 public class ExperimentRunner {
     private final LinkedList<VisualOperator> v;
     private final QuantumView quantumView;
+    private final int MAX_QUBIT;
     private int status;
     private boolean finished = false;
 
@@ -18,6 +19,8 @@ public class ExperimentRunner {
 
     public ExperimentRunner(QuantumView quantumView) {
         v = quantumView.getOperators();
+        int lUsed = quantumView.getLastUsedQubit();
+        MAX_QUBIT = lUsed < 2 ? 2 : lUsed + 1;
         this.quantumView = quantumView;
     }
 
@@ -32,16 +35,16 @@ public class ExperimentRunner {
         final int shots2 = shots;
         status = 0;
         finished = false;
-        int[][] sprobs = new int[1 << QuantumView.MAX_QUBITS][threads];
+        int[][] sprobs = new int[1 << MAX_QUBIT][threads];
         if (!probabilityMode) {
             Thread t0 = new Thread(() -> {
-                Qubit[] qubits = new Qubit[QuantumView.MAX_QUBITS];
-                for (int k = 0; k < qubits.length; k++) {
+                Qubit[] qubits = new Qubit[MAX_QUBIT];
+                for (int k = 0; k < MAX_QUBIT; k++) {
                     qubits[k] = new Qubit();
                 }
                 quArray = VisualOperator.toQubitArray(qubits);
                 for (int m = 0; m < v.size(); m++) {
-                    quArray = v.get(m).operateOn(quArray, qubits.length);
+                    quArray = v.get(m).operateOn(quArray, MAX_QUBIT);
                 }
             });
             t0.start();
@@ -88,7 +91,7 @@ public class ExperimentRunner {
                 }
             }
         } else {
-            Qubit[] qubits = new Qubit[QuantumView.MAX_QUBITS];
+            Qubit[] qubits = new Qubit[MAX_QUBIT];
             try {
                 Thread.sleep(0, new Random().nextInt(1000));
             } catch (Exception e) {
@@ -119,7 +122,7 @@ public class ExperimentRunner {
         }
         float[] ordered_probs = new float[sprobs.length];
         for (int o = 0; o < sprobs.length; o++) {
-            int correct_position = Integer.reverse(o << 24) & 0xFF;
+            int correct_position = Integer.reverse(o << (32-MAX_QUBIT)) & 0xFF;
             for (int j = 0; j < threads; j++) {
                 ordered_probs[correct_position] += sprobs[o][j];
             }
@@ -137,7 +140,7 @@ public class ExperimentRunner {
     }
 
     private Complex[] getStateVector(int which) {
-        Qubit[] qubits = new Qubit[QuantumView.MAX_QUBITS];
+        Qubit[] qubits = new Qubit[MAX_QUBIT];
         for (int k = 0; k < qubits.length; k++) {
             qubits[k] = new Qubit();
         }
@@ -164,7 +167,7 @@ public class ExperimentRunner {
     }
 
     public Complex[][] getFinalUnitaryMatrix() {
-        final int DIM = 1 << QuantumView.MAX_QUBITS;
+        final int DIM = 1 << MAX_QUBIT;
         Complex[][] matrix = new Complex[DIM][DIM];
         for (int i = 0; i < DIM; i++) {
             Complex[] state = getStateVector(i);
