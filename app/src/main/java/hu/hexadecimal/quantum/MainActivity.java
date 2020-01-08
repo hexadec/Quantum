@@ -3,7 +3,6 @@ package hu.hexadecimal.quantum;
 import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -77,6 +76,7 @@ import androidx.core.view.GravityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.drawerlayout.widget.DrawerLayout;
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
+import hu.hexadecimal.quantum.graphics.ExecutionProgressDialog;
 import hu.hexadecimal.quantum.graphics.QuantumView;
 
 import static android.view.View.GONE;
@@ -85,7 +85,9 @@ import static android.view.View.VISIBLE;
 public class MainActivity extends AppCompatActivity {
 
     QuantumView qv;
-    private ProgressDialog progressDialog;
+    private ExecutionProgressDialog progressDialog;
+    private Thread expThread;
+
     private int probabilityMode;
     private boolean saved;
     private int blochSpherePos = 0;
@@ -176,9 +178,14 @@ public class MainActivity extends AppCompatActivity {
             final int threads = Integer.valueOf(pref.getString("threads", "8"));
             final String separator = pref.getString("separator", ",");
             final boolean scientific = pref.getBoolean("sci_form", false);
+            qv.shouldStop = false;
             final Handler handler = new Handler((Message message) -> {
                 try {
-                    progressDialog.setMessage(MainActivity.this.getString(R.string.wait) + "\n" + message.what + "/" + shots);
+                    if (!progressDialog.isShowing()) {
+                        qv.shouldStop = true;
+                    } else {
+                        progressDialog.setProgress(message.what, shots);
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -189,16 +196,19 @@ public class MainActivity extends AppCompatActivity {
             }
             final int MAX_QUBITS = qv.getLastUsedQubit() + 1;
             try {
-                progressDialog = ProgressDialog.show(
-                        MainActivity.this, "", MainActivity.this.getString(R.string.wait), true);
+                progressDialog = new ExecutionProgressDialog(MainActivity.this, MainActivity.this.getString(R.string.wait));
+                progressDialog.show();
             } catch (Exception e) {
                 e.printStackTrace();
                 progressDialog = null;
             }
-            new Thread(() -> {
+            expThread = new Thread(() -> {
                 ExperimentRunner experimentRunner = new ExperimentRunner(qv);
                 long startTime = System.currentTimeMillis();
                 float[] probabilities = experimentRunner.runExperiment(shots, threads, handler, probabilityMode > 0);
+                if (qv.shouldStop) {
+                    return;
+                }
                 Complex[] tempStateVector = null;
                 if (shots == 0 || probabilityMode > 0) {
                     tempStateVector = experimentRunner.getStateVector();
@@ -309,7 +319,8 @@ public class MainActivity extends AppCompatActivity {
                     });
                     ad.show();
                 });
-            }).start();
+            });
+            expThread.start();
         }), 200);
 
         int help_shown = pref.getInt("help_shown", 0);

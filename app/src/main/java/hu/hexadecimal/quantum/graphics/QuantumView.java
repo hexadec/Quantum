@@ -37,6 +37,9 @@ public class QuantumView extends View {
     private LinkedList<VisualOperator> gos;
     private short[] measuredQubits;
 
+
+    public volatile boolean shouldStop;
+
     /**
      * VIsual QUantum-gate Sequence
      */
@@ -419,7 +422,7 @@ public class QuantumView extends View {
     public int optimizeCircuit() {
         if (gos.size() == 0) return 0;
         int counter = MAX_QUBITS;
-        for (int i = 0; i < MAX_QUBITS; i++) {
+        for (int i = MAX_QUBITS - 1; i > -1; i--) {
             if (measuredQubits[i] == 0) {
                 counter--;
                 for (int j = 0; j < gos.size(); j++) {

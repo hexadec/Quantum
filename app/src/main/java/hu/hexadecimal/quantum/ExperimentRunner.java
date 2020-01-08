@@ -36,6 +36,14 @@ public class ExperimentRunner {
         status = 0;
         finished = false;
         int[][] sprobs = new int[1 << MAX_QUBIT][threads];
+        final int increment;
+        if (shots < 10000) {
+            increment = 10;
+        } else if (shots < 100000) {
+            increment = 100;
+        } else {
+            increment = 1000;
+        }
         if (!probabilityMode) {
             Thread t0 = new Thread(() -> {
                 Qubit[] qubits = new Qubit[MAX_QUBIT];
@@ -45,13 +53,16 @@ public class ExperimentRunner {
                 quArray = VisualOperator.toQubitArray(qubits);
                 for (int m = 0; m < v.size(); m++) {
                     quArray = v.get(m).operateOn(quArray, MAX_QUBIT);
+                    if (quantumView.shouldStop) {
+                        return;
+                    }
                 }
             });
             t0.start();
             new Thread(() -> {
-                while (status < shots2 && !finished) {
+                while (status < shots2 && !finished && !quantumView.shouldStop) {
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(250);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -68,8 +79,13 @@ public class ExperimentRunner {
                         e.printStackTrace();
                     }
                     try {
-                        t0.join();
-                    } catch (InterruptedException e) {
+                        while (t0.isAlive()) {
+                            t0.join(500);
+                            if (quantumView.shouldStop) {
+                                return;
+                            }
+                        }
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                     VisualOperator vm = new VisualOperator();
@@ -77,12 +93,19 @@ public class ExperimentRunner {
                     for (int j = 0; j < timestorun; j++) {
                         int cprob = vm.measureFromProbabilities(probs);
                         sprobs[cprob][t_id]++;
-                        if ((j + 1) % 10 == 0) status += 10;
+                        if ((j + 1) % increment == 0) {
+                            status += increment;
+                            if (quantumView.shouldStop) {
+                                return;
+                            }
+                        }
                     }
                 });
                 t[i].start();
             }
             for (int i = 0; i < threads; i++) {
+                if (quantumView.shouldStop)
+                    return null;
                 try {
                     t[i].join();
                 } catch (Exception e) {
