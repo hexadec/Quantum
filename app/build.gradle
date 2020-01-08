@@ -6,7 +6,7 @@ android {
         applicationId "hu.hexadecimal.quantum"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 901
+        versionCode 902
         versionName getVersionNameString(versionCode)
         resConfig "en"
     }

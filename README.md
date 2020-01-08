@@ -12,7 +12,7 @@ A software for Android that emulates the actions of a quantum computer
 
 ### Main features
 
-- At most 8 qubits
+- At most 10 qubits
 - Gates with at most 4 qubits
 - Parallel processing (1-64 threads)
 - Extremely high number of shots (up to 2^20)

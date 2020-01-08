@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
 
     QuantumView qv;
     private ExecutionProgressDialog progressDialog;
+    private ExperimentRunner experimentRunner;
     private Thread expThread;
 
     private int probabilityMode;
@@ -179,12 +180,17 @@ public class MainActivity extends AppCompatActivity {
             final String separator = pref.getString("separator", ",");
             final boolean scientific = pref.getBoolean("sci_form", false);
             qv.shouldStop = false;
+            final int opLen = qv.getOperators().size();
             final Handler handler = new Handler((Message message) -> {
                 try {
                     if (!progressDialog.isShowing()) {
                         qv.shouldStop = true;
                     } else {
-                        progressDialog.setProgress(message.what, shots);
+                        if (experimentRunner.status != 0) {
+                            progressDialog.setProgress(message.what, shots);
+                        } else {
+                            progressDialog.setSecondaryProgress(message.what + 1, opLen);
+                        }
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -203,7 +209,7 @@ public class MainActivity extends AppCompatActivity {
                 progressDialog = null;
             }
             expThread = new Thread(() -> {
-                ExperimentRunner experimentRunner = new ExperimentRunner(qv);
+                experimentRunner = new ExperimentRunner(qv);
                 long startTime = System.currentTimeMillis();
                 float[] probabilities = experimentRunner.runExperiment(shots, threads, handler, probabilityMode > 0);
                 if (qv.shouldStop) {
@@ -268,7 +274,7 @@ public class MainActivity extends AppCompatActivity {
                     AlertDialog ad = adb.create();
                     ad.setOnShowListener((DialogInterface dialogInterface) -> {
                         float dpWidth = ad.getWindow().getDecorView().getWidth() / displayMetrics.density;
-                        Log.e("TAG", "dpwidth: " + dpWidth);
+                        Log.i("Debug", "Dialog dpwidth: " + dpWidth);
                         int decimalPoints = dpWidth > 280 ? dpWidth > 300 ? dpWidth > 365 ? dpWidth > 420 ? dpWidth > 450 ? dpWidth > 520 ? 10 : 8 : 7 : 6 : 5 : 4 : 3;
                         String decimals = new String(new char[decimalPoints]).replace("\0", "#");
                         DecimalFormat df = new DecimalFormat(stateVector == null ? "0.########" : "0." + decimals);
@@ -276,13 +282,15 @@ public class MainActivity extends AppCompatActivity {
                         outerFor:
                         for (int i = 0; i < probabilities.length; i++) {
                             TableRow tr = new TableRow(MainActivity.this);
+                            tr.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
+                            tr.setDividerDrawable(getDrawable(R.drawable.vertical_divider));
                             for (int j = 0; j < measuredQubits.length; j++) {
                                 if (measuredQubits[j] < 1 && (i >> j) % 2 == 1) {
                                     continue outerFor;
                                 }
                             }
                             TableRow.LayoutParams params = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
-                            params.setMargins((int) QuantumView.pxFromDp(this, dpWidth < 330 ? 8 : 12), 0, 0, 0);
+                            params.setMargins((int) QuantumView.pxFromDp(this, dpWidth < 330 || MAX_QUBITS > 7 ? 3 : 6), 0, (int) QuantumView.pxFromDp(this, dpWidth < 330 || MAX_QUBITS > 7 ? 3 : 6), 0);
                             AppCompatTextView[] textView = new AppCompatTextView[]{
                                     new AppCompatTextView(MainActivity.this),
                                     new AppCompatTextView(MainActivity.this),
@@ -355,20 +363,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDrawerOpened(@NonNull View drawerView) {
                 tintSystemBars(Color.parseColor("#171717"),
-                        ContextCompat.getColor(MainActivity.this, R.color.ic_launcher_background));
+                        ContextCompat.getColor(MainActivity.this, R.color.ic_launcher_background), 400);
             }
 
             @Override
             public void onDrawerClosed(@NonNull View drawerView) {
                 tintSystemBars(ContextCompat.getColor(MainActivity.this, R.color.ic_launcher_background),
-                        Color.parseColor("#171717"));
+                        Color.parseColor("#171717"), 500);
             }
 
             @Override
             public void onDrawerStateChanged(int newState) {
             }
 
-            private void tintSystemBars(int initial, int fin) {
+            private void tintSystemBars(int initial, int fin, int duration) {
 
                 ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
                 anim.addUpdateListener((ValueAnimator animation) -> {
@@ -380,7 +388,7 @@ public class MainActivity extends AppCompatActivity {
                     getSupportActionBar().setBackgroundDrawable(background);
                 });
 
-                anim.setDuration(500).start();
+                anim.setDuration(duration).start();
             }
 
             private int blendColors(int from, int to, float ratio) {
@@ -597,6 +605,30 @@ public class MainActivity extends AppCompatActivity {
                                 qX[i].setProgress(v.getQubitIDs()[i]);
                                 int pos = mGates.indexOf(v.getName());
                                 if (pos >= 0) gateName.setSelection(pos);
+                            }
+                            switch (v.getQubitIDs().length) {
+                                case 4:
+                                    qX[3].setVisibility(View.VISIBLE);
+                                    tX[3].setVisibility(View.VISIBLE);
+                                case 3:
+                                    qX[2].setVisibility(View.VISIBLE);
+                                    tX[2].setVisibility(View.VISIBLE);
+                                case 2:
+                                    qX[1].setVisibility(View.VISIBLE);
+                                    tX[1].setVisibility(View.VISIBLE);
+                                default:
+                            }
+                            switch (v.getQubitIDs().length) {
+                                case 1:
+                                    qX[1].setVisibility(View.INVISIBLE);
+                                    tX[1].setVisibility(View.INVISIBLE);
+                                case 2:
+                                    qX[2].setVisibility(GONE);
+                                    tX[2].setVisibility(GONE);
+                                case 3:
+                                    qX[3].setVisibility(GONE);
+                                    tX[3].setVisibility(GONE);
+                                default:
                             }
                         }
                     } else {

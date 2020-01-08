@@ -12,7 +12,8 @@ public class ExperimentRunner {
     private final LinkedList<VisualOperator> v;
     private final QuantumView quantumView;
     private final int MAX_QUBIT;
-    private int status;
+    protected int status;
+    private int opStatus;
     private boolean finished = false;
 
     private Complex[] quArray;
@@ -56,9 +57,9 @@ public class ExperimentRunner {
                     if (quantumView.shouldStop) {
                         return;
                     }
+                    opStatus = m;
                 }
             });
-            t0.start();
             new Thread(() -> {
                 while (status < shots2 && !finished && !quantumView.shouldStop) {
                     try {
@@ -66,9 +67,10 @@ public class ExperimentRunner {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    handler.sendEmptyMessage(status);
+                    handler.sendEmptyMessage(status == 0 ? opStatus : status);
                 }
             }).start();
+            t0.start();
             for (int i = 0; i < threads; i++) {
                 final int t_id = i;
                 t[i] = new Thread(() -> {
@@ -123,9 +125,23 @@ public class ExperimentRunner {
             for (int k = 0; k < qubits.length; k++) {
                 qubits[k] = new Qubit();
             }
+            new Thread(() -> {
+                while (status < shots2 && !finished && !quantumView.shouldStop) {
+                    try {
+                        Thread.sleep(250);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    handler.sendEmptyMessage(opStatus);
+                }
+            }).start();
             Complex[] quArray = VisualOperator.toQubitArray(qubits);
             for (int m = 0; m < v.size(); m++) {
                 quArray = v.get(m).operateOn(quArray, qubits.length);
+                if (quantumView.shouldStop) {
+                    return null;
+                }
+                opStatus = m;
             }
             float[] nprobs = new float[sprobs.length];
             float[] probs = VisualOperator.measureProbabilities(quArray);
@@ -145,7 +161,7 @@ public class ExperimentRunner {
         }
         float[] ordered_probs = new float[sprobs.length];
         for (int o = 0; o < sprobs.length; o++) {
-            int correct_position = Integer.reverse(o << (32-MAX_QUBIT)) & 0xFF;
+            int correct_position = Integer.reverse(o << (32 - MAX_QUBIT)) & 0xFFFF;
             for (int j = 0; j < threads; j++) {
                 ordered_probs[correct_position] += sprobs[o][j];
             }
