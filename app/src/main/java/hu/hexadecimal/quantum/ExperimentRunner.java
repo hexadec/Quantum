@@ -19,9 +19,9 @@ public class ExperimentRunner {
     private Complex[] quArray;
 
     public ExperimentRunner(QuantumView quantumView) {
-        v = quantumView.getOperators();
+        v = (LinkedList<VisualOperator>) quantumView.getOperators().clone();
         int lUsed = quantumView.getLastUsedQubit();
-        MAX_QUBIT = lUsed < 2 ? 2 : lUsed + 1;
+        MAX_QUBIT = lUsed < 4 ? 4 : lUsed + 1;
         this.quantumView = quantumView;
     }
 
@@ -47,18 +47,10 @@ public class ExperimentRunner {
         }
         if (!probabilityMode) {
             Thread t0 = new Thread(() -> {
-                Qubit[] qubits = new Qubit[MAX_QUBIT];
-                for (int k = 0; k < MAX_QUBIT; k++) {
-                    qubits[k] = new Qubit();
+                if (shouldOptimizeFurther()) {
+                    optimizeFurther();
                 }
-                quArray = VisualOperator.toQubitArray(qubits);
-                for (int m = 0; m < v.size(); m++) {
-                    quArray = v.get(m).operateOn(quArray, MAX_QUBIT);
-                    if (quantumView.shouldStop) {
-                        return;
-                    }
-                    opStatus = m;
-                }
+                quArray = getStateVector();
             });
             new Thread(() -> {
                 while (status < shots2 && !finished && !quantumView.shouldStop) {
@@ -126,7 +118,7 @@ public class ExperimentRunner {
                 qubits[k] = new Qubit();
             }
             new Thread(() -> {
-                while (status < shots2 && !finished && !quantumView.shouldStop) {
+                while (!finished && !quantumView.shouldStop) {
                     try {
                         Thread.sleep(250);
                     } catch (Exception e) {
@@ -135,39 +127,24 @@ public class ExperimentRunner {
                     handler.sendEmptyMessage(opStatus);
                 }
             }).start();
-            Complex[] quArray = VisualOperator.toQubitArray(qubits);
-            for (int m = 0; m < v.size(); m++) {
-                quArray = v.get(m).operateOn(quArray, qubits.length);
-                if (quantumView.shouldStop) {
-                    return null;
-                }
-                opStatus = m;
+            if (shouldOptimizeFurther()) {
+                optimizeFurther();
             }
-            float[] nprobs = new float[sprobs.length];
+            quArray = getStateVector();
+            if (quantumView.shouldStop)
+                return null;
             float[] probs = VisualOperator.measureProbabilities(quArray);
-            for (int m = 0; m < probs.length; m++) {
-                int[] x = new int[qubits.length];
-                for (int i = 0; i < qubits.length; i++) {
-                    x[i] = ((m) >> (qubits.length - i - 1)) % 2;
-                }
-                int ret = 0;
-                for (int i = 0; i < qubits.length; i++) {
-                    ret += x[i] << (i);
-                }
-                nprobs[m] = probs[ret];
-            }
             finished = true;
-            return nprobs;
+            return probs;
         }
         float[] ordered_probs = new float[sprobs.length];
         for (int o = 0; o < sprobs.length; o++) {
-            int correct_position = Integer.reverse(o << (32 - MAX_QUBIT)) & 0xFFFF;
             for (int j = 0; j < threads; j++) {
-                ordered_probs[correct_position] += sprobs[o][j];
+                ordered_probs[o] += sprobs[o][j];
             }
-            ordered_probs[correct_position] /= (float) shots;
+            ordered_probs[o] /= (float) shots;
             if (shots == 1) {
-                ordered_probs[correct_position] /= threads;
+                ordered_probs[o] /= threads;
             }
         }
         finished = true;
@@ -175,6 +152,7 @@ public class ExperimentRunner {
     }
 
     public Complex[] getStateVector() {
+        if (finished && quArray != null) return quArray;
         return getStateVector(-1);
     }
 
@@ -189,6 +167,10 @@ public class ExperimentRunner {
         }
         for (int m = 0; m < v.size(); m++) {
             quArray = v.get(m).operateOn(quArray, qubits.length);
+            if (quantumView.shouldStop) {
+                return null;
+            }
+            opStatus = m;
         }
         Complex[] orderedQuArray = new Complex[quArray.length];
         for (int m = 0; m < quArray.length; m++) {
@@ -203,6 +185,46 @@ public class ExperimentRunner {
             orderedQuArray[m] = quArray[ret];
         }
         return orderedQuArray;
+    }
+
+    public boolean shouldOptimizeFurther() {
+        int opLength = v.size();
+        int qFactor = 1 << MAX_QUBIT;
+        return opLength * qFactor >= 4096;
+    }
+
+    public void optimizeFurther() {
+        for (int i = 0; i < MAX_QUBIT; i++) {
+            VisualOperator last = null;
+            for (int j = 0; j < v.size(); j++) {
+                VisualOperator jThElement = v.get(j);
+                if (jThElement.isMultiQubit()) {
+                    for (int k = 0; k < jThElement.getQubitIDs().length; k++) {
+                        if (jThElement.getQubitIDs()[k] == i) {
+                            if (last != null) {
+                                v.add(j, last.copy());
+                                last = null;
+                                j++;
+                            }
+                            break;
+                        }
+                    }
+                } else if (jThElement.getQubitIDs()[0] == i) {
+                    if (last == null) {
+                        last = jThElement.copy();
+                    } else {
+                        last = jThElement.copy().matrixMultiplication(last);
+                    }
+                    v.remove(j);
+                    j--;
+                }
+                if (j == v.size() - 1 && last != null) {
+                    v.add(j, last.copy());
+                    last = null;
+                    j++;
+                }
+            }
+        }
     }
 
     public Complex[][] getFinalUnitaryMatrix() {

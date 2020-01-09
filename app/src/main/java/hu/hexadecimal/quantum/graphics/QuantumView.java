@@ -135,6 +135,7 @@ public class QuantumView extends View {
             VisualOperator v = gos.get(i);
             v.resetRect();
             final int[] qubitIDs = v.getQubitIDs();
+            boolean controlled = false;
             for (int j = 0; j < qubitIDs.length; j++) {
                 gatesNumber[qubitIDs[j]]++;
                 otherPaint.setColor(v.getColor());
@@ -173,12 +174,21 @@ public class QuantumView extends View {
                     RectF a = v.getRect().get(j - 1);
                     float center2x = a.centerX();
                     float center2y = a.centerY();
-                    center2x += (pxFromDp(super.getContext(), GATE_SIZE / 2) * (center2x - center1x) / (center2y - center1y)) / 2;
-                    center2y += pxFromDp(super.getContext(), GATE_SIZE / 1.7f) * (center2y > center1y ? -1 : 1);
+                    center2x += (pxFromDp(super.getContext(), GATE_SIZE / 1.1f) * (center1x - center2x) / Math.sqrt(Math.pow((center2x - center1x), 2) + Math.pow((center2y - center1y), 2)));
+                    center2y += pxFromDp(super.getContext(), GATE_SIZE / 1.1f) * (center1y - center2y) / Math.sqrt(Math.pow((center2x - center1x), 2) + Math.pow((center2y - center1y), 2));
                     canvas.drawLine(center1x, center1y, center2x, center2y, mPaint);
                 }
 
                 canvas.drawText(symbol, bounds.left, bounds.top - whiteTextPaint.ascent(), whiteTextPaint);
+
+                if (symbol.equals("●")) {
+                    controlled = true;
+                    whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 11));
+                    canvas.drawText("C", areaRect.right - (whiteTextPaint.measureText("C") * 1.3f), bounds.top - (whiteTextPaint.ascent() / 1.3f), whiteTextPaint);
+                } else if (controlled) {
+                    whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 11));
+                    canvas.drawText("T", areaRect.right - (whiteTextPaint.measureText("T") * 1.3f), bounds.top - (whiteTextPaint.ascent() / 1.3f), whiteTextPaint);
+                }
             }
         }
         whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 24));

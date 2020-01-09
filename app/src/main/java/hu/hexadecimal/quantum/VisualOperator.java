@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 public class VisualOperator implements Serializable {
 
     public static final long serialVersionUID = 2L;
-    public static final transient long helpVersion = 12L;
+    public static final transient long helpVersion = 14L;
     private Complex[][] matrix;
     private String[] symbols;
     private Random random;
@@ -52,7 +52,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)},
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
-                    }, "CNOT", new String[]{"●", "◯"}, 0xffE19417);
+                    }, "CNOT", new String[]{"●", "⊕"}, 0xffE19417);
 
     public static final transient VisualOperator CY =
             new VisualOperator(4,
@@ -119,7 +119,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
-                    }, "Toffoli", new String[]{"●", "●", "◯"}, 0xff17DCE1);
+                    }, "Toffoli", new String[]{"●", "●", "⊕"}, 0xff17DCE1);
 
     public static final transient VisualOperator FREDKIN =
             new VisualOperator(8,
@@ -365,6 +365,8 @@ public class VisualOperator implements Serializable {
         VisualOperator v = new VisualOperator(MATRIX_DIM, complex, name, symbols, color);
         v.theta = theta;
         v.phi = phi;
+        v.qubit_ids = new int[qubit_ids.length];
+        System.arraycopy(qubit_ids, 0, v.qubit_ids, 0, qubit_ids.length);
         return v;
     }
 
@@ -630,6 +632,14 @@ public class VisualOperator implements Serializable {
         return output;
     }
 
+    public VisualOperator matrixMultiplication(VisualOperator second) {
+        if (this.MATRIX_DIM != second.MATRIX_DIM)
+            return this;
+        this.matrix = matrixProduct(this.matrix, second.matrix);
+        this.name = "MUL";
+        return this;
+    }
+
     private static Complex[] operateOn(final Complex[] qubitArray, final Complex[][] gateTensor) {
         Complex[] resultMatrix = new Complex[qubitArray.length];
         for (int i = 0; i < gateTensor[0].length; i++) {
@@ -719,6 +729,7 @@ public class VisualOperator implements Serializable {
         float[] probs = new float[qubitArray.length];
         for (int i = 0; i < qubitArray.length; i++) {
             probs[i] = (float) Math.pow(qubitArray[i].mod(), 2);
+            if (probs[i] < Math.pow(10, -20)) probs[i] = 0;
         }
         return probs;
     }
