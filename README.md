@@ -29,9 +29,10 @@ A software for Android that emulates the actions of a quantum computer
 - Pauli-X/Y/Z
 - S-gate (π/2 phase shift)
 - T-gate (π/4 phase shift)
-- π/6 phase shift
 - √NOT
 - Identity
+- U3
+- Rotation (using spherical coordinates)
 
 ##### Multi Qubit
 - CNOT/CY/CZ (Controlled Pauli)
@@ -41,11 +42,15 @@ A software for Android that emulates the actions of a quantum computer
 - SWAP
 - Toffoli
 - Fredkin
-- 2 & 3 Qubit Identity
 
 ###### Planned features
 Create and run algorithms with loops and conditions  
-Apply rotation gates with custom angles more easily  
 Display the final unitary matrix of the system
 
-(C) All rights reserved! (for now)
+<br/>
+<a href='https://play.google.com/store/apps/details?id=hu.hexadecimal.quantum&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
+<img alt='Get it on Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png' width="150"/></a>
+<br/>
+<a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">
+<img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-nd/4.0/88x31.png" /></a>
+<br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
