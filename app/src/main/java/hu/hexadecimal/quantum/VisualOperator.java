@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 public class VisualOperator implements Serializable {
 
     public static final long serialVersionUID = 2L;
-    public static final transient long helpVersion = 14L;
+    public static final transient long helpVersion = 21L;
     private Complex[][] matrix;
     private String[] symbols;
     private Random random;
@@ -39,6 +39,7 @@ public class VisualOperator implements Serializable {
     private int[] qubit_ids;
     private transient double theta;
     private transient double phi;
+    private transient double lambda;
 
     public static final int HTML_MODE_BODY = 0b1;
     public static final int HTML_MODE_CAPTION = 0b10;
@@ -261,6 +262,24 @@ public class VisualOperator implements Serializable {
         name = "CustRot";
         this.theta = theta;
         this.phi = phi;
+        lambda = -100000f;
+    }
+
+    public VisualOperator(double theta, double phi, double lambda) {
+        Complex[][] U3matrix = new Complex[][]{
+                new Complex[]{new Complex(Math.cos(theta / 2), 0), Complex.multiply(new Complex(lambda), new Complex(-Math.sin(theta / 2), 0))},
+                new Complex[]{Complex.multiply(new Complex(phi), new Complex(Math.sin(theta / 2), 0)), Complex.multiply(new Complex(lambda + phi), new Complex(Math.cos(theta / 2), 0))}
+        };
+        matrix = U3matrix;
+        MATRIX_DIM = 2;
+        qubit_ids = new int[NQBITS = 1];
+        rectangle = new LinkedList<>();
+        color = 0xFFD12000;
+        symbols = new String[]{"U3"};
+        name = "U3";
+        this.theta = theta;
+        this.phi = phi;
+        this.lambda = lambda;
     }
 
     public String[] getSymbols() {
@@ -318,6 +337,9 @@ public class VisualOperator implements Serializable {
         }
         theta = -theta;
         phi = -phi;
+        if (lambda != -100000f) {
+            lambda = -lambda;
+        }
     }
 
     public static VisualOperator hermitianConjugate(VisualOperator visualOperator) {
@@ -347,11 +369,15 @@ public class VisualOperator implements Serializable {
     }
 
     public boolean isRotation() {
-        return theta != 0 || phi != 0;
+        return (theta != 0 || phi != 0) && lambda == -100000f;
+    }
+
+    public boolean isU3() {
+        return (theta != 0 || phi != 0 || lambda != 0) && lambda != -100000f;
     }
 
     public double[] getAngles() {
-        return new double[]{theta, phi};
+        return new double[]{theta, phi, lambda};
     }
 
     public VisualOperator copy() {
@@ -365,6 +391,7 @@ public class VisualOperator implements Serializable {
         VisualOperator v = new VisualOperator(MATRIX_DIM, complex, name, symbols, color);
         v.theta = theta;
         v.phi = phi;
+        v.lambda = lambda;
         v.qubit_ids = new int[qubit_ids.length];
         System.arraycopy(qubit_ids, 0, v.qubit_ids, 0, qubit_ids.length);
         return v;
@@ -412,6 +439,7 @@ public class VisualOperator implements Serializable {
         JSONObject angles = new JSONObject();
         angles.put("theta", theta);
         angles.put("phi", phi);
+        angles.put("lambda", lambda);
         jsonObject.put("angles", angles);
         jsonObject.put("qubits", qubits);
         jsonObject.put("symbols", symbols);
@@ -433,10 +461,12 @@ public class VisualOperator implements Serializable {
             int qubit_count = jsonObject.getInt("qubit_count");
             double theta = 0;
             double phi = 0;
+            double lambda = -100000f;
             try {
                 JSONObject angles = jsonObject.getJSONObject("angles");
                 theta = angles.getDouble("theta");
                 phi = angles.getDouble("phi");
+                lambda = angles.getDouble("lambda");
             } catch (Exception e) {
                 e.printStackTrace();
                 Log.w("VisualOperator fromJSON", "No angles?");
@@ -460,6 +490,7 @@ public class VisualOperator implements Serializable {
             visualOperator.qubit_ids = qubits;
             visualOperator.theta = theta;
             visualOperator.phi = phi;
+            visualOperator.lambda = lambda;
             return visualOperator;
         } catch (Exception e) {
             e.printStackTrace();

@@ -25,7 +25,7 @@
     <br/><b>Threads:</b> usually it is enough to use as many threads as CPU cores your device has, however, a little more won\'t deteriorate performance.
     <br/><b>Output folder:</b> select where to export the results/gate sequence and user-defined matrices.
     ]]></string>
-    <string name="matrix_editor">Matrix editor</string>
+    <string name="matrix_editor">Gate editor</string>
     <string name="matrix_editor_detailed">Create and edit custom gates</string>
     <string name="gate_name">Gate name</string>
     <string name="symbols_hint">Symbols, eg: S,X,D</string>

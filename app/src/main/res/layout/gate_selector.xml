@@ -122,7 +122,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="0dp"
                 android:layout_marginEnd="16dp"
                 android:max="3141"
                 android:progressDrawable="@drawable/seek_progress"
@@ -151,11 +151,10 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="12dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
                 android:max="6282"
                 android:progressDrawable="@drawable/seek_progress"
                 android:thumb="@drawable/seek_thumb"
-                app:layout_constraintBottom_toTopOf="@+id/fixed_values"
+                app:layout_constraintBottom_toTopOf="@+id/ry"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/rz_text"
                 app:layout_constraintTop_toBottomOf="@+id/rx" />
@@ -171,6 +170,33 @@
                 app:layout_constraintEnd_toStartOf="@+id/rz"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/rz" />
+
+            <SeekBar
+                android:id="@+id/ry"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="16dp"
+                android:max="6282"
+                android:progressDrawable="@drawable/seek_progress"
+                android:thumb="@drawable/seek_thumb"
+                app:layout_constraintBottom_toTopOf="@+id/fixed_values"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/ry_text"
+                app:layout_constraintTop_toBottomOf="@+id/rz" />
+
+            <TextView
+                android:id="@+id/ry_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="λ 0.000"
+                android:typeface="monospace"
+                app:layout_constraintBottom_toBottomOf="@id/ry"
+                app:layout_constraintEnd_toStartOf="@+id/ry"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/ry" />
 
             <CheckBox
                 android:id="@+id/fixed_values"

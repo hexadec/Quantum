@@ -32,6 +32,10 @@
             In order to use these gates on your virtual qubits
             in this app, you need to choose first a gate then select which qubits should be affected
             by it.
+            <br/>
+            In addition to predefined gates, the app includes two types of customizable gates, one of them being the
+            Rotation gate, while the other is the U3 gate. The latter is really important, as all other single qubit gates
+            are basically just a variant of U3.
             <br />
             Please note that for now, these gates are ideal, in contrast with real quantum gates
             that have some noise (a certain probability that they will
@@ -51,6 +55,50 @@
             called phase-shift. When you create a rotation gate using the
             app, always the rotation around the X-axis will be performed first, followed by the
             rotation around the Z-axis.
+        <table align="center">
+            <tr>
+                <td>
+                    cos(&theta;/2)
+                </td>
+                <td>
+                    -e<sup>i(&pi;/2)</sup>sin(&theta;/2)
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    e<sup>i(&phi;-&pi;/2)</sup>sin(&theta;/2)
+                </td>
+                <td>
+                    e<sup>i&phi;</sup>cos(&theta;/2)
+                </td>
+            </tr>
+        </table>
+        </p>
+        <p style="font-size:18px">
+            <i>U3 Gate</i>
+        </p>
+        <p style="text-align: justify;">
+            The U3 gate is a unitary gate that has three parameters, hence its name.
+            Using this gate, any single qubit gate can be constructed. It is somewhat similar to a
+            rotation gate, however, the parameters don't have the same meaning.
+        <table align="center">
+            <tr>
+                <td>
+                    cos(&theta;/2)
+                </td>
+                <td>
+                    -e<sup>i&lambda;</sup>sin(&theta;/2)
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    e<sup>i&phi;</sup>sin(&theta;/2)
+                </td>
+                <td>
+                    e<sup>i(&lambda;+&phi;)</sup>cos(&theta;/2)
+                </td>
+            </tr>
+        </table>
         </p>
         <p style="font-size:18px">
             <i>Single Qubit Gates</i>

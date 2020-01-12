@@ -46,6 +46,7 @@
         <item>Predefined</item>
         <item>User defined</item>
         <item>Rotation</item>
+        <item>U3</item>
     </string-array>
     <string-array name="filter_gates">
         <item>All gates</item>

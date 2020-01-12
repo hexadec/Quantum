@@ -558,10 +558,12 @@ public class MainActivity extends AppCompatActivity {
                 final Spinner gateName = mainView.findViewById(R.id.gate_name_spinner);
                 final ConstraintLayout subLayout = mainView.findViewById(R.id.sub_layout);
                 final ConstraintLayout rotLayout = mainView.findViewById(R.id.rot_layout);
-                final SeekBar rx = mainView.findViewById(R.id.rx);
-                final SeekBar rz = mainView.findViewById(R.id.rz);
-                final TextView rxText = mainView.findViewById(R.id.rx_text);
-                final TextView rzText = mainView.findViewById(R.id.rz_text);
+                final SeekBar thetaBar = mainView.findViewById(R.id.rx);
+                final SeekBar phiBar = mainView.findViewById(R.id.rz);
+                final SeekBar lamdaBar = mainView.findViewById(R.id.ry);
+                final TextView thetaText = mainView.findViewById(R.id.rx_text);
+                final TextView phiText = mainView.findViewById(R.id.rz_text);
+                final TextView lambdaText = mainView.findViewById(R.id.ry_text);
                 final CheckBox fixedValues = mainView.findViewById(R.id.fixed_values);
                 final SeekBar[] qX = new SeekBar[]{
                         mainView.findViewById(R.id.order_first),
@@ -600,9 +602,10 @@ public class MainActivity extends AppCompatActivity {
                         });
                     }
                     if (v != null) {
-                        if (!v.isRotation()) {
+                        if (!v.isRotation() && !v.isU3()) {
                             for (int i = 0; i < v.getQubitIDs().length; i++) {
                                 qX[i].setProgress(v.getQubitIDs()[i]);
+                                tX[i].setText("q" + (v.getQubitIDs()[i] + 1));
                                 int pos = mGates.indexOf(v.getName());
                                 if (pos >= 0) gateName.setSelection(pos);
                             }
@@ -632,7 +635,9 @@ public class MainActivity extends AppCompatActivity {
                             }
                         }
                     } else {
-                        qX[0].setProgress(qv.whichQubit(posy));
+                        int which = qv.whichQubit(posy);
+                        qX[0].setProgress(which);
+                        tX[0].setText("q" + (which + 1));
                     }
                     gateType.post(() ->
                             gateType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -673,10 +678,17 @@ public class MainActivity extends AppCompatActivity {
                                             t.setGravity(Gravity.CENTER, 0, 0);
                                             t.show();
                                         }
-                                    } else if (i == 2) {
+                                    } else if (i == 2 || i == 3) {
                                         for (int k = 1; k < qX.length; k++) {
                                             qX[k].setVisibility(GONE);
                                             tX[k].setVisibility(GONE);
+                                        }
+                                        if (i == 2) {
+                                            lambdaText.setVisibility(GONE);
+                                            lamdaBar.setVisibility(GONE);
+                                        } else {
+                                            lambdaText.setVisibility(VISIBLE);
+                                            lamdaBar.setVisibility(VISIBLE);
                                         }
                                         subLayout.setVisibility(GONE);
                                         rotLayout.setVisibility(VISIBLE);
@@ -720,25 +732,29 @@ public class MainActivity extends AppCompatActivity {
                         fixedValues.setOnCheckedChangeListener((CompoundButton compoundButton, boolean b) ->
                                 new Handler().postDelayed(() -> {
                                     if (b) {
-                                        rx.setMax(importantAngles.length - 1);
-                                        rz.setMax(importantAngles2PI.length - 1);
-                                        rx.setProgress(0);
-                                        rz.setProgress(0);
+                                        thetaBar.setMax(importantAngles.length - 1);
+                                        lamdaBar.setMax(importantAngles2PI.length - 1);
+                                        phiBar.setMax(importantAngles2PI.length - 1);
+                                        thetaBar.setProgress(0);
+                                        phiBar.setProgress(0);
+                                        lamdaBar.setProgress(0);
                                     } else {
-                                        rx.setMax(3141);
-                                        rz.setMax(6282);
-                                        rx.setProgress(0);
-                                        rz.setProgress(0);
+                                        thetaBar.setMax(3141);
+                                        lamdaBar.setMax(6282);
+                                        phiBar.setMax(6282);
+                                        thetaBar.setProgress(0);
+                                        phiBar.setProgress(0);
+                                        lamdaBar.setProgress(0);
                                     }
                                 }, 100));
                         DecimalFormat df = new DecimalFormat("0.000");
-                        rx.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        thetaBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                             @Override
                             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                                 if (fixedValues.isChecked()) {
-                                    rxText.setText(String.format("\u03B8 %-4s", importantAngleNames[i]));
+                                    thetaText.setText(String.format("\u03B8 %-4s", importantAngleNames[i]));
                                 } else {
-                                    rxText.setText("\u03B8 " + df.format(i / 1000f));
+                                    thetaText.setText("\u03B8 " + df.format(i / 1000f));
                                 }
                             }
 
@@ -752,13 +768,33 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                         });
-                        rz.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        lamdaBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                             @Override
                             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                                 if (fixedValues.isChecked()) {
-                                    rzText.setText(String.format("\u03C6 %-4s", importantAngleNames2PI[i]));
+                                    lambdaText.setText(String.format("\u03BB %-4s", importantAngleNames2PI[i]));
                                 } else {
-                                    rzText.setText("\u03C6 " + df.format(i / 1000f));
+                                    lambdaText.setText("\u03BB " + df.format(i / 1000f));
+                                }
+                            }
+
+                            @Override
+                            public void onStartTrackingTouch(SeekBar seekBar) {
+
+                            }
+
+                            @Override
+                            public void onStopTrackingTouch(SeekBar seekBar) {
+
+                            }
+                        });
+                        phiBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                            @Override
+                            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                                if (fixedValues.isChecked()) {
+                                    phiText.setText(String.format("\u03C6 %-4s", importantAngleNames2PI[i]));
+                                } else {
+                                    phiText.setText("\u03C6 " + df.format(i / 1000f));
                                 }
                             }
 
@@ -775,9 +811,19 @@ public class MainActivity extends AppCompatActivity {
                         if (v != null && v.isRotation()) {
                             gateType.setSelection(2);
                             qX[0].setProgress(v.getQubitIDs()[0]);
-                            rx.setProgress((int) Math.abs(v.getAngles()[0] * 1000));
-                            rz.setProgress((int) Math.abs(v.getAngles()[1] * 1000));
+                            phiBar.setMax(6282);
+                            thetaBar.setProgress((int) Math.abs(v.getAngles()[0] * 1000));
+                            phiBar.setProgress((int) Math.abs(v.getAngles()[1] * 1000));
                             if (v.getAngles()[0] < 0 || v.getAngles()[1] < 0) {
+                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(true);
+                            }
+                        } else if (v != null && v.isU3()) {
+                            gateType.setSelection(3);
+                            qX[0].setProgress(v.getQubitIDs()[0]);
+                            thetaBar.setProgress((int) Math.abs(v.getAngles()[0] * 1000));
+                            lamdaBar.setProgress((int) Math.abs(v.getAngles()[2] * 1000));
+                            phiBar.setProgress((int) Math.abs(v.getAngles()[1] * 1000));
+                            if (v.getAngles()[0] < 0 || v.getAngles()[1] < 0 || v.getAngles()[2] < 0) {
                                 ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(true);
                             }
                         } else {
@@ -824,7 +870,7 @@ public class MainActivity extends AppCompatActivity {
                         });
                         mainView.findViewById(R.id.cancel).setOnClickListener((View view) -> d.cancel());
                         mainView.findViewById(R.id.ok).setOnClickListener((View view) -> {
-                            if (gateType.getSelectedItemPosition() != 2) {
+                            if (gateType.getSelectedItemPosition() < 2) {
                                 if (operators.size() == 0 && gateType.getSelectedItemPosition() != 0) {
                                     return;
                                 }
@@ -862,10 +908,22 @@ public class MainActivity extends AppCompatActivity {
                                 else
                                     qv.replaceGateAt(quids, gate, posx, posy);
                                 d.cancel();
-                            } else {
-                                double theta = fixedValues.isChecked() ? importantAngles[rx.getProgress()] : rx.getProgress() / 1000f;
-                                double phi = fixedValues.isChecked() ? importantAngles2PI[rz.getProgress()] : rz.getProgress() / 1000f;
+                            } else if (gateType.getSelectedItemPosition() == 2){
+                                double theta = fixedValues.isChecked() ? importantAngles[thetaBar.getProgress()] : thetaBar.getProgress() / 1000f;
+                                double phi = fixedValues.isChecked() ? importantAngles2PI[phiBar.getProgress()] : phiBar.getProgress() / 1000f;
                                 VisualOperator gate = new VisualOperator(theta, phi);
+                                if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
+                                    gate.hermitianConjugate();
+                                if (v == null)
+                                    qv.addGate(new int[]{qX[0].getProgress()}, gate);
+                                else
+                                    qv.replaceGateAt(new int[]{qX[0].getProgress()}, gate, posx, posy);
+                                d.cancel();
+                            } else if (gateType.getSelectedItemPosition() == 3) {
+                                double theta = fixedValues.isChecked() ? importantAngles[thetaBar.getProgress()] : thetaBar.getProgress() / 1000f;
+                                double phi = fixedValues.isChecked() ? importantAngles2PI[phiBar.getProgress()] : phiBar.getProgress() / 1000f;
+                                double lambda = fixedValues.isChecked() ? importantAngles2PI[lamdaBar.getProgress()] : lamdaBar.getProgress() / 1000f;
+                                VisualOperator gate = new VisualOperator(theta, phi, lambda);
                                 if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
                                     gate.hermitianConjugate();
                                 if (v == null)

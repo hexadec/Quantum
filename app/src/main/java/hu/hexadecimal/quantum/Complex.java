@@ -140,10 +140,18 @@ public class Complex implements Serializable {
         return Complex.divide(Complex.sub(epz, enz), new Complex(0, 2));
     }
 
+    public static Complex asin(Complex complex) {
+        return Complex.multiply(new Complex(0, -1), Complex.log(new Complex(Math.E, 0), Complex.add(Complex.multiply(new Complex(0, 1), complex), Complex.exponent(Complex.sub(new Complex(1, 0), Complex.exponent(complex, new Complex(2, 0))), new Complex(0.5, 0)))));
+    }
+
     public static Complex cos(Complex complex) {
         Complex epz = Complex.exponent(new Complex(Math.E, 0), new Complex((-1) * complex.imaginary, complex.real));
         Complex enz = Complex.exponent(new Complex(Math.E, 0), new Complex(complex.imaginary, (-1) * complex.real));
         return Complex.multiply(Complex.add(epz, enz), new Complex(0.5, 0));
+    }
+
+    public static Complex acos(Complex complex) {
+        return Complex.multiply(new Complex(0, -1), Complex.log(new Complex(Math.E, 0), Complex.add(complex, Complex.exponent(Complex.sub(Complex.exponent(complex, new Complex(2, 0)), new Complex(1, 0)), new Complex(0.5, 0)))));
     }
 
     public static Complex sinh(Complex complex) {
@@ -212,7 +220,7 @@ public class Complex implements Serializable {
         String decimalChars = new String(new char[decimals]).replace("\0", "#");
         StringBuilder sb = new StringBuilder();
         if (Math.abs(real) >= Math.pow(10, -1 * (decimals + 1)) * 5) {
-            if (real >= 0) sb.append('+');
+            //if (real >= 0) sb.append('+');
             sb.append(new DecimalFormat("0." + decimalChars, new DecimalFormatSymbols(Locale.UK)).format(real));
         }
         if (Math.abs(imaginary) >= Math.pow(10, -1 * (decimals + 1)) * 5) {
