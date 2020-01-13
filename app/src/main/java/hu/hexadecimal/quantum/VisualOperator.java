@@ -46,6 +46,8 @@ public class VisualOperator implements Serializable {
     public static final int HTML_MODE_FAT = 0b100;
     public static final int HTML_MODE_BASIC = 0b0;
 
+    private static final transient double NULL_ANGLE = -10E10;
+
     public static final transient VisualOperator CNOT =
             new VisualOperator(4,
                     new Complex[][]{
@@ -227,11 +229,13 @@ public class VisualOperator implements Serializable {
 
         random = new Random();
         qubit_ids = new int[NQBITS];
+        theta = phi = lambda = NULL_ANGLE;
     }
 
     public VisualOperator(int MATRIX_DIM, Complex[][] M) {
         this(MATRIX_DIM, M, "Custom", VisualOperator.generateSymbols(MATRIX_DIM), 0xff000000);
         random = new Random();
+        theta = phi = lambda = NULL_ANGLE;
     }
 
     public VisualOperator() {
@@ -240,6 +244,7 @@ public class VisualOperator implements Serializable {
         rectangle = new LinkedList<>();
         MATRIX_DIM = 4;
         name = "";
+        theta = phi = lambda = NULL_ANGLE;
     }
 
     public VisualOperator(double theta, double phi) {
@@ -262,15 +267,14 @@ public class VisualOperator implements Serializable {
         name = "CustRot";
         this.theta = theta;
         this.phi = phi;
-        lambda = -100000f;
+        lambda = NULL_ANGLE;
     }
 
     public VisualOperator(double theta, double phi, double lambda) {
-        Complex[][] U3matrix = new Complex[][]{
+        matrix = new Complex[][]{
                 new Complex[]{new Complex(Math.cos(theta / 2), 0), Complex.multiply(new Complex(lambda), new Complex(-Math.sin(theta / 2), 0))},
                 new Complex[]{Complex.multiply(new Complex(phi), new Complex(Math.sin(theta / 2), 0)), Complex.multiply(new Complex(lambda + phi), new Complex(Math.cos(theta / 2), 0))}
         };
-        matrix = U3matrix;
         MATRIX_DIM = 2;
         qubit_ids = new int[NQBITS = 1];
         rectangle = new LinkedList<>();
@@ -335,9 +339,13 @@ public class VisualOperator implements Serializable {
         for (int i = 0; i < NQBITS; i++) {
             symbols[i] += "†";
         }
-        theta = -theta;
-        phi = -phi;
-        if (lambda != -100000f) {
+        if (theta != NULL_ANGLE) {
+            theta = -theta;
+        }
+        if (phi != NULL_ANGLE) {
+            phi = -phi;
+        }
+        if (lambda != NULL_ANGLE) {
             lambda = -lambda;
         }
     }
@@ -369,11 +377,11 @@ public class VisualOperator implements Serializable {
     }
 
     public boolean isRotation() {
-        return (theta != 0 || phi != 0) && lambda == -100000f;
+        return lambda == NULL_ANGLE && theta != NULL_ANGLE && phi != NULL_ANGLE && !isMultiQubit() && name.equals("CustRot");
     }
 
     public boolean isU3() {
-        return (theta != 0 || phi != 0 || lambda != 0) && lambda != -100000f;
+        return lambda != NULL_ANGLE && theta != NULL_ANGLE && phi != NULL_ANGLE && !isMultiQubit() && name.equals("U3");
     }
 
     public double[] getAngles() {
@@ -436,11 +444,13 @@ public class VisualOperator implements Serializable {
             qubits.put(qubit_ids[i]);
             symbols.put(this.symbols[i]);
         }
-        JSONObject angles = new JSONObject();
-        angles.put("theta", theta);
-        angles.put("phi", phi);
-        angles.put("lambda", lambda);
-        jsonObject.put("angles", angles);
+        if (isU3() || isRotation()) {
+            JSONObject angles = new JSONObject();
+            angles.put("theta", theta);
+            angles.put("phi", phi);
+            angles.put("lambda", lambda);
+            jsonObject.put("angles", angles);
+        }
         jsonObject.put("qubits", qubits);
         jsonObject.put("symbols", symbols);
         for (int i = 0; i < matrix.length; i++) {
@@ -459,9 +469,9 @@ public class VisualOperator implements Serializable {
             int matrix_dim = jsonObject.getInt("matrix_dim");
             int color = jsonObject.getInt("color");
             int qubit_count = jsonObject.getInt("qubit_count");
-            double theta = 0;
-            double phi = 0;
-            double lambda = -100000f;
+            double theta = NULL_ANGLE;
+            double phi = NULL_ANGLE;
+            double lambda = NULL_ANGLE;
             try {
                 JSONObject angles = jsonObject.getJSONObject("angles");
                 theta = angles.getDouble("theta");

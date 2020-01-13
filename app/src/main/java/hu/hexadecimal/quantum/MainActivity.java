@@ -607,7 +607,11 @@ public class MainActivity extends AppCompatActivity {
                                 qX[i].setProgress(v.getQubitIDs()[i]);
                                 tX[i].setText("q" + (v.getQubitIDs()[i] + 1));
                                 int pos = mGates.indexOf(v.getName());
-                                if (pos >= 0) gateName.setSelection(pos);
+                                if (pos >= 0) {
+                                    gateName.setSelection(pos);
+                                } else {
+                                    gateName.setSelection(mGates.indexOf(VisualOperator.HADAMARD.getName()));
+                                }
                             }
                             switch (v.getQubitIDs().length) {
                                 case 4:
