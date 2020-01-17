@@ -8,14 +8,16 @@ import android.view.View;
 
 import androidx.core.graphics.PaintCompat;
 import hu.hexadecimal.quantum.Complex;
+import hu.hexadecimal.quantum.R;
 import hu.hexadecimal.quantum.VisualOperator;
 import hu.hexadecimal.quantum.Qubit;
 
 public class BlochSphereView extends View {
 
-    final Paint mPaint, otherPaint, textPaint;
+    final Paint mPaint, otherPaint, textPaint, textPaintW;
 
     Qubit qb;
+    boolean hasMulti;
 
     public BlochSphereView(Context context) {
         super(context);
@@ -25,19 +27,25 @@ public class BlochSphereView extends View {
 
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setColor(0xff333333);
-        mPaint.setStrokeWidth(5);
+        mPaint.setStrokeWidth(pxFromDp(getContext(), 2));
 
         textPaint = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
         textPaint.setColor(0xff111111);
         textPaint.setTextSize(pxFromDp(context, 20));
         textPaint.setTypeface(Typeface.MONOSPACE);
 
+        textPaintW = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
+        textPaintW.setColor(0xff333333);
+        textPaintW.setTextSize(pxFromDp(context, 12));
+        textPaintW.setTypeface(Typeface.MONOSPACE);
+
         otherPaint = new Paint();
         otherPaint.setStyle(Paint.Style.STROKE);
     }
 
-    public void setQBit(Qubit qb) {
+    public void setQBit(Qubit qb, boolean hasMultiQubitGate) {
         this.qb = qb;
+        hasMulti = hasMultiQubitGate;
         invalidate();
     }
 
@@ -55,6 +63,12 @@ public class BlochSphereView extends View {
 
         int xpos = getWidth();
         int ypos = getHeight();
+        if (hasMulti) {
+            canvas.drawText(getContext().getString(R.string.state_of_qubit_warning),
+                    getWidth() / 2f - textPaintW.measureText(getContext().getString(R.string.state_of_qubit_warning)) / 2f,
+                    pxFromDp(getContext(), 15),
+                    textPaintW);
+        }
         char verticalBar = PaintCompat.hasGlyph(textPaint, "⎥") ? '⎥' : '|';
         if (verticalBar == '|') textPaint.setTextSize(pxFromDp(super.getContext(), 17));
         if (getHeight() < getWidth()) {

@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity {
     private int probabilityMode;
     private boolean saved;
     private int blochSpherePos = 0;
+    private boolean hasMultiQubitGate;
 
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle toggle;
@@ -440,16 +441,21 @@ public class MainActivity extends AppCompatActivity {
 
     public void displayBlochSphere() {
         blochSpherePos = 0;
+        hasMultiQubitGate = false;
         Qubit q2 = new Qubit();
-        for (VisualOperator v : qv.getOperators()) {
+        outer: for (VisualOperator v : qv.getOperators()) {
             for (int q : v.getQubitIDs())
-                if (q == blochSpherePos && !v.isMultiQubit()) {
+                if (q == blochSpherePos) {
+                    if (v.isMultiQubit()) {
+                        hasMultiQubitGate = true;
+                        break outer;
+                    }
                     q2 = v.operateOn(new Qubit[]{q2})[0];
                     break;
                 }
         }
         BlochSphereView blochSphereView = new BlochSphereView(this);
-        blochSphereView.setQBit(q2);
+        blochSphereView.setQBit(q2, hasMultiQubitGate);
         AlertDialog.Builder adb = new AlertDialog.Builder(this);
         adb.setTitle(getString(R.string.bloch_sphere) + ": q1");
         adb.setPositiveButton("OK", null);
@@ -462,28 +468,38 @@ public class MainActivity extends AppCompatActivity {
             d.getButton(DialogInterface.BUTTON_NEGATIVE).setOnClickListener((View view) -> {
                 if (++blochSpherePos >= qv.getDisplayedQubits()) blochSpherePos = 0;
                 Qubit q3 = new Qubit();
-                for (VisualOperator v : qv.getOperators()) {
+                outer: for (VisualOperator v : qv.getOperators()) {
+                    hasMultiQubitGate = false;
                     for (int q : v.getQubitIDs())
-                        if (q == blochSpherePos && !v.isMultiQubit()) {
+                        if (q == blochSpherePos) {
+                            if (v.isMultiQubit()) {
+                                hasMultiQubitGate = true;
+                                break outer;
+                            }
                             q3 = v.operateOn(new Qubit[]{q3})[0];
                             break;
                         }
                 }
-                blochSphereView.setQBit(q3);
+                blochSphereView.setQBit(q3, hasMultiQubitGate);
                 d.setTitle(getString(R.string.bloch_sphere) + ": q" + (blochSpherePos + 1));
 
             });
             d.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener((View view) -> {
                 if (--blochSpherePos < 0) blochSpherePos = qv.getDisplayedQubits() - 1;
                 Qubit q3 = new Qubit();
-                for (VisualOperator v : qv.getOperators()) {
+                outer: for (VisualOperator v : qv.getOperators()) {
+                    hasMultiQubitGate = false;
                     for (int q : v.getQubitIDs())
-                        if (q == blochSpherePos && !v.isMultiQubit()) {
+                        if (q == blochSpherePos) {
+                            if (v.isMultiQubit()) {
+                                hasMultiQubitGate = true;
+                                break outer;
+                            }
                             q3 = v.operateOn(new Qubit[]{q3})[0];
                             break;
                         }
                 }
-                blochSphereView.setQBit(q3);
+                blochSphereView.setQBit(q3, hasMultiQubitGate);
                 d.setTitle(getString(R.string.bloch_sphere) + ": q" + (blochSpherePos + 1));
             });
         });

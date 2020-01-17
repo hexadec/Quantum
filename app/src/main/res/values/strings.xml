@@ -85,4 +85,5 @@
     <string name="fixed_values">Significant angles only</string>
     <string name="optimize_circuit">Optimize circuit</string>
     <string name="optimize_circuit_long">This will move the circuit to the smallest qubits. Useful when using many qubits or gates. (EXPERIMENTAL)</string>
+    <string name="state_of_qubit_warning">State before the first MQ gate</string>
 </resources>
