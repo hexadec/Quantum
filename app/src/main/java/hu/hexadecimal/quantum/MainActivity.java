@@ -449,7 +449,7 @@ public class MainActivity extends AppCompatActivity {
                 gw.setLayoutParams(new TableRow.LayoutParams(gw.getMinimumWidth(), gw.getMinimumHeight()));
                 gw.setOnClickListener((View view) -> {
                     showAddGateDialog(-1, -1, gw.visualOperator);
-                    if (pref.getBoolean("shortcuts_autoclose", false))
+                    if (pref.getBoolean("shortcuts_autoclose", true))
                         drawerLayout.closeDrawers();
                 });
                 tr.addView(gw);

@@ -21,7 +21,7 @@ public class ExperimentRunner {
     public ExperimentRunner(QuantumView quantumView) {
         v = (LinkedList<VisualOperator>) quantumView.getOperators().clone();
         int lUsed = quantumView.getLastUsedQubit();
-        MAX_QUBIT = lUsed < 4 ? 4 : lUsed + 1;
+        MAX_QUBIT = lUsed < 5 ? 5 : lUsed + 1;
         this.quantumView = quantumView;
     }
 
@@ -165,12 +165,18 @@ public class ExperimentRunner {
         if (which >= 0 && which < quArray.length) {
             quArray[which] = new Complex(1);
         }
-        for (int m = 0; m < v.size(); m++) {
-            quArray = v.get(m).operateOn(quArray, qubits.length);
-            if (quantumView.shouldStop) {
-                return null;
+        try {
+            for (int m = 0; m < v.size(); m++) {
+                quArray = v.get(m).operateOn(quArray, qubits.length);
+                if (quantumView.shouldStop) {
+                    return null;
+                }
+                opStatus = m;
             }
-            opStatus = m;
+        } catch (Exception e) {
+            Log.e("Quantum Exp Runner", "Unknown error while calculating state-vector");
+            e.printStackTrace();
+            return VisualOperator.toQubitArray(qubits);
         }
         Complex[] orderedQuArray = new Complex[quArray.length];
         for (int m = 0; m < quArray.length; m++) {

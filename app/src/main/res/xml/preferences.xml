@@ -53,7 +53,7 @@
             android:title="@string/predefined_gate_shortcuts_close"
             android:enabled="true"
             android:summary="@string/predefined_gate_shortcuts_close_sum"
-            android:defaultValue="false" />
+            android:defaultValue="true" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/csv_settings">
