@@ -77,6 +77,7 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.drawerlayout.widget.DrawerLayout;
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
 import hu.hexadecimal.quantum.graphics.ExecutionProgressDialog;
+import hu.hexadecimal.quantum.graphics.GateView;
 import hu.hexadecimal.quantum.graphics.QuantumView;
 
 import static android.view.View.GONE;
@@ -156,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                 int[] loc = new int[2];
                 execute.getLocationOnScreen(loc);
                 if (loc[0] < rx && loc[1] < ry) return false;
-                showAddGateDialog(x, y);
+                showAddGateDialog(x, y, null);
                 return true;
             }
         });
@@ -437,13 +438,42 @@ public class MainActivity extends AppCompatActivity {
                     return false;
             }
         });
+        TableLayout gateHolder = findViewById(R.id.gate_view_holder);
+        gateHolder.postDelayed(() -> {
+            LinkedList<VisualOperator> operators = VisualOperator.getPredefinedGates(false);
+            operators.add(0, new VisualOperator(0f, 0f));
+            operators.add(0, new VisualOperator(0f, 0f, 0f));
+            TableRow tr = new TableRow(MainActivity.this);
+            for (int i = 0; i < operators.size(); i++) {
+                GateView gw = new GateView(MainActivity.this, operators.get(i));
+                gw.setLayoutParams(new TableRow.LayoutParams(gw.getMinimumWidth(), gw.getMinimumHeight()));
+                gw.setOnClickListener((View view) -> {
+                    showAddGateDialog(-1, -1, gw.visualOperator);
+                    if (pref.getBoolean("shortcuts_autoclose", false))
+                        drawerLayout.closeDrawers();
+                });
+                tr.addView(gw);
+                if ((i + 1) % 5 == 0 || i + 1 == operators.size()) {
+                    gateHolder.addView(tr);
+                    tr = new TableRow(MainActivity.this);
+                }
+            }
+            ConstraintLayout.LayoutParams lp = ((ConstraintLayout.LayoutParams) gateHolder.getLayoutParams());
+            lp.setMargins((int) QuantumView.pxFromDp(MainActivity.this, 10),
+                    (int) QuantumView.pxFromDp(MainActivity.this, 10),
+                    (int) QuantumView.pxFromDp(MainActivity.this, 10),
+                    (int) QuantumView.pxFromDp(MainActivity.this, 20));
+            gateHolder.setLayoutParams(lp);
+            gateHolder.bringToFront();
+        }, 300);
     }
 
     public void displayBlochSphere() {
         blochSpherePos = 0;
         hasMultiQubitGate = false;
         Qubit q2 = new Qubit();
-        outer: for (VisualOperator v : qv.getOperators()) {
+        outer:
+        for (VisualOperator v : qv.getOperators()) {
             for (int q : v.getQubitIDs())
                 if (q == blochSpherePos) {
                     if (v.isMultiQubit()) {
@@ -468,7 +498,8 @@ public class MainActivity extends AppCompatActivity {
             d.getButton(DialogInterface.BUTTON_NEGATIVE).setOnClickListener((View view) -> {
                 if (++blochSpherePos >= qv.getDisplayedQubits()) blochSpherePos = 0;
                 Qubit q3 = new Qubit();
-                outer: for (VisualOperator v : qv.getOperators()) {
+                outer:
+                for (VisualOperator v : qv.getOperators()) {
                     hasMultiQubitGate = false;
                     for (int q : v.getQubitIDs())
                         if (q == blochSpherePos) {
@@ -487,7 +518,8 @@ public class MainActivity extends AppCompatActivity {
             d.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener((View view) -> {
                 if (--blochSpherePos < 0) blochSpherePos = qv.getDisplayedQubits() - 1;
                 Qubit q3 = new Qubit();
-                outer: for (VisualOperator v : qv.getOperators()) {
+                outer:
+                for (VisualOperator v : qv.getOperators()) {
                     hasMultiQubitGate = false;
                     for (int q : v.getQubitIDs())
                         if (q == blochSpherePos) {
@@ -506,10 +538,13 @@ public class MainActivity extends AppCompatActivity {
         d.show();
     }
 
-    public void showAddGateDialog(float posx, float posy) {
+    public void showAddGateDialog(float posx, float posy, VisualOperator vo) {
         AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
-        final VisualOperator v;
-        if ((v = qv.whichGate(posx, posy)) != null) {
+        final VisualOperator prevOperator;
+        if (vo != null) {
+            vo.setQubitIDs(new int[]{0});
+            prevOperator = vo;
+        } else if ((prevOperator = qv.whichGate(posx, posy)) != null) {
             adb.setTitle(R.string.select_action);
             adb.setNegativeButton(R.string.delete_gate, (DialogInterface dialogInterface, int i) -> {
                 qv.deleteGateAt(posx, posy);
@@ -617,19 +652,19 @@ public class MainActivity extends AppCompatActivity {
                             }
                         });
                     }
-                    if (v != null) {
-                        if (!v.isRotation() && !v.isU3()) {
-                            for (int i = 0; i < v.getQubitIDs().length; i++) {
-                                qX[i].setProgress(v.getQubitIDs()[i]);
-                                tX[i].setText("q" + (v.getQubitIDs()[i] + 1));
-                                int pos = mGates.indexOf(v.getName());
+                    if (prevOperator != null) {
+                        if (!prevOperator.isRotation() && !prevOperator.isU3()) {
+                            for (int i = 0; i < prevOperator.getQubitIDs().length; i++) {
+                                qX[i].setProgress(prevOperator.getQubitIDs()[i]);
+                                tX[i].setText("q" + (prevOperator.getQubitIDs()[i] + 1));
+                                int pos = mGates.indexOf(prevOperator.getName());
                                 if (pos >= 0) {
                                     gateName.setSelection(pos);
                                 } else {
                                     gateName.setSelection(mGates.indexOf(VisualOperator.HADAMARD.getName()));
                                 }
                             }
-                            switch (v.getQubitIDs().length) {
+                            switch (prevOperator.getQubitIDs().length) {
                                 case 4:
                                     qX[3].setVisibility(View.VISIBLE);
                                     tX[3].setVisibility(View.VISIBLE);
@@ -641,7 +676,7 @@ public class MainActivity extends AppCompatActivity {
                                     tX[1].setVisibility(View.VISIBLE);
                                 default:
                             }
-                            switch (v.getQubitIDs().length) {
+                            switch (prevOperator.getQubitIDs().length) {
                                 case 1:
                                     qX[1].setVisibility(View.INVISIBLE);
                                     tX[1].setVisibility(View.INVISIBLE);
@@ -828,22 +863,22 @@ public class MainActivity extends AppCompatActivity {
 
                             }
                         });
-                        if (v != null && v.isRotation()) {
+                        if (prevOperator != null && prevOperator.isRotation()) {
                             gateType.setSelection(2);
-                            qX[0].setProgress(v.getQubitIDs()[0]);
+                            qX[0].setProgress(prevOperator.getQubitIDs()[0]);
                             phiBar.setMax(6282);
-                            thetaBar.setProgress((int) Math.abs(v.getAngles()[0] * 1000));
-                            phiBar.setProgress((int) Math.abs(v.getAngles()[1] * 1000));
-                            if (v.getAngles()[0] < 0 || v.getAngles()[1] < 0) {
+                            thetaBar.setProgress((int) Math.abs(prevOperator.getAngles()[0] * 1000));
+                            phiBar.setProgress((int) Math.abs(prevOperator.getAngles()[1] * 1000));
+                            if (prevOperator.getAngles()[0] < 0 || prevOperator.getAngles()[1] < 0) {
                                 ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(true);
                             }
-                        } else if (v != null && v.isU3()) {
+                        } else if (prevOperator != null && prevOperator.isU3()) {
                             gateType.setSelection(3);
-                            qX[0].setProgress(v.getQubitIDs()[0]);
-                            thetaBar.setProgress((int) Math.abs(v.getAngles()[0] * 1000));
-                            lamdaBar.setProgress((int) Math.abs(v.getAngles()[2] * 1000));
-                            phiBar.setProgress((int) Math.abs(v.getAngles()[1] * 1000));
-                            if (v.getAngles()[0] < 0 || v.getAngles()[1] < 0 || v.getAngles()[2] < 0) {
+                            qX[0].setProgress(prevOperator.getQubitIDs()[0]);
+                            thetaBar.setProgress((int) Math.abs(prevOperator.getAngles()[0] * 1000));
+                            lamdaBar.setProgress((int) Math.abs(prevOperator.getAngles()[2] * 1000));
+                            phiBar.setProgress((int) Math.abs(prevOperator.getAngles()[1] * 1000));
+                            if (prevOperator.getAngles()[0] < 0 || prevOperator.getAngles()[1] < 0 || prevOperator.getAngles()[2] < 0) {
                                 ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(true);
                             }
                         } else {
@@ -923,18 +958,18 @@ public class MainActivity extends AppCompatActivity {
                                         : operators.get(gateName.getSelectedItemPosition()).copy();
                                 if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
                                     gate.hermitianConjugate();
-                                if (v == null)
+                                if (prevOperator == null)
                                     qv.addGate(quids, gate);
                                 else
                                     qv.replaceGateAt(quids, gate, posx, posy);
                                 d.cancel();
-                            } else if (gateType.getSelectedItemPosition() == 2){
+                            } else if (gateType.getSelectedItemPosition() == 2) {
                                 double theta = fixedValues.isChecked() ? importantAngles[thetaBar.getProgress()] : thetaBar.getProgress() / 1000f;
                                 double phi = fixedValues.isChecked() ? importantAngles2PI[phiBar.getProgress()] : phiBar.getProgress() / 1000f;
                                 VisualOperator gate = new VisualOperator(theta, phi);
                                 if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
                                     gate.hermitianConjugate();
-                                if (v == null)
+                                if (prevOperator == null)
                                     qv.addGate(new int[]{qX[0].getProgress()}, gate);
                                 else
                                     qv.replaceGateAt(new int[]{qX[0].getProgress()}, gate, posx, posy);
@@ -946,7 +981,7 @@ public class MainActivity extends AppCompatActivity {
                                 VisualOperator gate = new VisualOperator(theta, phi, lambda);
                                 if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
                                     gate.hermitianConjugate();
-                                if (v == null)
+                                if (prevOperator == null)
                                     qv.addGate(new int[]{qX[0].getProgress()}, gate);
                                 else
                                     qv.replaceGateAt(new int[]{qX[0].getProgress()}, gate, posx, posy);
@@ -965,7 +1000,7 @@ public class MainActivity extends AppCompatActivity {
             }).start();
         };
 
-        if (v != null) {
+        if (prevOperator != null && vo == null) {
             d.setOnShowListener((DialogInterface dialog) -> {
                 final Button multi = d.getButton(AlertDialog.BUTTON_POSITIVE);
                 multi.setOnClickListener((View view) -> runOnUiThread(r));
@@ -1148,6 +1183,7 @@ public class MainActivity extends AppCompatActivity {
             probabilityMode = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("shots", "4096").equals("0") ? 2 : 0;
         navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setIcon(ContextCompat.getDrawable(MainActivity.this, probabilityMode == 0 ? R.drawable.alpha_p_circle_outline : R.drawable.alpha_p_circle));
         navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setEnabled(probabilityMode != 2);
+        findViewById(R.id.gate_view_holder).setVisibility(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("enable_shortcuts", true) ? VISIBLE : GONE);
         super.onResume();
     }
 }

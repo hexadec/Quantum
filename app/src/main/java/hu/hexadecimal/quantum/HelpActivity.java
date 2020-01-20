@@ -65,7 +65,7 @@ public class HelpActivity extends AppCompatActivity {
                             html = html.replace("&lt;CCXmatrix&gt;", VisualOperator.TOFFOLI.toStringHtmlTable(VisualOperator.HTML_MODE_BASIC));
                             html = html.replace("&lt;CHmatrix&gt;", VisualOperator.CH.toStringHtmlTable(VisualOperator.HTML_MODE_BASIC));
                             final String finalHtml = html;
-                            runOnUiThread(() -> webView.loadData(finalHtml, "text/html", "UTF-8"));
+                            runOnUiThread(() -> webView.loadDataWithBaseURL("file:///android_asset/info.html", finalHtml, "text/html", "UTF-8", null));
                             FileOutputStream fileOutputStream = new FileOutputStream(f);
                             fileOutputStream.write(html.getBytes(StandardCharsets.UTF_8));
                             fileOutputStream.flush();
@@ -77,7 +77,7 @@ public class HelpActivity extends AppCompatActivity {
                                 total.append(line).append('\n');
                             }
                             String html = total.toString();
-                            runOnUiThread(() -> webView.loadData(html, "text/html", "UTF-8"));
+                            runOnUiThread(() -> webView.loadDataWithBaseURL("file:///android_asset/info.html", html, "text/html", "UTF-8", null));
                             bufferedReader.close();
                         }
                     } catch (Exception e) {

@@ -30,7 +30,7 @@ import hu.hexadecimal.quantum.VisualOperator;
 
 public class QuantumView extends View {
 
-    final Paint mPaint, otherPaint, outerPaint, mTextPaint, whiteTextPaint;
+    final Paint mPaint, otherPaint, mTextPaint, whiteTextPaint;
     final int mPadding;
     final Path mPath;
 
@@ -87,10 +87,6 @@ public class QuantumView extends View {
         whiteTextPaint.setTypeface(Typeface.MONOSPACE);
 
         otherPaint = new Paint();
-
-        outerPaint = new Paint();
-        outerPaint.setStyle(Paint.Style.FILL);
-        outerPaint.setColor(Color.YELLOW);
 
         mPadding = (int) pxFromDp(context, 32);
     }
@@ -208,33 +204,38 @@ public class QuantumView extends View {
     }
 
     public boolean replaceGateAt(int[] qubits, VisualOperator visualOperator, float posx, float posy) {
-        for (int i = 0; i < gos.size(); i++) {
-            List<RectF> rectList = gos.get(i).getRect();
-            for (int j = 0; j < rectList.size(); j++) {
-                if (rectList.get(j).contains(posx, posy)) {
-                    for (int qubit : gos.get(i).getQubitIDs()) {
-                        measuredQubits[qubit]--;
-                    }
-                    gos.remove(i);
-                    for (int qubit : qubits) {
-                        if (qubit >= getDisplayedQubits()) {
-                            invalidate();
-                            return false;
+        if (posx < 0 || posy < 0) {
+            addGate(qubits, visualOperator);
+            return true;
+        } else {
+            for (int i = 0; i < gos.size(); i++) {
+                List<RectF> rectList = gos.get(i).getRect();
+                for (int j = 0; j < rectList.size(); j++) {
+                    if (rectList.get(j).contains(posx, posy)) {
+                        for (int qubit : gos.get(i).getQubitIDs()) {
+                            measuredQubits[qubit]--;
                         }
-                        if (!canAddGate(qubit))
-                            setLayoutParams(new LinearLayout.LayoutParams(getWidth() + 400, ViewGroup.LayoutParams.MATCH_PARENT));
-                        measuredQubits[qubit]++;
+                        gos.remove(i);
+                        for (int qubit : qubits) {
+                            if (qubit >= getDisplayedQubits()) {
+                                invalidate();
+                                return false;
+                            }
+                            if (!canAddGate(qubit))
+                                setLayoutParams(new LinearLayout.LayoutParams(getWidth() + 400, ViewGroup.LayoutParams.MATCH_PARENT));
+                            measuredQubits[qubit]++;
+                        }
+                        visualOperator.setQubitIDs(qubits);
+                        gos.add(i, visualOperator);
+                        invalidate();
+                        return true;
                     }
-                    visualOperator.setQubitIDs(qubits);
-                    gos.add(i, visualOperator);
-                    invalidate();
-                    return true;
                 }
             }
+            gos.addLast(visualOperator);
+            invalidate();
+            return false;
         }
-        gos.addLast(visualOperator);
-        invalidate();
-        return false;
     }
 
     public boolean deleteGateAt(float posx, float posy) {

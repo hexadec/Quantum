@@ -18,8 +18,9 @@ import androidx.annotation.NonNull;
 public class VisualOperator implements Serializable {
 
     public static final long serialVersionUID = 2L;
-    public static final transient long helpVersion = 21L;
+    public static final transient long helpVersion = 24L;
     private Complex[][] matrix;
+    //last one is to clarify meaning for navbar, so length is +1 to qubits
     private String[] symbols;
     private Random random;
 
@@ -55,7 +56,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)},
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
-                    }, "CNOT", new String[]{"●", "⊕"}, 0xffE19417);
+                    }, "CNOT", new String[]{"●", "⊕", "cX"}, 0xff009E5F);
 
     public static final transient VisualOperator CY =
             new VisualOperator(4,
@@ -64,7 +65,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0, -1)},
                             {new Complex(0), new Complex(0), new Complex(0, 1), new Complex(0)}
-                    }, "CY", new String[]{"●", "Y"}, 0xffE19417);
+                    }, "CY", new String[]{"●", "Y", "cY"}, 0xff009E5F);
 
     public static final transient VisualOperator CZ =
             new VisualOperator(4,
@@ -73,7 +74,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(-1)}
-                    }, "CZ", new String[]{"●", "Z"}, 0xffE19417);
+                    }, "CZ", new String[]{"●", "Z", "cZ"}, 0xff009E5F);
 
     public static final transient VisualOperator SWAP =
             new VisualOperator(4,
@@ -82,7 +83,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
-                    }, "SWAP", new String[]{"✖", "✖"}, 0xffE19417);
+                    }, "SWAP", new String[]{"✖", "✖", "SWAP"}, 0xffF28B00);
 
     public static final transient VisualOperator CS =
             new VisualOperator(4,
@@ -91,7 +92,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(-Math.PI / 4), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(Math.PI / 4)}
-                    }, "Controlled π/2 shift", new String[]{"●", "S"}, 0xff21BAAB);
+                    }, "Controlled π/2 shift", new String[]{"●", "S", "cS"}, 0xff21BAAB);
 
     public static final transient VisualOperator CT =
             new VisualOperator(4,
@@ -100,7 +101,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(-Math.PI / 8), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(Math.PI / 8)}
-                    }, "Controlled π/4 shift", new String[]{"●", "T"}, 0xffBA7021);
+                    }, "Controlled π/4 shift", new String[]{"●", "T", "cT"}, 0xffBA7021);
 
     public static final transient VisualOperator CH =
             new VisualOperator(4,
@@ -109,7 +110,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(1.0 / Math.sqrt(2), 0), new Complex(1.0 / Math.sqrt(2), 0)},
                             {new Complex(0), new Complex(0), new Complex(1.0 / Math.sqrt(2), 0), new Complex(-1.0 / Math.sqrt(2), 0)}
-                    }, "Controlled Hadamard", new String[]{"●", "H"}, 0xff2155BA);
+                    }, "Controlled Hadamard", new String[]{"●", "H", "cH"}, 0xff2155BA);
 
     public static final transient VisualOperator TOFFOLI =
             new VisualOperator(8,
@@ -122,7 +123,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
-                    }, "Toffoli", new String[]{"●", "●", "⊕"}, 0xff17DCE1);
+                    }, "Toffoli", new String[]{"●", "●", "⊕", "TOF"}, 0xff9200D1);
 
     public static final transient VisualOperator FREDKIN =
             new VisualOperator(8,
@@ -135,7 +136,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
-                    }, "Fredkin", new String[]{"●", "✖", "✖"}, 0xff17DCE1);
+                    }, "Fredkin", new String[]{"●", "✖", "✖", "FRE"}, 0xffD10075);
 
     public static final transient VisualOperator HADAMARD =
             VisualOperator.multiply(
@@ -220,7 +221,7 @@ public class VisualOperator implements Serializable {
                 throw new NullPointerException("Invalid array");
             }
         }
-        if (symbols.length != NQBITS) {
+        if (symbols.length < NQBITS || symbols.length > NQBITS + 1 || (symbols.length == 2 && NQBITS == 1)) {
             throw new NullPointerException("Invalid symbol");
         }
         this.name = name;
@@ -291,7 +292,10 @@ public class VisualOperator implements Serializable {
     }
 
     public boolean setSymbols(String[] symbols) {
-        if (symbols.length == MATRIX_DIM) {
+        if (symbols.length == NQBITS) {
+            this.symbols = symbols;
+            return true;
+        } else if (symbols.length == NQBITS + 1 && !(symbols.length == 2 && NQBITS == 1)){
             this.symbols = symbols;
             return true;
         } else {
@@ -336,7 +340,7 @@ public class VisualOperator implements Serializable {
     public void hermitianConjugate() {
         transpose();
         conjugate();
-        for (int i = 0; i < NQBITS; i++) {
+        for (int i = 0; i < symbols.length; i++) {
             symbols[i] += "†";
         }
         if (theta != NULL_ANGLE) {
@@ -396,7 +400,9 @@ public class VisualOperator implements Serializable {
                 complex[i][j] = matrix[i][j].copy();
             }
         }
-        VisualOperator v = new VisualOperator(MATRIX_DIM, complex, name, symbols, color);
+        String[] sym = new String[symbols.length];
+        System.arraycopy(symbols, 0, sym, 0, symbols.length);
+        VisualOperator v = new VisualOperator(MATRIX_DIM, complex, name, sym, color);
         v.theta = theta;
         v.phi = phi;
         v.lambda = lambda;
@@ -442,6 +448,8 @@ public class VisualOperator implements Serializable {
         JSONArray symbols = new JSONArray();
         for (int i = 0; i < qubit_ids.length; i++) {
             qubits.put(qubit_ids[i]);
+        }
+        for (int i = 0; i < this.symbols.length; i++) {
             symbols.put(this.symbols[i]);
         }
         if (isU3() || isRotation()) {
@@ -487,6 +495,8 @@ public class VisualOperator implements Serializable {
             JSONArray symbolsJson = jsonObject.getJSONArray("symbols");
             for (int i = 0; i < qubitsJson.length(); i++) {
                 qubits[i] = qubitsJson.getInt(i);
+            }
+            for (int i = 0; i < symbolsJson.length(); i++) {
                 symbols[i] = symbolsJson.getString(i);
             }
             Complex[][] matrix = new Complex[matrix_dim][matrix_dim];
@@ -873,6 +883,32 @@ public class VisualOperator implements Serializable {
                         && field.get(visualOperator) instanceof VisualOperator) {
                     if (!((VisualOperator) field.get(visualOperator)).isMultiQubit() == singleOnly) {
                         list.add(((VisualOperator) field.get(visualOperator)).getName());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return list;
+    }
+
+    public static LinkedList<VisualOperator> getPredefinedGates(boolean singleOnly) {
+        LinkedList<VisualOperator> list = new LinkedList<>();
+        VisualOperator visualOperator = new VisualOperator();
+        try {
+            Field[] fields = visualOperator.getClass().getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+                if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+                        && field.get(visualOperator) instanceof VisualOperator) {
+                    VisualOperator visualOperatorField = (VisualOperator) field.get(visualOperator);
+                    if (!(visualOperatorField.isMultiQubit() && singleOnly)) {
+                        if (visualOperatorField.isMultiQubit()) {
+                            list.addLast(visualOperatorField);
+                        } else {
+                            list.add(0, visualOperatorField);
+                        }
                     }
                 }
             }

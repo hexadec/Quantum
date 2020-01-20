@@ -40,6 +40,22 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/gui_settings">
+        <SwitchPreference
+            android:key="enable_shortcuts"
+            android:title="@string/predefined_gate_shortcuts"
+            android:enabled="true"
+            android:summary="@string/predefined_gate_shortcuts_sum"
+            android:defaultValue="true" />
+
+        <SwitchPreference
+            android:key="shortcuts_autoclose"
+            android:title="@string/predefined_gate_shortcuts_close"
+            android:enabled="true"
+            android:summary="@string/predefined_gate_shortcuts_close_sum"
+            android:defaultValue="false" />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/csv_settings">
         <SwitchPreference
             android:defaultValue="false"
