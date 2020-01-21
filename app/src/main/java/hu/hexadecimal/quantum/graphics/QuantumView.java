@@ -367,6 +367,37 @@ public class QuantumView extends View {
         return count;
     }
 
+    public void moveGate(float posx, float posy, boolean toRight) {
+        int index = 0;
+        VisualOperator operator = null;
+        outer: for (int i = 0; i < gos.size(); i++) {
+            List<RectF> rectList = gos.get(i).getRect();
+            for (int j = 0; j < rectList.size(); j++) {
+                if (rectList.get(j).contains(posx, posy)) {
+                    operator = gos.get(i);
+                    index = i;
+                    break outer;
+                }
+            }
+        }
+        if (operator == null)
+            return;
+        int direction = toRight ? 1 : -1;
+        outer: for (int i = index + direction; i < gos.size() && i > -1; i += direction) {
+            int[] qubits = gos.get(i).getQubitIDs();
+            for (int j = 0; j < qubits.length; j++) {
+                for (int m = 0; m < operator.getQubitIDs().length; m++) {
+                    if (qubits[j] == operator.getQubitIDs()[m]) {
+                        gos.remove(index);
+                        gos.add(i, operator);
+                        invalidate();
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
     public static float pxFromDp(final Context context, final float dp) {
         return dp * context.getResources().getDisplayMetrics().density;
     }

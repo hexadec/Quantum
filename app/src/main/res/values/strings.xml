@@ -91,4 +91,6 @@
     <string name="predefined_gate_shortcuts_sum">Show gate shortcuts on the bottom of the navigation bar</string>
     <string name="predefined_gate_shortcuts_close">Automatically close the navbar</string>
     <string name="predefined_gate_shortcuts_close_sum">Close the navigation bar when you select a gate shortcut</string>
+    <string name="move_gate_to_left">Move the gate to the left</string>
+    <string name="move_gate_to_right">Move the gate to the right</string>
 </resources>
