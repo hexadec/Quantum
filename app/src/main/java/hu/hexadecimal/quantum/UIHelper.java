@@ -381,7 +381,21 @@ public class UIHelper {
                             ArrayAdapter<String> adapter =
                                     new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, filter.getSelectedItemPosition() == 0 ? mGates : gates);
 
-                            int qubits = gateType.getSelectedItemPosition() == 0 ? VisualOperator.findGateByName(adapter.getItem(i)).getQubits() : operators.get(i).getQubits();
+                            if (gateType.getSelectedItemPosition() == 1 && operators.size() == 0) {
+                                gateType.setSelection(0);
+                                Toast t = Toast.makeText(context, R.string.no_user_gates, Toast.LENGTH_SHORT);
+                                t.setGravity(Gravity.CENTER, 0, 0);
+                                t.show();
+                                return;
+                            } else if (gateType.getSelectedItemPosition() == 1 && operators.size() - 1 < i) {
+                                Log.e("Unknown error", "Gate name index is unacceptably large");
+                                gateName.setSelection(0);
+                            }
+
+                            int qubits = gateType.getSelectedItemPosition() == 0 ?
+                                    VisualOperator.findGateByName(adapter.getItem(i)).getQubits() :
+                                    gateType.getSelectedItemPosition() == 1 ?
+                                            operators.get(i).getQubits() : 1;
                             switch (qubits) {
                                 case 4:
                                     qX[3].setVisibility(View.VISIBLE);

@@ -19,7 +19,8 @@
             android:layout_gravity="center"
             android:background="@drawable/dialog_gate_selector_bg"
             android:gravity="center"
-            android:clickable="true">
+            android:clickable="true"
+            android:maxWidth="500dp">
 
             <Spinner
                 android:id="@+id/type_spinner"
