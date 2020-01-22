@@ -354,11 +354,12 @@
 
             <Button
                 android:id="@+id/cancel"
-                android:layout_width="wrap_content"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="24dp"
-                android:layout_marginEnd="64dp"
+                android:layout_marginEnd="32dp"
                 android:text="@android:string/cancel"
                 app:layout_constraintEnd_toStartOf="@+id/ok"
                 app:layout_constraintStart_toStartOf="parent"
@@ -366,11 +367,16 @@
 
             <Button
                 android:id="@+id/ok"
-                android:layout_width="wrap_content"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="64dp"
+                android:layout_marginStart="32dp"
                 android:layout_marginTop="24dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
                 android:text="ok"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/cancel"
                 app:layout_constraintTop_toBottomOf="@+id/hermitianConjugate" />
 

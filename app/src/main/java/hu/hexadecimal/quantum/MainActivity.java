@@ -426,7 +426,12 @@ public class MainActivity extends AppCompatActivity {
             TableRow tr = new TableRow(MainActivity.this);
             for (int i = 0; i < operators.size(); i++) {
                 GateView gw = new GateView(MainActivity.this, operators.get(i));
-                gw.setLayoutParams(new TableRow.LayoutParams(gw.getMinimumWidth(), gw.getMinimumHeight()));
+                TableRow.LayoutParams params = new TableRow.LayoutParams(gw.getMinimumWidth(), gw.getMinimumHeight());
+                params.setMargins((int) QuantumView.pxFromDp(MainActivity.this, 2),
+                        (int) QuantumView.pxFromDp(MainActivity.this, 2),
+                        (int) QuantumView.pxFromDp(MainActivity.this, 2),
+                        (int) QuantumView.pxFromDp(MainActivity.this, 2));
+                gw.setLayoutParams(params);
                 gw.setOnClickListener((View view) -> {
                     showAddGateDialog(-1, -1, gw.visualOperator);
                     if (pref.getBoolean("shortcuts_autoclose", true))
