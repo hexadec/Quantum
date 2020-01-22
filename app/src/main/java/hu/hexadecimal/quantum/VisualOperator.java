@@ -486,13 +486,12 @@ public class VisualOperator implements Serializable {
                 phi = angles.getDouble("phi");
                 lambda = angles.getDouble("lambda");
             } catch (Exception e) {
-                e.printStackTrace();
-                Log.w("VisualOperator fromJSON", "No angles?");
+                Log.i("VisualOperator fromJSON", "No angles?");
             }
-            int[] qubits = new int[qubit_count];
-            String[] symbols = new String[qubit_count];
             JSONArray qubitsJson = jsonObject.getJSONArray("qubits");
             JSONArray symbolsJson = jsonObject.getJSONArray("symbols");
+            int[] qubits = new int[qubitsJson.length()];
+            String[] symbols = new String[symbolsJson.length()];
             for (int i = 0; i < qubitsJson.length(); i++) {
                 qubits[i] = qubitsJson.getInt(i);
             }
@@ -513,6 +512,7 @@ public class VisualOperator implements Serializable {
             visualOperator.lambda = lambda;
             return visualOperator;
         } catch (Exception e) {
+            Log.e("VisualOperatorLoader", "Error while parsing:");
             e.printStackTrace();
             return null;
         }

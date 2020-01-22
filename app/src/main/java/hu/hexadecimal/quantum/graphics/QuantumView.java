@@ -36,7 +36,7 @@ public class QuantumView extends View {
 
     private LinkedList<VisualOperator> gos;
     private short[] measuredQubits;
-
+    public boolean saved;
 
     public volatile boolean shouldStop;
 
@@ -89,6 +89,7 @@ public class QuantumView extends View {
         otherPaint = new Paint();
 
         mPadding = (int) pxFromDp(context, 32);
+        saved = true;
     }
 
     public double getLimit() {
@@ -228,6 +229,7 @@ public class QuantumView extends View {
                         visualOperator.setQubitIDs(qubits);
                         gos.add(i, visualOperator);
                         invalidate();
+                        saved = false;
                         return true;
                     }
                 }
@@ -248,6 +250,7 @@ public class QuantumView extends View {
                     }
                     gos.remove(i);
                     invalidate();
+                    saved = false;
                     return true;
                 }
             }
@@ -266,6 +269,7 @@ public class QuantumView extends View {
         mm.setQubitIDs(qubits);
         gos.addLast(mm);
         invalidate();
+        saved = false;
     }
 
     public boolean canAddGate(int qubit) {
@@ -335,6 +339,7 @@ public class QuantumView extends View {
                 measuredQubits[v.getQubitIDs()[i]]--;
             }
             invalidate();
+            saved = false;
             return true;
         }
         return false;
@@ -345,6 +350,7 @@ public class QuantumView extends View {
         measuredQubits = null;
         measuredQubits = new short[MAX_QUBITS];
         invalidate();
+        saved = false;
     }
 
     public int getLastUsedQubit() {
@@ -391,6 +397,7 @@ public class QuantumView extends View {
                         gos.remove(index);
                         gos.add(i, operator);
                         invalidate();
+                        saved = false;
                         return;
                     }
                 }
@@ -431,11 +438,16 @@ public class QuantumView extends View {
             this.name = visualOperators.getName();
             gos = new LinkedList<>();
             measuredQubits = new short[MAX_QUBITS];
+            boolean hadError = false;
             for (VisualOperator vo : ((LinkedList<VisualOperator>) visualOperators)) {
+                if (vo == null) {
+                    hadError = true;
+                    continue;
+                }
                 addGate(vo.getQubitIDs(), vo);
             }
             invalidate();
-            return true;
+            return !hadError;
         } catch (Exception e) {
             e.printStackTrace();
             return false;

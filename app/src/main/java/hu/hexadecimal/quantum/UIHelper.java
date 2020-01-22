@@ -46,7 +46,7 @@ public class UIHelper {
     private static final String[] importantAngleNames2PI = new String[]{"0", "π/8", "π/6", "π/4", "π/3", "π/2", "2π/3", "3π/4", "π",
             "5π/4", "4π/3", "3π/2", "5π/3", "7π/4"};
 
-    public static void runnableForGateSelection(AppCompatActivity context, QuantumView qv, VisualOperator prevOperator, float posx, float posy, Dialog d) {
+    public void runnableForGateSelection(AppCompatActivity context, QuantumView qv, VisualOperator prevOperator, float posx, float posy, Dialog d) {
         final LinkedList<VisualOperator> operators = new LinkedList<>();
         final LinkedList<String> operatorNames = new LinkedList<>();
         new Thread(() -> {
@@ -58,28 +58,29 @@ public class UIHelper {
                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                     pickedDir = null;
                 }
-
-                for (DocumentFile file : pickedDir.listFiles()) {
-                    try {
-                        if (file.getName().endsWith(VisualOperator.FILE_EXTENSION_LEGACY)) {
-                            ObjectInputStream oi = new ObjectInputStream(context.getContentResolver().openInputStream(file.getUri()));
-                            VisualOperator m = (VisualOperator) oi.readObject();
-                            oi.close();
-                            operatorNames.add(m.getName());
-                            operators.add(m);
-                        } else if (file.getName().endsWith(VisualOperator.FILE_EXTENSION)) {
-                            BufferedReader in = new BufferedReader(new InputStreamReader(context.getContentResolver().openInputStream(file.getUri())));
-                            StringBuilder total = new StringBuilder();
-                            for (String line; (line = in.readLine()) != null; ) {
-                                total.append(line).append('\n');
+                synchronized (UIHelper.this) {
+                    for (DocumentFile file : pickedDir.listFiles()) {
+                        try {
+                            if (file.getName().endsWith(VisualOperator.FILE_EXTENSION_LEGACY)) {
+                                ObjectInputStream oi = new ObjectInputStream(context.getContentResolver().openInputStream(file.getUri()));
+                                VisualOperator m = (VisualOperator) oi.readObject();
+                                oi.close();
+                                operatorNames.add(m.getName());
+                                operators.add(m);
+                            } else if (file.getName().endsWith(VisualOperator.FILE_EXTENSION)) {
+                                BufferedReader in = new BufferedReader(new InputStreamReader(context.getContentResolver().openInputStream(file.getUri())));
+                                StringBuilder total = new StringBuilder();
+                                for (String line; (line = in.readLine()) != null; ) {
+                                    total.append(line).append('\n');
+                                }
+                                String json = total.toString();
+                                VisualOperator m = VisualOperator.fromJSON(new JSONObject(json));
+                                operatorNames.add(m.getName());
+                                operators.add(m);
                             }
-                            String json = total.toString();
-                            VisualOperator m = VisualOperator.fromJSON(new JSONObject(json));
-                            operatorNames.add(m.getName());
-                            operators.add(m);
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
             } catch (IndexOutOfBoundsException ie) {
@@ -207,20 +208,22 @@ public class UIHelper {
                                         gateName.setAdapter(gateAdapter);
                                     }
                                 } else if (i == 1) {
-                                    if (operators.size() > 0) {
-                                        filter.setEnabled(false);
-                                        filter.setSelection(0);
-                                        subLayout.setVisibility(VISIBLE);
-                                        rotLayout.setVisibility(GONE);
-                                        ArrayAdapter<String> gateAdapter =
-                                                new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, operatorNames);
-                                        gateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                        gateName.setAdapter(gateAdapter);
-                                    } else {
-                                        gateType.setSelection(0);
-                                        Toast t = Toast.makeText(context, R.string.no_user_gates, Toast.LENGTH_SHORT);
-                                        t.setGravity(Gravity.CENTER, 0, 0);
-                                        t.show();
+                                    synchronized (UIHelper.this) {
+                                        if (operators.size() > 0) {
+                                            filter.setEnabled(false);
+                                            filter.setSelection(0);
+                                            subLayout.setVisibility(VISIBLE);
+                                            rotLayout.setVisibility(GONE);
+                                            ArrayAdapter<String> gateAdapter =
+                                                    new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, operatorNames);
+                                            gateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                            gateName.setAdapter(gateAdapter);
+                                        } else {
+                                            gateType.setSelection(0);
+                                            Toast t = Toast.makeText(context, R.string.no_user_gates, Toast.LENGTH_SHORT);
+                                            t.setGravity(Gravity.CENTER, 0, 0);
+                                            t.show();
+                                        }
                                     }
                                 } else if (i == 2 || i == 3) {
                                     for (int k = 1; k < qX.length; k++) {
@@ -381,44 +384,46 @@ public class UIHelper {
                             ArrayAdapter<String> adapter =
                                     new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, filter.getSelectedItemPosition() == 0 ? mGates : gates);
 
-                            if (gateType.getSelectedItemPosition() == 1 && operators.size() == 0) {
-                                gateType.setSelection(0);
-                                Toast t = Toast.makeText(context, R.string.no_user_gates, Toast.LENGTH_SHORT);
-                                t.setGravity(Gravity.CENTER, 0, 0);
-                                t.show();
-                                return;
-                            } else if (gateType.getSelectedItemPosition() == 1 && operators.size() - 1 < i) {
-                                Log.e("Unknown error", "Gate name index is unacceptably large");
-                                gateName.setSelection(0);
-                            }
+                            synchronized (UIHelper.this) {
+                                if (gateType.getSelectedItemPosition() == 1 && operators.size() == 0) {
+                                    gateType.setSelection(0);
+                                    Toast t = Toast.makeText(context, R.string.no_user_gates, Toast.LENGTH_SHORT);
+                                    t.setGravity(Gravity.CENTER, 0, 0);
+                                    t.show();
+                                    return;
+                                } else if (gateType.getSelectedItemPosition() == 1 && operators.size() - 1 < i) {
+                                    Log.e("Unknown error", "Gate name index is unacceptably large");
+                                    gateName.setSelection(0);
+                                }
 
-                            int qubits = gateType.getSelectedItemPosition() == 0 ?
-                                    VisualOperator.findGateByName(adapter.getItem(i)).getQubits() :
-                                    gateType.getSelectedItemPosition() == 1 ?
-                                            operators.get(i).getQubits() : 1;
-                            switch (qubits) {
-                                case 4:
-                                    qX[3].setVisibility(View.VISIBLE);
-                                    tX[3].setVisibility(View.VISIBLE);
-                                case 3:
-                                    qX[2].setVisibility(View.VISIBLE);
-                                    tX[2].setVisibility(View.VISIBLE);
-                                case 2:
-                                    qX[1].setVisibility(View.VISIBLE);
-                                    tX[1].setVisibility(View.VISIBLE);
-                                default:
-                            }
-                            switch (qubits) {
-                                case 1:
-                                    qX[1].setVisibility(View.INVISIBLE);
-                                    tX[1].setVisibility(View.INVISIBLE);
-                                case 2:
-                                    qX[2].setVisibility(GONE);
-                                    tX[2].setVisibility(GONE);
-                                case 3:
-                                    qX[3].setVisibility(GONE);
-                                    tX[3].setVisibility(GONE);
-                                default:
+                                int qubits = gateType.getSelectedItemPosition() == 0 ?
+                                        VisualOperator.findGateByName(adapter.getItem(i)).getQubits() :
+                                        gateType.getSelectedItemPosition() == 1 ?
+                                                operators.get(i).getQubits() : 1;
+                                switch (qubits) {
+                                    case 4:
+                                        qX[3].setVisibility(View.VISIBLE);
+                                        tX[3].setVisibility(View.VISIBLE);
+                                    case 3:
+                                        qX[2].setVisibility(View.VISIBLE);
+                                        tX[2].setVisibility(View.VISIBLE);
+                                    case 2:
+                                        qX[1].setVisibility(View.VISIBLE);
+                                        tX[1].setVisibility(View.VISIBLE);
+                                    default:
+                                }
+                                switch (qubits) {
+                                    case 1:
+                                        qX[1].setVisibility(View.INVISIBLE);
+                                        tX[1].setVisibility(View.INVISIBLE);
+                                    case 2:
+                                        qX[2].setVisibility(GONE);
+                                        tX[2].setVisibility(GONE);
+                                    case 3:
+                                        qX[3].setVisibility(GONE);
+                                        tX[3].setVisibility(GONE);
+                                    default:
+                                }
                             }
                         }
 
@@ -429,42 +434,59 @@ public class UIHelper {
                     mainView.findViewById(R.id.cancel).setOnClickListener((View view) -> d.cancel());
                     mainView.findViewById(R.id.ok).setOnClickListener((View view) -> {
                         if (gateType.getSelectedItemPosition() < 2) {
-                            if (operators.size() == 0 && gateType.getSelectedItemPosition() != 0) {
-                                return;
+                            synchronized (UIHelper.this) {
+                                if (operators.size() == 0 && gateType.getSelectedItemPosition() != 0) {
+                                    return;
+                                }
                             }
                             LinkedList<String> gates = VisualOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
                             Collections.sort(gates);
                             ArrayAdapter<String> adapter =
                                     new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, filter.getSelectedItemPosition() == 0 ? mGates : gates);
 
-                            int qubits = gateType.getSelectedItemPosition() == 0
-                                    ? VisualOperator.findGateByName(adapter.getItem(gateName.getSelectedItemPosition())).getQubits()
-                                    : operators.get(gateName.getSelectedItemPosition()).getQubits();
-                            int[] quids = new int[qubits];
-                            for (int i = 0; i < qubits; i++) {
-                                quids[i] = qX[i].getProgress();
-                            }
-                            for (int i = 0; i < qubits; i++) {
-                                for (int j = i + 1; j < qubits; j++) {
-                                    if (quids[i] == quids[j]) {
-                                        d.cancel();
-                                        Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), R.string.use_different_qubits, Snackbar.LENGTH_LONG);
-                                        snackbar.getView().setBackgroundColor(0xffD81010);
-                                        snackbar.show();
-                                        return;
+                            synchronized (UIHelper.this) {
+                                if (gateType.getSelectedItemPosition() == 1 && operators.size() == 0) {
+                                    gateType.setSelection(0);
+                                    Toast t = Toast.makeText(context, R.string.no_user_gates, Toast.LENGTH_SHORT);
+                                    t.setGravity(Gravity.CENTER, 0, 0);
+                                    t.show();
+                                    return;
+                                } else if (gateType.getSelectedItemPosition() == 1 && operators.size() - 1 < gateName.getSelectedItemPosition()) {
+                                    Log.e("Unknown error", "Gate name index is unacceptably large");
+                                    gateName.setSelection(0);
+                                }
+
+                                int qubits = gateType.getSelectedItemPosition() == 0 ?
+                                        VisualOperator.findGateByName(adapter.getItem(gateName.getSelectedItemPosition())).getQubits() :
+                                        gateType.getSelectedItemPosition() == 1 ?
+                                                operators.get(gateName.getSelectedItemPosition()).getQubits() : 1;
+
+                                int[] quids = new int[qubits];
+                                for (int i = 0; i < qubits; i++) {
+                                    quids[i] = qX[i].getProgress();
+                                }
+                                for (int i = 0; i < qubits; i++) {
+                                    for (int j = i + 1; j < qubits; j++) {
+                                        if (quids[i] == quids[j]) {
+                                            d.cancel();
+                                            Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), R.string.use_different_qubits, Snackbar.LENGTH_LONG);
+                                            snackbar.getView().setBackgroundColor(0xffD81010);
+                                            snackbar.show();
+                                            return;
+                                        }
                                     }
                                 }
+                                //TODO saved = false;
+                                VisualOperator gate = gateType.getSelectedItemPosition() == 0
+                                        ? VisualOperator.findGateByName((String) gateName.getSelectedItem()).copy()
+                                        : operators.get(gateName.getSelectedItemPosition()).copy();
+                                if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
+                                    gate.hermitianConjugate();
+                                if (prevOperator == null)
+                                    qv.addGate(quids, gate);
+                                else
+                                    qv.replaceGateAt(quids, gate, posx, posy);
                             }
-                            //TODO saved = false;
-                            VisualOperator gate = gateType.getSelectedItemPosition() == 0
-                                    ? VisualOperator.findGateByName((String) gateName.getSelectedItem()).copy()
-                                    : operators.get(gateName.getSelectedItemPosition()).copy();
-                            if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
-                                gate.hermitianConjugate();
-                            if (prevOperator == null)
-                                qv.addGate(quids, gate);
-                            else
-                                qv.replaceGateAt(quids, gate, posx, posy);
                             d.cancel();
                         } else if (gateType.getSelectedItemPosition() == 2) {
                             double theta = fixedValues.isChecked() ? importantAngles[thetaBar.getProgress()] : thetaBar.getProgress() / 1000f;
@@ -501,5 +523,32 @@ public class UIHelper {
                 }
             });
         }).start();
+    }
+
+    public void applyActions(AppCompatActivity context, QuantumView qv, VisualOperator prevOperator, float posx, float posy, Dialog d, View layout) {
+        layout.findViewById(R.id.delete_selected_gate).setOnClickListener((View view) -> {
+            qv.deleteGateAt(posx, posy);
+            d.cancel();
+        });
+        layout.findViewById(R.id.edit_selected_gate).setOnClickListener((View view) -> {
+            this.runnableForGateSelection(context, qv, prevOperator, posx, posy, d);
+        });
+        layout.findViewById(R.id.move_selected_gate_left).setOnClickListener((View view) -> {
+            qv.moveGate(posx, posy, false);
+            d.cancel();
+        });
+        layout.findViewById(R.id.move_selected_gate_left).setOnLongClickListener((View view) -> {
+            Toast.makeText(context, R.string.move_gate_to_left, Toast.LENGTH_SHORT).show();
+            return true;
+        });
+        layout.findViewById(R.id.move_selected_gate_right).setOnClickListener((View view) -> {
+            qv.moveGate(posx, posy, true);
+            d.cancel();
+        });
+        layout.findViewById(R.id.move_selected_gate_right).setOnLongClickListener((View view) -> {
+            Toast.makeText(context, R.string.move_gate_to_right, Toast.LENGTH_SHORT).show();
+            return true;
+        });
+        layout.findViewById(R.id.gate_action_main).setOnClickListener((View view) -> d.cancel());
     }
 }

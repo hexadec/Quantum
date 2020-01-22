@@ -81,7 +81,6 @@ public class MainActivity extends AppCompatActivity {
     private Thread expThread;
 
     private int probabilityMode;
-    private boolean saved;
     private int blochSpherePos = 0;
     private boolean hasMultiQubitGate;
 
@@ -92,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        saved = true;
         probabilityMode = 0;
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar2);
@@ -109,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         qv.setLayoutParams(new LinearLayout.LayoutParams(displayMetrics.widthPixels * 2, ViewGroup.LayoutParams.MATCH_PARENT));
+        qv.saved = true;
 
         FloatingActionButton fab = findViewById(R.id.fab_main);
         FloatingActionButton execute = findViewById(R.id.fab_matrix);
@@ -399,7 +398,6 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(new Intent(MainActivity.this, HelpActivity.class));
                         break;
                     case R.id.clear:
-                        saved = true;
                         qv.clearScreen();
                         break;
                     case R.id.matrix:
@@ -530,38 +528,12 @@ public class MainActivity extends AppCompatActivity {
         } else if ((prevOperator = qv.whichGate(posx, posy)) != null) {
             d.setTitle(R.string.select_action);
             View layout = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.gate_action_selector, null);
-            layout.findViewById(R.id.delete_selected_gate).setOnClickListener((View view) -> {
-                qv.deleteGateAt(posx, posy);
-                saved = false;
-                d.cancel();
-            });
-            layout.findViewById(R.id.edit_selected_gate).setOnClickListener((View view) -> {
-                UIHelper.runnableForGateSelection(MainActivity.this, qv, prevOperator, posx, posy, d);
-                saved = false;
-            });
-            layout.findViewById(R.id.move_selected_gate_left).setOnClickListener((View view) -> {
-                qv.moveGate(posx, posy, false);
-                d.cancel();
-            });
-            layout.findViewById(R.id.move_selected_gate_left).setOnLongClickListener((View view) -> {
-                Toast.makeText(MainActivity.this, R.string.move_gate_to_left, Toast.LENGTH_SHORT).show();
-                return true;
-            });
-            layout.findViewById(R.id.move_selected_gate_right).setOnClickListener((View view) -> {
-                qv.moveGate(posx, posy, true);
-                d.cancel();
-            });
-            layout.findViewById(R.id.move_selected_gate_right).setOnLongClickListener((View view) -> {
-                Toast.makeText(MainActivity.this, R.string.move_gate_to_right, Toast.LENGTH_SHORT).show();
-                return true;
-            });
-            layout.findViewById(R.id.gate_action_main).setOnClickListener((View view) -> d.cancel());
+            new UIHelper().applyActions(MainActivity.this, qv, prevOperator, posx, posy, d, layout);
             d.setContentView(layout);
         }
 
         Runnable r = () -> {
-            UIHelper.runnableForGateSelection(MainActivity.this, qv, prevOperator, posx, posy, d);
-            saved = false;
+            new UIHelper().runnableForGateSelection(MainActivity.this, qv, prevOperator, posx, posy, d);
         };
         d.setCancelable(true);
         d.setCanceledOnTouchOutside(true);
@@ -649,7 +621,7 @@ public class MainActivity extends AppCompatActivity {
                             snackbar.getView().setBackgroundColor(0xffD81010);
                             snackbar.show();
                         }
-                        saved = true;
+                        qv.saved = true;
                     });
                     adb.setNeutralButton(R.string.cancel, null);
                     adb.show();
@@ -674,7 +646,7 @@ public class MainActivity extends AppCompatActivity {
                     if (!qv.importGatesLegacy(obj, pickedFile.getName())) {
                         throw new Exception("Maybe empty gate sequence?");
                     } else {
-                        saved = true;
+                        qv.saved = true;
                         Snackbar.make(findViewById(R.id.parent2), R.string.successfully_imported, Snackbar.LENGTH_LONG).show();
                     }
                 } else if (pickedFile.getName().endsWith(QuantumView.FILE_EXTENSION)) {
@@ -687,7 +659,7 @@ public class MainActivity extends AppCompatActivity {
                     if (!qv.importGates(new JSONObject(json))) {
                         throw new Exception("Maybe empty gate sequence?");
                     } else {
-                        saved = true;
+                        qv.saved = true;
                         Snackbar.make(findViewById(R.id.parent2), R.string.successfully_imported, Snackbar.LENGTH_LONG).show();
                     }
                 } else {
@@ -725,7 +697,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (!saved && qv.getOperators().size() > 2) {
+        if (!qv.saved && qv.getOperators().size() > 2) {
             final Dialog d = new Dialog(this, android.R.style.Theme_Translucent_NoTitleBar);
             View v = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.back_dialog, null);
             v.findViewById(R.id.exit).setOnClickListener((View view) -> MainActivity.super.onBackPressed());
