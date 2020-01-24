@@ -22,15 +22,65 @@
             <strong>Table of Contents</strong>
         </p>
         <p>
-            <ul>
-                <li><a href="#qlgs">Quantum Logic Gates</a></li>
-                <li><a href="#rotation">Rotation gate</a></li>
-                <li><a href="#u3">U3 gate</a></li>
-                <li><a href="#single_qubit">Single Qubit Gates</a></li>
-                <li><a href="#multi_qubit">Multi Qubit Gates</a></li>
-            </ul>
+        <ul>
+            <li>
+                <a href="#getting_started">Getting Started</a>
+            </li>
+            <li>
+                <a href="#qlgs">Quantum Logic Gates</a>
+            </li>
+            <li>
+                <a href="#rotation">Rotation gate</a>
+            </li>
+            <li>
+                <a href="#u3">U3 gate</a>
+            </li>
+            <li>
+                <a href="#single_qubit">Single Qubit Gates</a>
+            </li>
+            <li>
+                <a href="#multi_qubit">Multi Qubit Gates</a>
+            </li>
+        </ul>
         </p>
-        <h4 id="qlgs" name="qlgs">
+        <h4
+                id="getting_started"
+                name="getting_started">
+            <strong>Getting Started</strong>
+        </h4>
+        <p style="text-align: justify;">
+            Quantum Computing for Android (aka this app) emulates (almost) the lowest level of a
+            quantum computer, i.e. logic gates. These are also the basic components of classical
+            computers, however, in quantum computers logic gates work somewhat differently, which
+            you can read about more in detail in the next part.
+            <br />
+            To place a logic gate in the app, first click somewhere on the screen. In the appeared
+            window, you can select a gate and modify its properties. For example, its place or in
+            case of a rotation or U3 gate, the angle of the rotations.
+            <br />
+            If you are done placing gates, you can execute the circuit, which may take a while if
+            you placed many of them.
+            <i>It is worth taking a quick tour in the settings menu, to see what options are
+                available.
+            </i>
+            <br />
+            If you wish to change the order of the gates, or if you want to replace them with a
+            different one, simply click on the gate, and select the desired option in the dialog
+            that opened.
+            <br />
+            You can also save the circuit you have created, but before you need to select a folder
+            for saving, in the settings. This directory will also be used to save any gates you have
+            created yourself in the gate editor. To open a file, click the folder icon on the bottom
+            left corner of the main screen and select the desired file. The app currently only
+            supports its own file format, which are
+            <b>.qsf</b>
+            (new) and
+            <b>.viqus</b>
+            (old) files.
+        </p>
+        <h4
+                id="qlgs"
+                name="qlgs">
             <strong>Quantum Logic Gates</strong>
         </h4>
         <p style="text-align: justify;">
@@ -56,7 +106,10 @@
             <i>not</i>
             work as intended).
         </p>
-        <p style="font-size:18px" id="rotation" name="rotation">
+        <p
+                style="font-size:18px"
+                id="rotation"
+                name="rotation">
             <i>Rotation Gates</i>
         </p>
         <p style="text-align: justify;">
@@ -88,7 +141,10 @@
             </tr>
         </table>
         </p>
-        <p style="font-size:18px" id="u3" name="u3">
+        <p
+                style="font-size:18px"
+                id="u3"
+                name="u3">
             <i>U3 Gate</i>
         </p>
         <p style="text-align: justify;">
@@ -114,7 +170,10 @@
             </tr>
         </table>
         </p>
-        <p style="font-size:18px" id="single_qubit" name="single_qubit">
+        <p
+                style="font-size:18px"
+                id="single_qubit"
+                name="single_qubit">
             <i>Single Qubit Gates</i>
         </p>
         <p style="text-align: justify;">
@@ -156,7 +215,10 @@
         </p>
         <p>&lt;Imatrix&gt;</p>
         <br />
-        <p style="font-size:18px" id="multi_qubit" name="multi_qubit">
+        <p
+                style="font-size:18px"
+                id="multi_qubit"
+                name="multi_qubit">
             <i>Multi Qubit Gates</i>
         </p>
         <p style="text-align: justify;">
