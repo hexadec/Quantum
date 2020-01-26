@@ -151,6 +151,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                 TextInputEditText nameEditText = v.findViewById(R.id.name0);
                 TextInputEditText symbolsEditText = v.findViewById(R.id.symbols0);
                 TextInputEditText matrixEditText = v.findViewById(R.id.editText30);
+                matrixEditText.setHint("0.707,0.707i\n0.707,-0.707i");
                 final Button okButton = d.getButton(DialogInterface.BUTTON_POSITIVE);
                 View.OnClickListener onClickListener = (View view) -> {
                     int qs = qubits.getProgress() + 1;

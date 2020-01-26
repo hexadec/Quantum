@@ -26,6 +26,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
+                android:maxLength="16"
                 android:gravity="center|bottom"
                 android:hint="@string/gate_name"
                 android:inputType="text"
@@ -126,8 +127,7 @@
                 android:digits="0123456789.,-+ie^\n"
                 android:ems="10"
                 android:gravity="center"
-                android:hint="@string/matrix"
-                android:inputType="textMultiLine"
+                android:inputType="textMultiLine|textLongMessage"
                 android:maxLines="16" />
         </com.google.android.material.textfield.TextInputLayout>
 

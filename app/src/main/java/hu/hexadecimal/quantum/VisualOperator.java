@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 public class VisualOperator implements Serializable {
 
     public static final long serialVersionUID = 2L;
-    public static final transient long helpVersion = 26L;
+    public static final transient long helpVersion = 27L;
     private Complex[][] matrix;
     //last one is to clarify meaning for navbar, so length is +1 to qubits
     private String[] symbols;
@@ -979,45 +979,41 @@ public class VisualOperator implements Serializable {
     }
 
     public boolean isUnitary() {
-        Qubit q1 = new Qubit();
-        Qubit q2 = new Qubit();
-        Qubit q3 = new Qubit();
-        q2.applyOperator(VisualOperator.HADAMARD);
-        q3.applyOperator(VisualOperator.HADAMARD);
-        q3.applyOperator(VisualOperator.S_GATE);
-        Qubit[] qa = new Qubit[NQBITS + 2];
-        Qubit[] qb = new Qubit[NQBITS + 2];
-        Qubit[] qc = new Qubit[NQBITS + 2];
+        Qubit[] qX = new Qubit[]{new Qubit(), new Qubit(), new Qubit(), new Qubit()};
+        qX[1].applyOperator(VisualOperator.HADAMARD);
+        qX[2].applyOperator(VisualOperator.HADAMARD);
+        qX[2].applyOperator(VisualOperator.S_GATE);
+        qX[3].applyOperator(VisualOperator.SQRT_NOT);
+        Qubit[][] qAX = new Qubit[qX.length][NQBITS + 2];
         if (NQBITS != 1) {
             for (int i = 0; i < NQBITS + 2; i++) {
                 if (i < NQBITS) qubit_ids[i] = i;
-                qa[i] = q1.copy();
-                qb[i] = q2.copy();
-                qc[i] = q3.copy();
+                for (int m = 0; m < qX.length; m++) {
+                    qAX[m][i] = qX[m].copy();
+                }
             }
-            Complex[] a1 = toQubitArray(qa);
-            Complex[] a2 = toQubitArray(qb);
-            Complex[] a3 = toQubitArray(qc);
+            Complex[][] aX = new Complex[qX.length][];
+            Complex[][] bX = new Complex[qX.length][];
+            Complex[][] oX = new Complex[qX.length][];
+            for (int m = 0; m < qX.length; m++) {
+                aX[m] = toQubitArray(qAX[m]);
+                bX[m] = toQubitArray(qAX[m]);
+            }
             VisualOperator vo = hermitianConjugate(this);
-            Complex[] o1 = vo.copy().operateOn(copy().operateOn(a1, NQBITS + 2), NQBITS + 2);
-            Complex[] o2 = vo.copy().operateOn(copy().operateOn(a2, NQBITS + 2), NQBITS + 2);
-            Complex[] o3 = vo.copy().operateOn(copy().operateOn(a3, NQBITS + 2), NQBITS + 2);
-            Complex[] b1 = toQubitArray(qa);
-            Complex[] b2 = toQubitArray(qb);
-            Complex[] b3 = toQubitArray(qc);
-            for (int i = 0; i < a1.length; i++) {
-                if (!b1[i].equals3Decimals(o1[i])) return false;
-                if (!b2[i].equals3Decimals(o2[i])) return false;
-                if (!b3[i].equals3Decimals(o3[i])) return false;
+            for (int m = 0; m < qX.length; m++) {
+                oX[m] = vo.copy().operateOn(copy().operateOn(aX[m], NQBITS + 2), NQBITS + 2);
+            }
+            for (int m = qX.length - 1; m >= 0; m--) {
+                for (int i = 0; i < oX[0].length; i++) {
+                    if (!bX[m][i].equals3Decimals(oX[m][i])) return false;
+                }
             }
         } else {
-            Qubit o1 = hermitianConjugate(this).operateOn(operateOn(new Qubit[]{q1.copy()}))[0];
-            Qubit o2 = hermitianConjugate(this).operateOn(operateOn(new Qubit[]{q2.copy()}))[0];
-            Qubit o3 = hermitianConjugate(this).operateOn(operateOn(new Qubit[]{q3.copy()}))[0];
-            for (int i = 0; i < 2; i++) {
-                if (!o1.matrix[i].equals3Decimals(q1.matrix[i])) return false;
-                if (!o2.matrix[i].equals3Decimals(q2.matrix[i])) return false;
-                if (!o3.matrix[i].equals3Decimals(q3.matrix[i])) return false;
+            for (int m = qX.length - 1; m >= 0; m--) {
+                Qubit o = hermitianConjugate(this).operateOn(operateOn(new Qubit[]{qX[m].copy()}))[0];
+                for (int j = 0; j < 2; j++) {
+                    if (!o.matrix[j].equals3Decimals(qX[m].matrix[j])) return false;
+                }
             }
         }
         return true;
