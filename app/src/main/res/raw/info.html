@@ -44,6 +44,9 @@
             <li>
                 <a href="#bloch_sphere">Bloch sphere</a>
             </li>
+            <li>
+                <a href="#settings">Available settings</a>
+            </li>
         </ul>
         </p>
         <h4
@@ -70,7 +73,8 @@
             If you wish to change the order of the gates, or if you want to replace them with a
             different one, simply click on the gate, and select the desired option in the dialog
             that opened.
-            <br />
+        </p>
+        <p style="text-align: justify;">
             You can also save the circuit you have created, but before you need to select a folder
             for saving, in the settings. This directory will also be used to save any gates you have
             created yourself in the gate editor. To open a file, click the folder icon on the bottom
@@ -93,7 +97,8 @@
             based on how many qubits are involved in the operation. An important property of QLGs
             is that they are reversible, which means that no information is lost when we use them.
             From this, it follows that they have an equal number of inputs and outputs.
-            <br />
+        </p>
+        <p style="text-align: justify;">
             In order to use these gates on your virtual qubits
             in this app, you need to choose first a gate then select which qubits should be affected
             by it.
@@ -314,6 +319,61 @@
             button in the top right corner and navigate to the desired qubit using the buttons on
             the bottom. Please note, that the state displayed on the bloch sphere is the state
             of the qubit before the first multi-qubit gate was applied on the selected qubit.
+        </p>
+        <br />
+        <h4
+                id="settings"
+                name="settings">
+            <strong>Available settings</strong>
+        </h4>
+        <p style="text-align: justify;">
+            <b>Shots</b>
+            <br />
+            Select how many times the experiment should be executed before displaying the
+            probabilities. You can also switch to probability mode, where the final statevector of
+            the system will also be shown. In this mode you will get the probabilities that an
+            ideal, noise-free quantum computer would produce.
+        </p>
+        <p style="text-align: justify;">
+            <b>Threads</b>
+            <br />
+            Control the degree of parallelization in the program. Increasing this value beyond the
+            available CPU cores does not bring significant performance increase.
+        </p>
+        <p style="text-align: justify;">
+            <b>Output folder</b>
+            <br />
+            Select where to find the user-defined gate files and where to export the results and
+            circuit files.
+        </p>
+        <p style="text-align: justify;">
+            <b>Optimize the circuit</b>
+            <br />
+            By optimizing the circuit the app ensures that your circuit uses the least amount of
+            qubits. At least 5 qubits are always in use.
+        </p>
+        <p style="text-align: justify;">
+            <b>Optimize circuit</b>
+            <br />
+            By optimizing the circuit the app ensures that your circuit uses the least amount of
+            qubits. At least 5 qubits are always in use.
+        </p>
+        <p style="text-align: justify;">
+            <b>Scientific notation</b>
+            <br />
+            Use scientific notation when exporting results into CSV files. This allows a greater
+            range to be saved and smaller file size. However, some programs may not support it.
+            (MS Excel and Google Sheets do)
+        </p>
+        <p style="text-align: justify;">
+            <b>Separator</b>
+            <br />
+            Select which character should separate the rows in the CSV files. Most programs use
+            <i>comma</i>
+            or
+            <i>tab</i>,
+            however, some programs or languages can use a
+            <i>semicolon</i>.
         </p>
     </body>
 </html>
