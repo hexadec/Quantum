@@ -295,7 +295,7 @@ public class VisualOperator implements Serializable {
         if (symbols.length == NQBITS) {
             this.symbols = symbols;
             return true;
-        } else if (symbols.length == NQBITS + 1 && !(symbols.length == 2 && NQBITS == 1)){
+        } else if (symbols.length == NQBITS + 1 && !(symbols.length == 2 && NQBITS == 1)) {
             this.symbols = symbols;
             return true;
         } else {
@@ -363,7 +363,7 @@ public class VisualOperator implements Serializable {
     public boolean isHermitian() {
         VisualOperator t = copy();
         t.hermitianConjugate();
-        return equals(t);
+        return equals3Decimals(t);
     }
 
     public void multiply(Complex complex) {
@@ -584,6 +584,9 @@ public class VisualOperator implements Serializable {
     }
 
     public boolean equals3Decimals(VisualOperator visualOperator) {
+        if (MATRIX_DIM != visualOperator.MATRIX_DIM) {
+            return false;
+        }
         for (int i = 0; i < MATRIX_DIM; i++)
             for (int j = 0; j < MATRIX_DIM; j++)
                 if (!matrix[i][j].equals3Decimals(visualOperator.matrix[i][j]))
@@ -1069,5 +1072,58 @@ public class VisualOperator implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getOpenQASMSymbol() {
+        String line = "";
+        if (equals3Decimals(HADAMARD)) {
+            line += "h qubit[" + getQubitIDs()[0] + "];";
+        } else if (equals3Decimals(PAULI_X)) {
+            line += "x qubit[" + getQubitIDs()[0] + "];";
+        } else if (equals3Decimals(PAULI_Y)) {
+            line += "y qubit[" + getQubitIDs()[0] + "];";
+        } else if (equals3Decimals(PAULI_Z)) {
+            line += "z qubit[" + getQubitIDs()[0] + "];";
+        } else if (equals3Decimals(ID)) {
+            line += "id qubit[" + getQubitIDs()[0] + "];";
+        } else if (equals3Decimals(T_GATE)) {
+            line += "t qubit[" + getQubitIDs()[0] + "];";
+        } else if (equals3Decimals(S_GATE)) {
+            line += "s qubit[" + getQubitIDs()[0] + "];";
+        } else if (equals3Decimals(CNOT)) {
+            line += "cx qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[1] + "];";
+        } else if (equals3Decimals(CY)) {
+            line += "cy qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[1] + "];";
+        } else if (equals3Decimals(CZ)) {
+            line += "cz qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[1] + "];";
+        } else if (equals3Decimals(CT)) {
+            line += "crz(pi/4) qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[1] + "];";
+        } else if (equals3Decimals(CS)) {
+            line += "crz(pi/2) qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[1] + "];";
+        } else if (equals3Decimals(CH)) {
+            line += "ch qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[1] + "];";
+        } else if (equals3Decimals(SWAP)) {
+            line += "swap qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[1] + "];";
+        } else if (equals3Decimals(TOFFOLI)) {
+            line += "ccx qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[1] + "],qubit[" + getQubitIDs()[2] + "];";
+        } else if (equals3Decimals(FREDKIN)) {
+            line += "cswap qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[1] + "],qubit[" + getQubitIDs()[2] + "];";
+        } else if (equals3Decimals(hermitianConjugate(T_GATE.copy()))) {
+            line += "tdg qubit[" + getQubitIDs()[0] + "];";
+        } else if (equals3Decimals(hermitianConjugate(S_GATE.copy()))) {
+            line += "sdg qubit[" + getQubitIDs()[0] + "];";
+        } else if (equals3Decimals(SQRT_NOT)) {
+            line += "h qubit[" + getQubitIDs()[0] + "];\n";
+            line += "sdg qubit[" + getQubitIDs()[0] + "];\n";
+            line += "ry(pi/2) qubit[" + getQubitIDs()[0] + "];";
+        } else if (isU3()) {
+            line += "u3(" + theta + "," + phi + "," + lambda + ") qubit[" + getQubitIDs()[0] + "];";
+        } else if (isRotation()) {
+            line += "rx(" + theta + ") qubit[" + getQubitIDs()[0] + "];\n";
+            line += "rz(" + phi + ") qubit[" + getQubitIDs()[0] + "];";
+        } else {
+            line += "//The following gate cannot be exported into OpenQASM: " + getName();
+        }
+        return line;
     }
 }

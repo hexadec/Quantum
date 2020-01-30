@@ -36,4 +36,10 @@
         android:orderInCategory="5"
         android:title="@string/probability_mode"
         app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/openqasm"
+        android:orderInCategory="3"
+        android:title="@string/export_into_qasm"
+        app:showAsAction="ifRoom" />
 </menu>

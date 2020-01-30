@@ -403,6 +403,70 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.matrix:
                         startActivity(new Intent(MainActivity.this, MatrixEditorActivity.class));
                         break;
+                    case R.id.openqasm:
+                        if (qv.getOperators().size() < 1) {
+                            Snackbar.make(findViewById(R.id.parent2), getString(R.string.no_gates), Snackbar.LENGTH_LONG).show();
+                            return;
+                        }
+                        SimpleDateFormat sdf = new SimpleDateFormat("'exp'_yyyy-MM-dd_HHmmss'" + QuantumView.OPENQASM_FILE_EXTENSION + "'", Locale.UK);
+                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        String filename = sdf.format(new Date());
+                        AlertDialog.Builder adb = new AlertDialog.Builder(this);
+                        adb.setTitle(R.string.select_filename);
+                        LinearLayout container = new LinearLayout(this);
+                        container.setOrientation(LinearLayout.VERTICAL);
+                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                        params.setMargins((int) QuantumView.pxFromDp(this, 20), 0, (int) QuantumView.pxFromDp(this, 20), 0);
+                        EditText editText = new EditText(this);
+                        InputFilter[] filterArray = new InputFilter[]{new InputFilter.LengthFilter(32), (CharSequence source, int start, int end, Spanned dest, int sta, int en) -> {
+                            if (source != null && "/\\:?;!~\'\",^ˇ|+<>[]{}".contains(("" + source))) {
+                                return "";
+                            }
+                            return null;
+                        }
+                        };
+                        editText.setText(qv.name);
+                        editText.setFilters(filterArray);
+                        editText.setHint(filename);
+                        editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_CLASS_TEXT);
+                        container.addView(editText, params);
+                        adb.setView(container);
+                        adb.setPositiveButton(R.string.save, (DialogInterface dialogInterface, int i) -> {
+                            try {
+                                String name = qv.name = editText.getText().toString().length() < 1 ? filename : editText.getText().toString();
+                                if (!name.endsWith(QuantumView.OPENQASM_FILE_EXTENSION)) {
+                                    name += QuantumView.OPENQASM_FILE_EXTENSION;
+                                }
+                                Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
+                                DocumentFile pickedDir = DocumentFile.fromTreeUri(MainActivity.this, uri);
+                                if (!pickedDir.exists()) {
+                                    getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                                    pickedDir = null;
+                                }
+                                DocumentFile newFile = pickedDir.findFile(name) == null ? pickedDir.createFile("application/octet-stream", name) : pickedDir.findFile(name);
+                                OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
+                                out.write(qv.openQASMExport().getBytes());
+                                out.flush();
+                                out.close();
+                                Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG).show();
+                            } catch (IndexOutOfBoundsException iout) {
+                                iout.printStackTrace();
+                                Snackbar.make(findViewById(R.id.parent2), R.string.choose_save_location, Snackbar.LENGTH_LONG)
+                                        .setAction(R.string.select, (View view2) ->
+                                                startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), 44)).show();
+
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
+                                snackbar.getView().setBackgroundColor(0xffD81010);
+                                snackbar.show();
+                            }
+                            qv.saved = true;
+                        });
+                        adb.setNeutralButton(R.string.cancel, null);
+                        adb.show();
+                        break;
                     default:
                 }
             }, 200);
@@ -691,6 +755,25 @@ public class MainActivity extends AppCompatActivity {
                 out.flush();
                 out.close();
                 Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG).show();
+            } catch (Exception e) {
+                e.printStackTrace();
+                Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
+                snackbar.getView().setBackgroundColor(0xffD81010);
+                snackbar.show();
+            }
+        } else if (resultCode == RESULT_OK && requestCode == 44) {
+            Uri treeUri = resultData.getData();
+            getContentResolver().takePersistableUriPermission(treeUri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            DocumentFile pickedDir = DocumentFile.fromTreeUri(this, treeUri);
+            try {
+                DocumentFile newFile = pickedDir.createFile("application/octet-stream", qv.name + QuantumView.OPENQASM_FILE_EXTENSION);
+                OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
+                out.write(qv.openQASMExport().getBytes());
+                out.flush();
+                out.close();
+                Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name + QuantumView.OPENQASM_FILE_EXTENSION, Snackbar.LENGTH_LONG).show();
             } catch (Exception e) {
                 e.printStackTrace();
                 Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);

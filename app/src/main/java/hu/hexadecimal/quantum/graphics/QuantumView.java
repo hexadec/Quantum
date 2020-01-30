@@ -48,6 +48,7 @@ public class QuantumView extends View {
      * Quantum Sequence File
      */
     public static final String FILE_EXTENSION = ".qsf";
+    public static final String OPENQASM_FILE_EXTENSION = ".qasm";
 
     public static final int STEP = 70;
     public static final int MAX_QUBITS = 10;
@@ -376,7 +377,8 @@ public class QuantumView extends View {
     public void moveGate(float posx, float posy, boolean toRight) {
         int index = 0;
         VisualOperator operator = null;
-        outer: for (int i = 0; i < gos.size(); i++) {
+        outer:
+        for (int i = 0; i < gos.size(); i++) {
             List<RectF> rectList = gos.get(i).getRect();
             for (int j = 0; j < rectList.size(); j++) {
                 if (rectList.get(j).contains(posx, posy)) {
@@ -389,7 +391,8 @@ public class QuantumView extends View {
         if (operator == null)
             return;
         int direction = toRight ? 1 : -1;
-        outer: for (int i = index + direction; i < gos.size() && i > -1; i += direction) {
+        outer:
+        for (int i = index + direction; i < gos.size() && i > -1; i += direction) {
             int[] qubits = gos.get(i).getQubitIDs();
             for (int j = 0; j < qubits.length; j++) {
                 for (int m = 0; m < operator.getQubitIDs().length; m++) {
@@ -493,6 +496,31 @@ public class QuantumView extends View {
         }
         invalidate();
         return counter;
+    }
+
+    public String openQASMExport() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("OPENQASM 2.0;\n" +
+                "include \"qelib1.inc\";\n");
+        builder.append("qreg qubit[");
+        builder.append(getLastUsedQubit() + 1);
+        builder.append("];\n");
+        builder.append("creg c[");
+        builder.append(getLastUsedQubit() + 1);
+        builder.append("];\n");
+        for (VisualOperator visualOperator : gos) {
+            try {
+                builder.append(visualOperator.getOpenQASMSymbol());
+                builder.append("\n");
+            } catch (Exception e) {
+                e.printStackTrace();
+                builder.append("//Error while exporting the following: ");
+                builder.append(visualOperator.getName());
+                builder.append("\n");
+            }
+        }
+        builder.append("measure qubit -> c;\n");
+        return builder.toString();
     }
 
 }

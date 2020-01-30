@@ -5,6 +5,8 @@
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
+# This is of crucial importance to keep predefined operators
+# and other methods / fields related to them
 -keepclassmembers class hu.hexadecimal.quantum.* {
     public *;
 }

@@ -93,4 +93,6 @@
     <string name="predefined_gate_shortcuts_close_sum">Close the navigation bar when you select a gate shortcut</string>
     <string name="move_gate_to_left">Move the gate to the left</string>
     <string name="move_gate_to_right">Move the gate to the right</string>
+    <string name="export_into_qasm">Export into OpenQASM</string>
+    <string name="export_into_qasm_compatibility">Please be careful! Some gates, including all user-defined ones cannot be exported to OpenQASM currently. Please check the export file for any messages.</string>
 </resources>
