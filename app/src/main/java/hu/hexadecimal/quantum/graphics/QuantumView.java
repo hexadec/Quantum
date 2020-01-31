@@ -501,13 +501,13 @@ public class QuantumView extends View {
     public String openQASMExport() {
         StringBuilder builder = new StringBuilder();
         builder.append("OPENQASM 2.0;\n" +
-                "include \"qelib1.inc\";\n");
+                "include \"qelib1.inc\";\n\n");
         builder.append("qreg qubit[");
         builder.append(getLastUsedQubit() + 1);
         builder.append("];\n");
         builder.append("creg c[");
         builder.append(getLastUsedQubit() + 1);
-        builder.append("];\n");
+        builder.append("];\n\n");
         for (VisualOperator visualOperator : gos) {
             try {
                 builder.append(visualOperator.getOpenQASMSymbol());

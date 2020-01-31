@@ -39,6 +39,7 @@
 
     <item
         android:id="@+id/openqasm"
+        android:icon="@drawable/export"
         android:orderInCategory="3"
         android:title="@string/export_into_qasm"
         app:showAsAction="ifRoom" />

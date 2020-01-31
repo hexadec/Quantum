@@ -398,7 +398,15 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(new Intent(MainActivity.this, HelpActivity.class));
                         break;
                     case R.id.clear:
-                        qv.clearScreen();
+                        if (qv.getOperators().size() >= 5) {
+                            AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
+                            adb.setMessage(R.string.are_you_sure_to_delete);
+                            adb.setPositiveButton(R.string.yes, (DialogInterface dialogInterface, int i) -> qv.clearScreen());
+                            adb.setNegativeButton(R.string.cancel, null);
+                            adb.show();
+                        } else {
+                            qv.clearScreen();
+                        }
                         break;
                     case R.id.matrix:
                         startActivity(new Intent(MainActivity.this, MatrixEditorActivity.class));
@@ -417,6 +425,8 @@ public class MainActivity extends AppCompatActivity {
                         container.setOrientation(LinearLayout.VERTICAL);
                         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
                         params.setMargins((int) QuantumView.pxFromDp(this, 20), 0, (int) QuantumView.pxFromDp(this, 20), 0);
+                        LinearLayout.LayoutParams textViewParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                        textViewParams.setMargins((int) QuantumView.pxFromDp(this, 23), (int) QuantumView.pxFromDp(this, 3), (int) QuantumView.pxFromDp(this, 23), 0);
                         EditText editText = new EditText(this);
                         InputFilter[] filterArray = new InputFilter[]{new InputFilter.LengthFilter(32), (CharSequence source, int start, int end, Spanned dest, int sta, int en) -> {
                             if (source != null && "/\\:?;!~\'\",^ˇ|+<>[]{}".contains(("" + source))) {
@@ -425,13 +435,19 @@ public class MainActivity extends AppCompatActivity {
                             return null;
                         }
                         };
+                        if (qv.name.endsWith(QuantumView.FILE_EXTENSION)) {
+                            qv.name = qv.name.replace(QuantumView.FILE_EXTENSION, "");
+                        }
                         editText.setText(qv.name);
                         editText.setFilters(filterArray);
                         editText.setHint(filename);
                         editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_CLASS_TEXT);
+                        TextView textView = new TextView(MainActivity.this);
+                        textView.setText(R.string.export_into_qasm_compatibility);
+                        container.addView(textView, textViewParams);
                         container.addView(editText, params);
                         adb.setView(container);
-                        adb.setPositiveButton(R.string.save, (DialogInterface dialogInterface, int i) -> {
+                        adb.setPositiveButton(R.string.export, (DialogInterface dialogInterface, int i) -> {
                             try {
                                 String name = qv.name = editText.getText().toString().length() < 1 ? filename : editText.getText().toString();
                                 if (!name.endsWith(QuantumView.OPENQASM_FILE_EXTENSION)) {
@@ -653,6 +669,9 @@ public class MainActivity extends AppCompatActivity {
                         return null;
                     }
                     };
+                    if (qv.name.endsWith(QuantumView.OPENQASM_FILE_EXTENSION)) {
+                        qv.name = qv.name.replace(QuantumView.OPENQASM_FILE_EXTENSION, "");
+                    }
                     editText.setText(qv.name);
                     editText.setFilters(filterArray);
                     editText.setHint(filename);

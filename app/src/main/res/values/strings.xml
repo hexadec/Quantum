@@ -69,7 +69,7 @@
     <string name="click_to_start">Click anywhere on the screen to start!</string>
     <string name="copy_matrix">Copy matrix</string>
     <string name="help_menu">Help</string>
-    <string name="are_you_sure">Do you really want to quit?</string>
+    <string name="are_you_sure_to_quit">Do you really want to quit?</string>
     <string name="any_unsaved_will_be_lost">Any unsaved changes will be lost</string>
     <string name="exit">Exit</string>
     <string name="next_qubit">Next qubit</string>
@@ -94,5 +94,8 @@
     <string name="move_gate_to_left">Move the gate to the left</string>
     <string name="move_gate_to_right">Move the gate to the right</string>
     <string name="export_into_qasm">Export into OpenQASM</string>
-    <string name="export_into_qasm_compatibility">Please be careful! Some gates, including all user-defined ones cannot be exported to OpenQASM currently. Please check the export file for any messages.</string>
+    <string name="export_into_qasm_compatibility">Please be careful! User-defined gates cannot be exported to OpenQASM currently. Please check the export file for any messages.</string>
+    <string name="export">Export</string>
+    <string name="warning">Warning</string>
+    <string name="are_you_sure_to_delete">Do you really want to delete all gates?</string>
 </resources>
