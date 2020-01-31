@@ -128,6 +128,9 @@ public class Complex implements Serializable {
     }
 
     public static Complex exponent(Complex base, Complex power) {
+        if (base.mod() < 0.0001) {
+            return new Complex(0);
+        }
         double realExpPart = Math.log(base.mod()) * power.real - (power.imaginary * base.arg());
         double imagExpPart = base.arg() * power.real + power.imaginary * Math.log(base.mod());
         double modulus = Math.exp(realExpPart);
@@ -151,7 +154,12 @@ public class Complex implements Serializable {
     }
 
     public static Complex acos(Complex complex) {
-        return Complex.multiply(new Complex(0, -1), Complex.log(new Complex(Math.E, 0), Complex.add(complex, Complex.exponent(Complex.sub(Complex.exponent(complex, new Complex(2, 0)), new Complex(1, 0)), new Complex(0.5, 0)))));
+        Complex square = Complex.exponent(complex, new Complex(2, 0));
+        Complex diff = Complex.sub(square, new Complex(1, 0));
+        Complex sqrt = Complex.exponent(diff, new Complex(0.5, 0));
+        Complex sum = Complex.add(complex, sqrt);
+        Complex logarithm = Complex.log(new Complex(Math.E, 0), sum);
+        return Complex.multiply(new Complex(0, -1), logarithm);
     }
 
     public static Complex sinh(Complex complex) {
@@ -167,6 +175,12 @@ public class Complex implements Serializable {
     }
 
     public static Complex log(Complex base, Complex anti_logarithm) {
+        if (base.mod() < 0.00001) {
+            return new Complex(0);
+        }
+        if (anti_logarithm.mod() < 0.00001) {
+            return new Complex(0);
+        }
         Complex loga = Complex.add(new Complex(Math.log(anti_logarithm.mod()), 0.0), Complex.multiply(new Complex(0, 1), new Complex(anti_logarithm.arg(), 0)));
         Complex logb = Complex.add(new Complex(Math.log(base.mod()), 0.0), Complex.multiply(new Complex(0, 1), new Complex(base.arg(), 0)));
         return Complex.divide(loga, logb);

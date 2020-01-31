@@ -389,7 +389,20 @@ public class VisualOperator implements Serializable {
     }
 
     public double[] getAngles() {
-        return new double[]{theta, phi, lambda};
+        if (isU3() || isRotation()) {
+            return new double[]{theta, phi, lambda};
+        } else if (!isMultiQubit()) {
+            Complex theta = Complex.multiply(new Complex(2, 0), Complex.acos(matrix[0][0]));
+            Complex lambda = Complex.divide(Complex.sub(Complex.log(new Complex(Math.E, 0), Complex.multiply(new Complex(-1, 0), matrix[0][1])),
+                    Complex.log(new Complex(Math.E, 0), Complex.sin(Complex.acos(matrix[0][0])))), new Complex(0, 1));
+            Complex phi = Complex.divide(Complex.sub(Complex.log(new Complex(Math.E, 0), matrix[1][0]),
+                    Complex.log(new Complex(Math.E, 0), Complex.sin(Complex.acos(matrix[0][0])))), new Complex(0, 1));
+            Complex phi2 = Complex.sub(Complex.divide(Complex.log(new Complex(Math.E, 0), matrix[1][1]), Complex.multiply(matrix[0][0], new Complex(0, 1))), lambda);
+            Log.d("Angles", "theta: " + theta.toString3Decimals() + ", lambda: " + lambda.toString3Decimals() + ", phi: " + phi.toString3Decimals() + ", phi2: " + phi2);
+            return new double[]{theta.real, phi2.real, lambda.real};
+        } else {
+            return new double[]{theta, phi, lambda};
+        }
     }
 
     public VisualOperator copy() {
@@ -1121,6 +1134,10 @@ public class VisualOperator implements Serializable {
         } else if (isRotation()) {
             line += "rx(" + theta + ") qubit[" + getQubitIDs()[0] + "];\n";
             line += "rz(" + phi + ") qubit[" + getQubitIDs()[0] + "];";
+        } else if (!isMultiQubit()) {
+            double[] angles = getAngles();
+            line += "u3(" + angles[0] + "," + angles[1] + "," + angles[2] + ") qubit[" + getQubitIDs()[0] + "];\n";
+            line += "//U3 autoconvert: " + getName();
         } else {
             line += "//The following gate cannot be exported into OpenQASM: " + getName();
         }
