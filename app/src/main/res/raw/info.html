@@ -30,7 +30,7 @@
                 <a href="#qlgs">Quantum Logic Gates</a>
             </li>
             <li>
-                <a href="#rotation">Rotation gate</a>
+                <a href="#rotation">Rotation Gate</a>
             </li>
             <li>
                 <a href="#u3">U3 gate</a>
@@ -42,10 +42,13 @@
                 <a href="#multi_qubit">Multi Qubit Gates</a>
             </li>
             <li>
-                <a href="#bloch_sphere">Bloch sphere</a>
+                <a href="#bloch_sphere">Bloch Sphere</a>
             </li>
             <li>
-                <a href="#settings">Available settings</a>
+                <a href="#openqasm_export">OpenQASM Export</a>
+            </li>
+            <li>
+                <a href="#settings">Available Settings</a>
             </li>
         </ul>
         </p>
@@ -319,6 +322,20 @@
             button in the top right corner and navigate to the desired qubit using the buttons on
             the bottom. Please note, that the state displayed on the bloch sphere is the state
             of the qubit before the first multi-qubit gate was applied on the selected qubit.
+        </p>
+        <br />
+        <h4
+                id="openqasm_export"
+                name="openqasm_export">
+            <strong>OpenQASM Export</strong>
+        </h4>
+        <p style="text-align: justify;">
+            If you wish to open your circuit in another program, your best option is to export it
+            into OpenQASM. Please note, that the application is currently unable to export any
+            user-defined gate that uses more than one qubit. If the application encounters any such
+            gate, it will leave a remark in the QASM file. Single-qubit user-defined gates will be
+            converted into U3 when saving. Some special gates may also be converted into a
+            combination of other gates, such as the &radic;NOT.
         </p>
         <br />
         <h4
