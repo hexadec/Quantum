@@ -4,4 +4,5 @@
     android:id="@+id/help_parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HelpActivity" />
+    tools:context=".HelpActivity"
+    android:background="#FFFFFF"/>

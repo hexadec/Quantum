@@ -64,6 +64,7 @@ public class ExecutionProgressDialog extends AlertDialog {
         progressBar.setMax(max);
         progressBar.setProgress(0);
         progressBar.setSecondaryProgress(progress);
+        progressText.setText(R.string.assembling_experiment);
     }
     
     

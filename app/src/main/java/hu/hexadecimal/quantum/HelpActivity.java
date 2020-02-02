@@ -1,13 +1,18 @@
 package hu.hexadecimal.quantum;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import hu.hexadecimal.quantum.graphics.QuantumView;
 
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.WebView;
 
@@ -20,11 +25,13 @@ import java.nio.charset.StandardCharsets;
 
 public class HelpActivity extends AppCompatActivity {
 
+    WebView webView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_help);
-        WebView webView = new WebView(HelpActivity.this);
+        webView = new WebView(HelpActivity.this);
         ((ConstraintLayout) findViewById(R.id.help_parent)).addView(webView);
 
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#171717")));
@@ -85,6 +92,36 @@ public class HelpActivity extends AppCompatActivity {
                         runOnUiThread(() -> webView.loadUrl("file:///android_res/raw/info.html"));
                     }
                 }).start(), 100);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+        Log.i("dpWidth", "" + dpWidth);
+        int padding = dpWidth > 450 ? dpWidth > 600 ? dpWidth >= 800 ? 40 : 30 : 20 : 10;
+        ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        lp.setMargins((int) QuantumView.pxFromDp(this, padding),
+                (int) QuantumView.pxFromDp(this, padding / 2),
+                (int) QuantumView.pxFromDp(this, padding),
+                (int) QuantumView.pxFromDp(this, padding / 2));
+        webView.setLayoutParams(lp);
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+        Log.i("dpWidth", "" + dpWidth);
+        int padding = dpWidth > 400 ? dpWidth > 600 ? 30 : 20 : 10;
+        ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        lp.setMargins((int) QuantumView.pxFromDp(this, padding),
+                (int) QuantumView.pxFromDp(this, padding / 2),
+                (int) QuantumView.pxFromDp(this, padding),
+                (int) QuantumView.pxFromDp(this, padding / 2));
+        webView.setLayoutParams(lp);
     }
 
     /**

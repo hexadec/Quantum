@@ -255,6 +255,7 @@ public class MainActivity extends AppCompatActivity {
                     scrollView.addView(tableLayout);
                     adb.setView(scrollView);
                     AlertDialog ad = adb.create();
+                    progressDialog.setProgress(experimentRunner.status, shots);
                     ad.setOnShowListener((DialogInterface dialogInterface) -> {
                         float dpWidth = ad.getWindow().getDecorView().getWidth() / displayMetrics.density;
                         Log.i("Debug", "Dialog dpwidth: " + dpWidth);
@@ -264,6 +265,9 @@ public class MainActivity extends AppCompatActivity {
                         DecimalFormat sf = new DecimalFormat(stateVector == null ? "0.########" : "0." + (decimalPoints < 4 ? decimals.substring(2) : decimals.substring(3)) + "E0");
                         outerFor:
                         for (int i = 0; i < probabilities.length; i++) {
+                            if (shots == 1 && probabilities[i] == 0) {
+                                continue;
+                            }
                             TableRow tr = new TableRow(MainActivity.this);
                             tr.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
                             tr.setDividerDrawable(getDrawable(R.drawable.vertical_divider));
@@ -299,13 +303,13 @@ public class MainActivity extends AppCompatActivity {
                             tr.addView(textView[1]);
                             tr.addView(textView[2]);
                             tableLayout.addView(tr);
+                        }
 
-                            try {
-                                progressDialog.cancel();
-                            } catch (Exception e) {
-                                progressDialog = null;
-                                e.printStackTrace();
-                            }
+                        try {
+                            progressDialog.cancel();
+                        } catch (Exception e) {
+                            progressDialog = null;
+                            e.printStackTrace();
                         }
                     });
                     ad.show();
@@ -465,7 +469,9 @@ public class MainActivity extends AppCompatActivity {
                                 out.write(qv.openQASMExport().getBytes());
                                 out.flush();
                                 out.close();
-                                Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG).show();
+                                Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG);
+                                ((TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text)).setSingleLine(false);
+                                snackbar.show();
                             } catch (IndexOutOfBoundsException iout) {
                                 iout.printStackTrace();
                                 Snackbar.make(findViewById(R.id.parent2), R.string.choose_save_location, Snackbar.LENGTH_LONG)
@@ -696,7 +702,9 @@ public class MainActivity extends AppCompatActivity {
                             out.write(qv.exportGates(qv.name).toString(2).getBytes());
                             out.flush();
                             out.close();
-                            Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG).show();
+                            Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG);
+                            ((TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text)).setSingleLine(false);
+                            snackbar.show();
                         } catch (IndexOutOfBoundsException iout) {
                             iout.printStackTrace();
                             Snackbar.make(findViewById(R.id.parent2), R.string.choose_save_location, Snackbar.LENGTH_LONG)
@@ -773,7 +781,9 @@ public class MainActivity extends AppCompatActivity {
                 out.write(qv.exportGates(qv.name).toString(2).getBytes());
                 out.flush();
                 out.close();
-                Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG).show();
+                Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG);
+                ((TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text)).setSingleLine(false);
+                snackbar.show();
             } catch (Exception e) {
                 e.printStackTrace();
                 Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
@@ -792,7 +802,9 @@ public class MainActivity extends AppCompatActivity {
                 out.write(qv.openQASMExport().getBytes());
                 out.flush();
                 out.close();
-                Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name + QuantumView.OPENQASM_FILE_EXTENSION, Snackbar.LENGTH_LONG).show();
+                Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name + QuantumView.OPENQASM_FILE_EXTENSION, Snackbar.LENGTH_LONG);
+                ((TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text)).setSingleLine(false);
+                snackbar.show();
             } catch (Exception e) {
                 e.printStackTrace();
                 Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);

@@ -19,7 +19,7 @@ A software for Android that emulates the actions of a quantum computer
 - Lots of predefined gates
 - Get results immediately
 - Export results
-- Import / Export gate sequence
+- Import / Export gate sequence & Export as OpenQASM
 - Show bloch sphere
 - Display the final state-vector of the system
 
