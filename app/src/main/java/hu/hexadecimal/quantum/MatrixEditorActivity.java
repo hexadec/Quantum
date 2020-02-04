@@ -24,6 +24,9 @@ import androidx.documentfile.provider.DocumentFile;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import hu.hexadecimal.quantum.graphics.ContextMenuRecyclerView;
+import hu.hexadecimal.quantum.graphics.RecyclerViewAdapter;
+import hu.hexadecimal.quantum.math.Complex;
+import hu.hexadecimal.quantum.math.VisualOperator;
 
 import android.preference.PreferenceManager;
 import android.text.TextUtils;

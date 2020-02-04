@@ -69,6 +69,9 @@ import hu.hexadecimal.quantum.graphics.BlochSphereView;
 import hu.hexadecimal.quantum.graphics.ExecutionProgressDialog;
 import hu.hexadecimal.quantum.graphics.GateView;
 import hu.hexadecimal.quantum.graphics.QuantumView;
+import hu.hexadecimal.quantum.math.Complex;
+import hu.hexadecimal.quantum.math.Qubit;
+import hu.hexadecimal.quantum.math.VisualOperator;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -108,6 +111,8 @@ public class MainActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         qv.setLayoutParams(new LinearLayout.LayoutParams(displayMetrics.widthPixels * 2, ViewGroup.LayoutParams.MATCH_PARENT));
         qv.saved = true;
+
+        VisualOperator.S_GATE.getAngles();
 
         FloatingActionButton fab = findViewById(R.id.fab_main);
         FloatingActionButton execute = findViewById(R.id.fab_matrix);
@@ -452,39 +457,7 @@ public class MainActivity extends AppCompatActivity {
                         container.addView(editText, params);
                         adb.setView(container);
                         adb.setPositiveButton(R.string.export, (DialogInterface dialogInterface, int i) -> {
-                            try {
-                                String name = qv.name = editText.getText().toString().length() < 1 ? filename : editText.getText().toString();
-                                if (!name.endsWith(QuantumView.OPENQASM_FILE_EXTENSION)) {
-                                    name += QuantumView.OPENQASM_FILE_EXTENSION;
-                                }
-                                Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
-                                DocumentFile pickedDir = DocumentFile.fromTreeUri(MainActivity.this, uri);
-                                if (!pickedDir.exists()) {
-                                    getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                                            Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                                    pickedDir = null;
-                                }
-                                DocumentFile newFile = pickedDir.findFile(name) == null ? pickedDir.createFile("application/octet-stream", name) : pickedDir.findFile(name);
-                                OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                                out.write(qv.openQASMExport().getBytes());
-                                out.flush();
-                                out.close();
-                                Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG);
-                                ((TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text)).setSingleLine(false);
-                                snackbar.show();
-                            } catch (IndexOutOfBoundsException iout) {
-                                iout.printStackTrace();
-                                Snackbar.make(findViewById(R.id.parent2), R.string.choose_save_location, Snackbar.LENGTH_LONG)
-                                        .setAction(R.string.select, (View view2) ->
-                                                startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), 44)).show();
-
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
-                                snackbar.getView().setBackgroundColor(0xffD81010);
-                                snackbar.show();
-                            }
-                            qv.saved = true;
+                            UIHelper.saveFile(MainActivity.this, editText, qv, filename, true);
                         });
                         adb.setNeutralButton(R.string.cancel, null);
                         adb.show();
@@ -512,11 +485,11 @@ public class MainActivity extends AppCompatActivity {
             TableRow tr = new TableRow(MainActivity.this);
             for (int i = 0; i < operators.size(); i++) {
                 GateView gw = new GateView(MainActivity.this, operators.get(i));
-                TableRow.LayoutParams params = new TableRow.LayoutParams(gw.getMinimumWidth(), gw.getMinimumHeight());
-                params.setMargins((int) QuantumView.pxFromDp(MainActivity.this, 2),
-                        (int) QuantumView.pxFromDp(MainActivity.this, 2),
-                        (int) QuantumView.pxFromDp(MainActivity.this, 2),
-                        (int) QuantumView.pxFromDp(MainActivity.this, 2));
+                TableRow.LayoutParams params = new TableRow.LayoutParams(gw.minSize(), gw.minSize());
+                params.setMargins((int) QuantumView.pxFromDp(MainActivity.this, 6),
+                        (int) QuantumView.pxFromDp(MainActivity.this, 6),
+                        (int) QuantumView.pxFromDp(MainActivity.this, 6),
+                        (int) QuantumView.pxFromDp(MainActivity.this, 6));
                 gw.setLayoutParams(params);
                 gw.setOnClickListener((View view) -> {
                     showAddGateDialog(-1, -1, gw.visualOperator);
@@ -530,10 +503,12 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             ConstraintLayout.LayoutParams lp = ((ConstraintLayout.LayoutParams) gateHolder.getLayoutParams());
-            lp.setMargins((int) QuantumView.pxFromDp(MainActivity.this, 10),
-                    (int) QuantumView.pxFromDp(MainActivity.this, 10),
-                    (int) QuantumView.pxFromDp(MainActivity.this, 10),
-                    (int) QuantumView.pxFromDp(MainActivity.this, 20));
+            float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+            int margin = dpWidth > 330 ? dpWidth > 420 ? 15 : 10 : 5;
+            lp.setMargins((int) QuantumView.pxFromDp(MainActivity.this, margin),
+                    (int) QuantumView.pxFromDp(MainActivity.this, margin),
+                    (int) QuantumView.pxFromDp(MainActivity.this, margin),
+                    (int) QuantumView.pxFromDp(MainActivity.this, margin * 2));
             gateHolder.setLayoutParams(lp);
             gateHolder.bringToFront();
         }, 300);
@@ -685,39 +660,7 @@ public class MainActivity extends AppCompatActivity {
                     container.addView(editText, params);
                     adb.setView(container);
                     adb.setPositiveButton(R.string.save, (DialogInterface dialogInterface, int i) -> {
-                        try {
-                            qv.name = editText.getText().toString().length() < 1 ? filename : editText.getText().toString();
-                            if (!qv.name.endsWith(QuantumView.FILE_EXTENSION)) {
-                                qv.name += QuantumView.FILE_EXTENSION;
-                            }
-                            Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
-                            DocumentFile pickedDir = DocumentFile.fromTreeUri(MainActivity.this, uri);
-                            if (!pickedDir.exists()) {
-                                getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
-                                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                                pickedDir = null;
-                            }
-                            DocumentFile newFile = pickedDir.findFile(qv.name) == null ? pickedDir.createFile("application/octet-stream", qv.name) : pickedDir.findFile(qv.name);
-                            OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                            out.write(qv.exportGates(qv.name).toString(2).getBytes());
-                            out.flush();
-                            out.close();
-                            Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG);
-                            ((TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text)).setSingleLine(false);
-                            snackbar.show();
-                        } catch (IndexOutOfBoundsException iout) {
-                            iout.printStackTrace();
-                            Snackbar.make(findViewById(R.id.parent2), R.string.choose_save_location, Snackbar.LENGTH_LONG)
-                                    .setAction(R.string.select, (View view2) ->
-                                            startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), 43)).show();
-
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
-                            snackbar.getView().setBackgroundColor(0xffD81010);
-                            snackbar.show();
-                        }
-                        qv.saved = true;
+                        UIHelper.saveFile(MainActivity.this, editText, qv, filename, false);
                     });
                     adb.setNeutralButton(R.string.cancel, null);
                     adb.show();
@@ -774,43 +717,13 @@ public class MainActivity extends AppCompatActivity {
             getContentResolver().takePersistableUriPermission(treeUri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION |
                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            DocumentFile pickedDir = DocumentFile.fromTreeUri(this, treeUri);
-            try {
-                DocumentFile newFile = pickedDir.createFile("application/octet-stream", qv.name);
-                OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                out.write(qv.exportGates(qv.name).toString(2).getBytes());
-                out.flush();
-                out.close();
-                Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name, Snackbar.LENGTH_LONG);
-                ((TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text)).setSingleLine(false);
-                snackbar.show();
-            } catch (Exception e) {
-                e.printStackTrace();
-                Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
-                snackbar.getView().setBackgroundColor(0xffD81010);
-                snackbar.show();
-            }
+            UIHelper.saveFileActivityResult(treeUri, this, qv, false);
         } else if (resultCode == RESULT_OK && requestCode == 44) {
             Uri treeUri = resultData.getData();
             getContentResolver().takePersistableUriPermission(treeUri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION |
                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-            DocumentFile pickedDir = DocumentFile.fromTreeUri(this, treeUri);
-            try {
-                DocumentFile newFile = pickedDir.createFile("application/octet-stream", qv.name + QuantumView.OPENQASM_FILE_EXTENSION);
-                OutputStream out = getContentResolver().openOutputStream(newFile.getUri());
-                out.write(qv.openQASMExport().getBytes());
-                out.flush();
-                out.close();
-                Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), getString(R.string.experiment_saved) + " \n" + qv.name + QuantumView.OPENQASM_FILE_EXTENSION, Snackbar.LENGTH_LONG);
-                ((TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text)).setSingleLine(false);
-                snackbar.show();
-            } catch (Exception e) {
-                e.printStackTrace();
-                Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
-                snackbar.getView().setBackgroundColor(0xffD81010);
-                snackbar.show();
-            }
+            UIHelper.saveFileActivityResult(treeUri, this, qv, true);
         }
     }
 

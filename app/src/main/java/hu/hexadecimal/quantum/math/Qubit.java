@@ -1,4 +1,4 @@
-package hu.hexadecimal.quantum;
+package hu.hexadecimal.quantum.math;
 
 import android.util.Log;
 

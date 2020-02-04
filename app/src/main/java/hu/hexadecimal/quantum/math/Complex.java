@@ -1,4 +1,4 @@
-package hu.hexadecimal.quantum;
+package hu.hexadecimal.quantum.math;
 
 import java.io.Serializable;
 import java.text.DecimalFormat;
@@ -162,6 +162,17 @@ public class Complex implements Serializable {
         return Complex.multiply(new Complex(0, -1), logarithm);
     }
 
+    public static Complex tan(Complex complex) {
+        return Complex.divide(sin(complex), cos(complex));
+    }
+
+    public static Complex atan(Complex complex) {
+        Complex dividend = Complex.add(new Complex(1, 0), Complex.multiply(new Complex(0, 1), complex));
+        Complex divisor = Complex.sub(new Complex(1, 0), Complex.multiply(new Complex(0, 1), complex));
+        Complex log = Complex.log(new Complex(Math.E, 0), Complex.divide(dividend, divisor));
+        return Complex.multiply(Complex.divide(new Complex(1, 0), new Complex(0, 2)), log);
+    }
+
     public static Complex sinh(Complex complex) {
         Complex epz = Complex.exponent(new Complex(Math.E, 0), new Complex(complex.real, complex.imaginary));
         Complex enz = Complex.exponent(new Complex(Math.E, 0), new Complex(-complex.real, -complex.imaginary));
@@ -175,6 +186,7 @@ public class Complex implements Serializable {
     }
 
     public static Complex log(Complex base, Complex anti_logarithm) {
+        //TODO this should not look like what it is
         if (base.mod() < 0.00001) {
             return new Complex(0);
         }
@@ -351,6 +363,10 @@ public class Complex implements Serializable {
             e.printStackTrace();
             throw new NumberFormatException(e.getMessage());
         }
+    }
+
+    public boolean isReal() {
+        return Math.abs(imaginary) < 0.0001;
     }
 
     public Complex copy() {

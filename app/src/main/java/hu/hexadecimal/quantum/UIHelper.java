@@ -12,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -24,6 +25,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
+import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -32,6 +34,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
 import hu.hexadecimal.quantum.graphics.QuantumView;
+import hu.hexadecimal.quantum.math.VisualOperator;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -550,5 +553,72 @@ public class UIHelper {
             return true;
         });
         layout.findViewById(R.id.gate_action_main).setOnClickListener((View view) -> d.cancel());
+    }
+
+
+    public static void saveFileActivityResult(Uri treeUri, AppCompatActivity context, QuantumView qv, boolean export) {
+        DocumentFile pickedDir = DocumentFile.fromTreeUri(context, treeUri);
+        try {
+            DocumentFile newFile = pickedDir.createFile("application/octet-stream", qv.name + (export ? QuantumView.OPENQASM_FILE_EXTENSION : ""));
+            OutputStream out = context.getContentResolver().openOutputStream(newFile.getUri());
+            if (export) {
+                out.write(qv.openQASMExport().getBytes());
+            } else {
+                out.write(qv.exportGates(qv.name).toString(2).getBytes());
+            }
+            out.flush();
+            out.close();
+            Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), context.getString(R.string.experiment_saved) + " \n" + qv.name + (export ? QuantumView.OPENQASM_FILE_EXTENSION : ""), Snackbar.LENGTH_LONG);
+            ((TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text)).setSingleLine(false);
+            snackbar.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
+            snackbar.getView().setBackgroundColor(0xffD81010);
+            snackbar.show();
+        }
+    }
+
+
+    public static void saveFile(AppCompatActivity context, EditText editText, QuantumView qv, String filename, boolean export) {
+        try {
+            String name = qv.name = editText.getText().toString().length() < 1 ? filename : editText.getText().toString();
+            if (!export && !name.endsWith(QuantumView.FILE_EXTENSION)) {
+                name += QuantumView.FILE_EXTENSION;
+            } else if (export && !name.endsWith(QuantumView.OPENQASM_FILE_EXTENSION)) {
+                name += QuantumView.OPENQASM_FILE_EXTENSION;
+            }
+            Uri uri = context.getContentResolver().getPersistedUriPermissions().get(0).getUri();
+            DocumentFile pickedDir = DocumentFile.fromTreeUri(context, uri);
+            if (!pickedDir.exists()) {
+                context.getContentResolver().releasePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION |
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                pickedDir = null;
+            }
+            DocumentFile newFile = pickedDir.findFile(name) == null ? pickedDir.createFile("application/octet-stream", name) : pickedDir.findFile(name);
+            OutputStream out = context.getContentResolver().openOutputStream(newFile.getUri());
+            if (export) {
+                out.write(qv.openQASMExport().getBytes());
+            } else {
+                out.write(qv.exportGates(name).toString(2).getBytes());
+            }
+            out.flush();
+            out.close();
+            Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), context.getString(R.string.experiment_saved) + " \n" + name, Snackbar.LENGTH_LONG);
+            ((TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text)).setSingleLine(false);
+            snackbar.show();
+        } catch (IndexOutOfBoundsException iout) {
+            iout.printStackTrace();
+            Snackbar.make(context.findViewById(R.id.parent2), R.string.choose_save_location, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.select, (View view2) ->
+                            context.startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), export ? 44 : 43)).show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
+            snackbar.getView().setBackgroundColor(0xffD81010);
+            snackbar.show();
+        }
+        qv.saved = true;
     }
 }

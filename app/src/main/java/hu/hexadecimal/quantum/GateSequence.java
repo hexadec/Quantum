@@ -7,6 +7,8 @@ import org.json.JSONObject;
 import java.util.Collection;
 import java.util.LinkedList;
 
+import hu.hexadecimal.quantum.math.VisualOperator;
+
 public class GateSequence<T> extends LinkedList {
 
     final String name;

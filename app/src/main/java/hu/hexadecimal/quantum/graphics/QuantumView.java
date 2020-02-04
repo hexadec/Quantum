@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -26,7 +25,7 @@ import java.util.stream.IntStream;
 
 import androidx.core.graphics.PaintCompat;
 import hu.hexadecimal.quantum.GateSequence;
-import hu.hexadecimal.quantum.VisualOperator;
+import hu.hexadecimal.quantum.math.VisualOperator;
 
 public class QuantumView extends View {
 

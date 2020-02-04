@@ -1,4 +1,4 @@
-package hu.hexadecimal.quantum;
+package hu.hexadecimal.quantum.graphics;
 
 import android.content.Context;
 import android.text.Html;
@@ -11,6 +11,8 @@ import android.widget.TextView;
 import java.util.List;
 
 import androidx.recyclerview.widget.RecyclerView;
+import hu.hexadecimal.quantum.R;
+import hu.hexadecimal.quantum.math.VisualOperator;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
@@ -20,7 +22,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ItemLongClickListener mLongClickListener;
 
     // data is passed into the constructor
-    RecyclerViewAdapter(Context context, List<VisualOperator> data) {
+    public RecyclerViewAdapter(Context context, List<VisualOperator> data) {
         this.mInflater = LayoutInflater.from(context);
         this.operators = data;
     }
@@ -92,11 +94,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     // allows clicks events to be caught
-    void setClickListener(ItemClickListener itemClickListener) {
+    public void setClickListener(ItemClickListener itemClickListener) {
         this.mClickListener = itemClickListener;
     }
 
-    void setLongClickListener(ItemLongClickListener itemLongClickListener) {
+    public void setLongClickListener(ItemLongClickListener itemLongClickListener) {
         this.mLongClickListener = itemLongClickListener;
     }
 

@@ -7,6 +7,9 @@ import java.util.LinkedList;
 import java.util.Random;
 
 import hu.hexadecimal.quantum.graphics.QuantumView;
+import hu.hexadecimal.quantum.math.Complex;
+import hu.hexadecimal.quantum.math.Qubit;
+import hu.hexadecimal.quantum.math.VisualOperator;
 
 public class ExperimentRunner {
     private final LinkedList<VisualOperator> v;

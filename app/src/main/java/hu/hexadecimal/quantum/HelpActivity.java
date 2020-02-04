@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import hu.hexadecimal.quantum.graphics.QuantumView;
+import hu.hexadecimal.quantum.math.VisualOperator;
 
 import android.content.res.Configuration;
 import android.graphics.Color;

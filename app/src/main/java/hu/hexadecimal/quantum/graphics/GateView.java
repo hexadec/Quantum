@@ -8,7 +8,7 @@ import android.graphics.Typeface;
 import android.view.View;
 
 import androidx.annotation.NonNull;
-import hu.hexadecimal.quantum.VisualOperator;
+import hu.hexadecimal.quantum.math.VisualOperator;
 
 import static hu.hexadecimal.quantum.graphics.QuantumView.pxFromDp;
 
@@ -24,7 +24,7 @@ public class GateView extends View {
     public GateView(Context context, @NonNull VisualOperator v) {
         super(context);
         UNIT = pxFromDp(super.getContext(), 1);
-        PADDING = pxFromDp(super.getContext(), 2);
+        PADDING = pxFromDp(super.getContext(), 1);
         visualOperator = v;
 
         whiteTextPaint = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
@@ -35,8 +35,8 @@ public class GateView extends View {
         otherPaint = new Paint();
         otherPaint.setStyle(Paint.Style.FILL);
 
-        setMinimumWidth((int) pxFromDp(getContext(), GATE_SIZE * 2 + PADDING * 2));
-        setMinimumHeight((int) pxFromDp(getContext(), GATE_SIZE * 2 + PADDING * 2));
+        setMinimumWidth(minSize());
+        setMinimumHeight(minSize());
     }
 
     @Override
@@ -74,5 +74,9 @@ public class GateView extends View {
 
         canvas.drawRect(areaRect, otherPaint);
         canvas.drawText(symbol, bounds.left, bounds.top - whiteTextPaint.ascent(), whiteTextPaint);
+    }
+
+    public int minSize() {
+        return (int) pxFromDp(getContext(), GATE_SIZE * 2 + PADDING);
     }
 }

@@ -7,10 +7,10 @@ import android.graphics.Typeface;
 import android.view.View;
 
 import androidx.core.graphics.PaintCompat;
-import hu.hexadecimal.quantum.Complex;
+import hu.hexadecimal.quantum.math.Complex;
 import hu.hexadecimal.quantum.R;
-import hu.hexadecimal.quantum.VisualOperator;
-import hu.hexadecimal.quantum.Qubit;
+import hu.hexadecimal.quantum.math.VisualOperator;
+import hu.hexadecimal.quantum.math.Qubit;
 
 public class BlochSphereView extends View {
 
