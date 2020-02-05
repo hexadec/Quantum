@@ -6,6 +6,7 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
@@ -752,5 +753,19 @@ public class MainActivity extends AppCompatActivity {
         navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setEnabled(probabilityMode != 2);
         findViewById(R.id.gate_view_holder).setVisibility(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("enable_shortcuts", true) ? VISIBLE : GONE);
         super.onResume();
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        try {
+            View v = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.navigation_header, null, false);
+            ((TextView) v.findViewById(R.id.version)).setText(getPackageManager()
+                    .getPackageInfo(getPackageName(), 0).versionName);
+            navigationView.removeHeaderView(navigationView.getHeaderView(0));
+            navigationView.addHeaderView(v);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

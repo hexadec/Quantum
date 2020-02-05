@@ -175,12 +175,6 @@ public class VisualOperator implements Serializable {
                     new Complex[]{new Complex(0), new Complex(0, 1)}
             }, "π/2 Phase-shift", new String[]{"S"}, 0xff21BAAB);
 
-    /*public static final transient VisualOperator PI6_GATE =
-            new VisualOperator(2, new Complex[][]{
-                    new Complex[]{new Complex(1), new Complex(0)},
-                    new Complex[]{new Complex(0), new Complex(Math.PI / 6)}
-            }, "π/6 Phase-shift", new String[]{"π6"}, 0xffDCE117);*/
-
     public static final transient VisualOperator SQRT_NOT =
             VisualOperator.multiply(new VisualOperator(2, new Complex[][]{
                     new Complex[]{new Complex(1, 1), new Complex(1, -1)},

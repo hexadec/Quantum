@@ -41,12 +41,12 @@ import static android.view.View.VISIBLE;
 
 public class UIHelper {
 
-    private static final double[] importantAngles = new double[]{0, Math.PI / 8, Math.PI / 6, Math.PI / 4, Math.PI / 3, Math.PI / 2, Math.PI / 3 * 2, Math.PI / 4 * 3, Math.PI};
-    private static final String[] importantAngleNames = new String[]{"0", "π/8", "π/6", "π/4", "π/3", "π/2", "2π/3", "3π/4", "π"};
+    private static final double[] importantAngles = new double[]{0, Math.PI / 8, Math.PI / 6, Math.PI / 5, Math.PI / 4, Math.PI / 3, Math.PI / 8 * 3, Math.PI / 5 * 2, Math.PI / 2, Math.PI / 3 * 2, Math.PI / 4 * 3, Math.PI};
+    private static final String[] importantAngleNames = new String[]{"0", "π/8", "π/6", "π/5", "π/4", "π/3", "3π/8", "2π/5", "π/2", "2π/3", "3π/4", "π"};
 
-    private static final double[] importantAngles2PI = new double[]{0, Math.PI / 8, Math.PI / 6, Math.PI / 4, Math.PI / 3, Math.PI / 2, Math.PI / 3 * 2, Math.PI / 4 * 3, Math.PI,
+    private static final double[] importantAngles2PI = new double[]{0, Math.PI / 8, Math.PI / 6, Math.PI / 5, Math.PI / 4, Math.PI / 3, Math.PI / 8 * 3, Math.PI / 5 * 2, Math.PI / 2, Math.PI / 3 * 2, Math.PI / 4 * 3, Math.PI,
             Math.PI / 5 * 4, Math.PI / 3 * 4, Math.PI / 2 * 3, Math.PI / 3 * 5, Math.PI / 4 * 7};
-    private static final String[] importantAngleNames2PI = new String[]{"0", "π/8", "π/6", "π/4", "π/3", "π/2", "2π/3", "3π/4", "π",
+    private static final String[] importantAngleNames2PI = new String[]{"0", "π/8", "π/6", "π/5", "π/4", "π/3", "3π/8", "2π/5", "π/2", "2π/3", "3π/4", "π",
             "5π/4", "4π/3", "3π/2", "5π/3", "7π/4"};
 
     public void runnableForGateSelection(AppCompatActivity context, QuantumView qv, VisualOperator prevOperator, float posx, float posy, Dialog d) {
