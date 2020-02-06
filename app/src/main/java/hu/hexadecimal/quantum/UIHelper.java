@@ -609,9 +609,11 @@ public class UIHelper {
             snackbar.show();
         } catch (IndexOutOfBoundsException iout) {
             iout.printStackTrace();
-            Snackbar.make(context.findViewById(R.id.parent2), R.string.choose_save_location, Snackbar.LENGTH_LONG)
+            Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), R.string.choose_save_location, Snackbar.LENGTH_LONG)
                     .setAction(R.string.select, (View view2) ->
-                            context.startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), export ? 44 : 43)).show();
+                            context.startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), export ? 44 : 43));
+            ((TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text)).setSingleLine(false);
+            snackbar.show();
 
         } catch (Exception e) {
             e.printStackTrace();

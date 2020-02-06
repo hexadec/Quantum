@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import androidx.core.graphics.PaintCompat;
-import hu.hexadecimal.quantum.GateSequence;
+import hu.hexadecimal.quantum.tools.GateSequence;
 import hu.hexadecimal.quantum.math.VisualOperator;
 
 public class QuantumView extends View {
@@ -411,20 +411,6 @@ public class QuantumView extends View {
         return dp * context.getResources().getDisplayMetrics().density;
     }
 
-    public byte[] exportGatesLegacy(String name) {
-        this.name = name;
-        try {
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            ObjectOutput output = new ObjectOutputStream(byteArrayOutputStream);
-            output.writeObject(new GateSequence<VisualOperator>(gos, name));
-            output.flush();
-            return byteArrayOutputStream.toByteArray();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public JSONObject exportGates(String name) {
         try {
             return new GateSequence<VisualOperator>(gos, name).toJSON();
@@ -450,25 +436,6 @@ public class QuantumView extends View {
             }
             invalidate();
             return !hadError;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
-
-    public boolean importGatesLegacy(Object input, String name) {
-        try {
-            if (input instanceof LinkedList && ((LinkedList<Object>) input).getFirst() instanceof VisualOperator) {
-                gos = new LinkedList<>();
-                measuredQubits = new short[MAX_QUBITS];
-                invalidate();
-                this.name = name.substring(0, name.lastIndexOf('.') < 1 ? name.length() : name.lastIndexOf('.'));
-            } else return false;
-            for (VisualOperator vo : ((LinkedList<VisualOperator>) input)) {
-                addGate(vo.getQubitIDs(), vo);
-            }
-            invalidate();
-            return true;
         } catch (Exception e) {
             e.printStackTrace();
             return false;

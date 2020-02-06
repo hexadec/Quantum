@@ -83,8 +83,9 @@ public class MatrixEditorActivity extends AppCompatActivity {
                     if (file.isDirectory()) continue;
                     try {
                         if (file.getName().endsWith(VisualOperator.FILE_EXTENSION_LEGACY)) {
-                            VisualOperator m = (VisualOperator) new ObjectInputStream(getContentResolver().openInputStream(file.getUri())).readObject();
-                            operators.add(m);
+                            Snackbar snackbar = Snackbar.make(findViewById(R.id.parent3), R.string.fileformat_not_supported, Snackbar.LENGTH_SHORT);
+                            snackbar.getView().setBackgroundColor(0xffD81010);
+                            snackbar.show();
                         } else if (file.getName().endsWith(VisualOperator.FILE_EXTENSION)) {
                             BufferedReader in = new BufferedReader(new InputStreamReader(getContentResolver().openInputStream(file.getUri())));
                             StringBuilder total = new StringBuilder();

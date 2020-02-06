@@ -46,7 +46,6 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -73,6 +72,7 @@ import hu.hexadecimal.quantum.graphics.QuantumView;
 import hu.hexadecimal.quantum.math.Complex;
 import hu.hexadecimal.quantum.math.Qubit;
 import hu.hexadecimal.quantum.math.VisualOperator;
+import hu.hexadecimal.quantum.tools.ExperimentRunner;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -682,13 +682,9 @@ public class MainActivity extends AppCompatActivity {
             DocumentFile pickedFile = DocumentFile.fromSingleUri(this, uri);
             try {
                 if (pickedFile.getName().endsWith(QuantumView.FILE_EXTENSION_LEGACY)) {
-                    Object obj = new ObjectInputStream(getContentResolver().openInputStream(pickedFile.getUri())).readObject();
-                    if (!qv.importGatesLegacy(obj, pickedFile.getName())) {
-                        throw new Exception("Maybe empty gate sequence?");
-                    } else {
-                        qv.saved = true;
-                        Snackbar.make(findViewById(R.id.parent2), R.string.successfully_imported, Snackbar.LENGTH_LONG).show();
-                    }
+                    Snackbar snackbar = Snackbar.make(findViewById(R.id.parent2), R.string.fileformat_not_supported, Snackbar.LENGTH_LONG);
+                    snackbar.getView().setBackgroundColor(0xffD81010);
+                    snackbar.show();
                 } else if (pickedFile.getName().endsWith(QuantumView.FILE_EXTENSION)) {
                     BufferedReader in = new BufferedReader(new InputStreamReader(getContentResolver().openInputStream(pickedFile.getUri())));
                     StringBuilder total = new StringBuilder();

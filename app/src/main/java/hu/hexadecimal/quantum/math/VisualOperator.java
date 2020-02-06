@@ -18,7 +18,7 @@ import androidx.annotation.NonNull;
 public class VisualOperator implements Serializable {
 
     public static final long serialVersionUID = 2L;
-    public static final transient long helpVersion = 31L;
+    public static final transient long helpVersion = 32L;
     private Complex[][] matrix;
     //last one is to clarify meaning for navbar, so length is +1 to qubits
     private String[] symbols;

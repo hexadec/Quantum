@@ -7,16 +7,16 @@
 
 # This is of crucial importance to keep predefined operators
 # and other methods / fields related to them
--keepclassmembers class hu.hexadecimal.quantum.* {
-    public *;
-}
-
 -keepclassmembers class hu.hexadecimal.quantum.graphics* {
     public *;
 }
 
--keep class hu.hexadecimal.quantum.*
+-keepclassmembers class hu.hexadecimal.quantum.math* {
+    public *;
+}
+
 -keep class hu.hexadecimal.quantum.graphics.*
+-keep class hu.hexadecimal.quantum.math.*
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.

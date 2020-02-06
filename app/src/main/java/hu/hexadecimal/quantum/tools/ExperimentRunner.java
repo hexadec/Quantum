@@ -1,4 +1,4 @@
-package hu.hexadecimal.quantum;
+package hu.hexadecimal.quantum.tools;
 
 import android.os.Handler;
 import android.util.Log;
@@ -15,7 +15,7 @@ public class ExperimentRunner {
     private final LinkedList<VisualOperator> v;
     private final QuantumView quantumView;
     private final int MAX_QUBIT;
-    protected int status;
+    public int status;
     private int opStatus;
     private boolean finished = false;
 

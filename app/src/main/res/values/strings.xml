@@ -99,4 +99,5 @@
     <string name="warning">Warning</string>
     <string name="are_you_sure_to_delete">Do you really want to delete all gates?</string>
     <string name="assembling_experiment">Assembling the final unitary matrix</string>
+    <string name="fileformat_not_supported">.viqus and .vqg files are no longer supported</string>
 </resources>

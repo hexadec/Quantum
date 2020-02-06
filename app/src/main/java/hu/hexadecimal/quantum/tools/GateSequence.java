@@ -1,4 +1,4 @@
-package hu.hexadecimal.quantum;
+package hu.hexadecimal.quantum.tools;
 
 import org.json.JSONArray;
 import org.json.JSONException;
