@@ -100,4 +100,10 @@
     <string name="are_you_sure_to_delete">Do you really want to remove all gates?</string>
     <string name="assembling_experiment">Assembling the final unitary matrix</string>
     <string name="fileformat_not_supported">.viqus and .vqg files are no longer supported</string>
+    <string name="doable_add">Add</string>
+    <string name="doable_delete">Delete</string>
+    <string name="doable_edit">Edit</string>
+    <string name="doable_move">Move</string>
+    <string name="undo">Undo</string>
+    <string name="redo">Redo</string>
 </resources>

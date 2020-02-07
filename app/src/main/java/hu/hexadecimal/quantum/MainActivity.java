@@ -112,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         qv.setLayoutParams(new LinearLayout.LayoutParams(displayMetrics.widthPixels * 2, ViewGroup.LayoutParams.MATCH_PARENT));
         qv.saved = true;
+        qv.setLongClickable(true);
 
         VisualOperator.S_GATE.getAngles();
 
@@ -122,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onLongPress(MotionEvent e) {
-                onSingleTapUp(e);
+                qv.showContextMenu();
             }
 
             @Override
@@ -186,8 +187,13 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return true;
             });
+            int oldMax = qv.getLastUsedQubit();
             if (pref.getBoolean("optimize", false)) {
                 qv.optimizeCircuit();
+                if (oldMax != qv.getLastUsedQubit()) {
+                    qv.undoList.clear();
+                    qv.redoList.clear();
+                }
             }
             final int MAX_QUBITS = qv.getLastUsedQubit() + 1;
             try {
