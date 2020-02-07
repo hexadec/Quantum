@@ -7,7 +7,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,10 +14,9 @@ import java.util.Random;
 
 import androidx.annotation.NonNull;
 
-public class VisualOperator implements Serializable {
+public class VisualOperator {
 
-    public static final long serialVersionUID = 2L;
-    public static final transient long helpVersion = 32L;
+    public static final long helpVersion = 32L;
     private Complex[][] matrix;
     //last one is to clarify meaning for navbar, so length is +1 to qubits
     private String[] symbols;
@@ -31,25 +29,25 @@ public class VisualOperator implements Serializable {
     /**
      * Quantum Gate File
      */
-    public static final transient String FILE_EXTENSION = ".qgf";
+    public static final String FILE_EXTENSION = ".qgf";
     private final int NQBITS;
     public int color = 0xff000000;
     public String name;
-    private transient LinkedList<RectF> rectangle;
+    private LinkedList<RectF> rectangle;
     private final int MATRIX_DIM;
     private int[] qubit_ids;
-    private transient double theta;
-    private transient double phi;
-    private transient double lambda;
+    private double theta;
+    private double phi;
+    private double lambda;
 
     public static final int HTML_MODE_BODY = 0b1;
     public static final int HTML_MODE_CAPTION = 0b10;
     public static final int HTML_MODE_FAT = 0b100;
     public static final int HTML_MODE_BASIC = 0b0;
 
-    private static final transient double NULL_ANGLE = -10E10;
+    private static final double NULL_ANGLE = -10E10;
 
-    public static final transient VisualOperator CNOT =
+    public static final VisualOperator CNOT =
             new VisualOperator(4,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
@@ -58,7 +56,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
                     }, "CNOT", new String[]{"●", "⊕", "cX"}, 0xff009E5F);
 
-    public static final transient VisualOperator CY =
+    public static final VisualOperator CY =
             new VisualOperator(4,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
@@ -67,7 +65,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(0, 1), new Complex(0)}
                     }, "CY", new String[]{"●", "Y", "cY"}, 0xff009E5F);
 
-    public static final transient VisualOperator CZ =
+    public static final VisualOperator CZ =
             new VisualOperator(4,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
@@ -76,7 +74,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(-1)}
                     }, "CZ", new String[]{"●", "Z", "cZ"}, 0xff009E5F);
 
-    public static final transient VisualOperator SWAP =
+    public static final VisualOperator SWAP =
             new VisualOperator(4,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
@@ -85,7 +83,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
                     }, "SWAP", new String[]{"✖", "✖", "SWAP"}, 0xffF28B00);
 
-    public static final transient VisualOperator CS =
+    public static final VisualOperator CS =
             new VisualOperator(4,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
@@ -94,7 +92,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(Math.PI / 4)}
                     }, "Controlled π/2 shift", new String[]{"●", "S", "cS"}, 0xff21BAAB);
 
-    public static final transient VisualOperator CT =
+    public static final VisualOperator CT =
             new VisualOperator(4,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
@@ -103,7 +101,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(Math.PI / 8)}
                     }, "Controlled π/4 shift", new String[]{"●", "T", "cT"}, 0xffBA7021);
 
-    public static final transient VisualOperator CH =
+    public static final VisualOperator CH =
             new VisualOperator(4,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
@@ -112,7 +110,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(1.0 / Math.sqrt(2), 0), new Complex(-1.0 / Math.sqrt(2), 0)}
                     }, "Controlled Hadamard", new String[]{"●", "H", "cH"}, 0xff2155BA);
 
-    public static final transient VisualOperator TOFFOLI =
+    public static final VisualOperator TOFFOLI =
             new VisualOperator(8,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
@@ -125,7 +123,7 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
                     }, "Toffoli", new String[]{"●", "●", "⊕", "TOF"}, 0xff9200D1);
 
-    public static final transient VisualOperator FREDKIN =
+    public static final VisualOperator FREDKIN =
             new VisualOperator(8,
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0)},
@@ -138,50 +136,50 @@ public class VisualOperator implements Serializable {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)}
                     }, "Fredkin", new String[]{"●", "✖", "✖", "FRE"}, 0xffD10075);
 
-    public static final transient VisualOperator HADAMARD =
+    public static final VisualOperator HADAMARD =
             VisualOperator.multiply(
                     new VisualOperator(2, new Complex[][]{
                             new Complex[]{new Complex(1), new Complex(1)},
                             new Complex[]{new Complex(1), new Complex(-1)}
                     }, "Hadamard", new String[]{"H"}, 0xff2155BA), new Complex(1 / Math.sqrt(2), 0));
 
-    public static final transient VisualOperator PAULI_Z =
+    public static final VisualOperator PAULI_Z =
             new VisualOperator(2, new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(-1)}
             }, "Pauli-Z", new String[]{"Z"}, 0xff60BA21);
 
-    public static final transient VisualOperator PAULI_Y =
+    public static final VisualOperator PAULI_Y =
             new VisualOperator(2, new Complex[][]{
                     new Complex[]{new Complex(0), new Complex(0, -1)},
                     new Complex[]{new Complex(0, 1), new Complex(0)}
             }, "Pauli-Y", new String[]{"Y"}, 0xff60BA21);
 
-    public static final transient VisualOperator PAULI_X =
+    public static final VisualOperator PAULI_X =
             new VisualOperator(2, new Complex[][]{
                     new Complex[]{new Complex(0), new Complex(1)},
                     new Complex[]{new Complex(1), new Complex(0)}
             }, "Pauli-X", new String[]{"X"}, 0xff60BA21);
 
-    public static final transient VisualOperator T_GATE =
+    public static final VisualOperator T_GATE =
             new VisualOperator(2, new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(Math.PI / 4)}
             }, "π/4 Phase-shift", new String[]{"T"}, 0xffBA7021);
 
-    public static final transient VisualOperator S_GATE =
+    public static final VisualOperator S_GATE =
             new VisualOperator(2, new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(0, 1)}
             }, "π/2 Phase-shift", new String[]{"S"}, 0xff21BAAB);
 
-    public static final transient VisualOperator SQRT_NOT =
+    public static final VisualOperator SQRT_NOT =
             VisualOperator.multiply(new VisualOperator(2, new Complex[][]{
                     new Complex[]{new Complex(1, 1), new Complex(1, -1)},
                     new Complex[]{new Complex(1, -1), new Complex(1, 1)}
             }, "√NOT", new String[]{"√X"}, 0xff2155BA), new Complex(0.5, 0));
 
-    public static final transient VisualOperator ID =
+    public static final VisualOperator ID =
             new VisualOperator(2, new Complex[][]{
                     new Complex[]{new Complex(1), new Complex(0)},
                     new Complex[]{new Complex(0), new Complex(1)}
@@ -763,32 +761,6 @@ public class VisualOperator implements Serializable {
             }
         }
         return -1;
-    }
-
-    public Qubit[] measure(final Complex[] qubitArray, int qubits) {
-        double[] probs = new double[qubitArray.length];
-        double subtrahend = 0;
-        for (int i = 0; i < qubitArray.length; i++) {
-            probs[i] = Math.pow(qubitArray[i].mod(), 2);
-        }
-        for (int i = 0; i < qubitArray.length; i++) {
-            double prob = random.nextDouble();
-            if (probs[i] > prob * (1 - subtrahend)) {
-                Qubit[] result = new Qubit[qubits];
-                for (int j = 0; j < qubits; j++) {
-                    result[j] = new Qubit();
-                    if ((i >> (j)) % 2 == 1) result[j].prepare(true);
-                }
-                return result;
-            } else {
-                subtrahend += probs[i];
-                if (i == qubitArray.length - 2) {
-                    subtrahend = 2;
-                }
-            }
-        }
-        Log.e("VisualOperator", "NO RESULT");
-        return null;
     }
 
     public static float[] measureProbabilities(final Complex[] qubitArray) {

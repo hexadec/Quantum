@@ -12,7 +12,6 @@ import hu.hexadecimal.quantum.math.VisualOperator;
 public class GateSequence<T> extends LinkedList {
 
     final String name;
-    public static final long serialVersionUID = 1L;
 
     public GateSequence(String name) {
         super();

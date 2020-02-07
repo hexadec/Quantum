@@ -32,9 +32,9 @@
 
     <item
         android:id="@+id/probability"
-        android:icon="@drawable/alpha_p_circle_outline"
+        android:icon="@drawable/alpha_s_box_outline"
         android:orderInCategory="5"
-        android:title="@string/probability_mode"
+        android:title="@string/statevector_mode"
         app:showAsAction="ifRoom" />
 
     <item

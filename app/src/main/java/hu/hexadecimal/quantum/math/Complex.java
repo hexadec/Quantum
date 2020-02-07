@@ -1,13 +1,11 @@
 package hu.hexadecimal.quantum.math;
 
-import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
-public class Complex implements Serializable {
+public class Complex {
 
-    public static final long serialVersionUID = 1L;
     public double real = 0;
     public double imaginary = 0;
 

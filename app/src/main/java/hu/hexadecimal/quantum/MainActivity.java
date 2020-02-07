@@ -398,7 +398,7 @@ public class MainActivity extends AppCompatActivity {
             new Handler().postDelayed(() -> {
                 switch (item.getItemId()) {
                     case R.id.probability:
-                        navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setIcon(ContextCompat.getDrawable(MainActivity.this, probabilityMode > 0 ? R.drawable.alpha_p_circle_outline : R.drawable.alpha_p_circle));
+                        navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setIcon(ContextCompat.getDrawable(MainActivity.this, probabilityMode > 0 ? R.drawable.alpha_s_box_outline : R.drawable.alpha_s_box));
                         probabilityMode = 1 - probabilityMode;
                         break;
                     case R.id.prefs:
@@ -745,7 +745,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         if (probabilityMode != 1)
             probabilityMode = PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getString("shots", "4096").equals("0") ? 2 : 0;
-        navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setIcon(ContextCompat.getDrawable(MainActivity.this, probabilityMode == 0 ? R.drawable.alpha_p_circle_outline : R.drawable.alpha_p_circle));
+        navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setIcon(ContextCompat.getDrawable(MainActivity.this, probabilityMode == 0 ? R.drawable.alpha_s_box_outline : R.drawable.alpha_s_box));
         navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setEnabled(probabilityMode != 2);
         findViewById(R.id.gate_view_holder).setVisibility(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("enable_shortcuts", true) ? VISIBLE : GONE);
         super.onResume();

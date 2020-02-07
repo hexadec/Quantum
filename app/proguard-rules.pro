@@ -11,7 +11,7 @@
     public *;
 }
 
--keepclassmembers class hu.hexadecimal.quantum.math* {
+-keepclassmembers class hu.hexadecimal.quantum.math.VisualOperator {
     public *;
 }
 
