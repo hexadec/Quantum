@@ -193,7 +193,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             });
             int oldMax = qv.getLastUsedQubit();
-            if (pref.getBoolean("optimize", false)) {
+            if (pref.getBoolean("optimize", true)) {
                 qv.optimizeCircuit();
                 if (oldMax != qv.getLastUsedQubit()) {
                     qv.undoList.clear();
@@ -709,22 +709,35 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_Z && event.isCtrlPressed()) {
+            //UNDO
             qv.undo();
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_Y && event.isCtrlPressed()) {
+            //REDO
             qv.redo();
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_D && event.isCtrlPressed()) {
+            //CLEAR TIMELINE
             UIHelper.clearScreen(qv, MainActivity.this);
         } else if (keyCode == KeyEvent.KEYCODE_M && event.isCtrlPressed()) {
+            //CHANGE STATEVECTOR MODE
             navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setIcon(ContextCompat.getDrawable(MainActivity.this, probabilityMode > 0 ? R.drawable.alpha_s_box_outline : R.drawable.alpha_s_box));
             probabilityMode = 1 - probabilityMode;
         } else if (keyCode == KeyEvent.KEYCODE_S && event.isCtrlPressed()) {
+            //SAVE
             UIHelper.saveFileUI(qv, this, false);
         } else if (keyCode == KeyEvent.KEYCODE_R && event.isCtrlPressed()) {
+            //RUN
             findViewById(R.id.fab_matrix).callOnClick();
         } else if (keyCode == KeyEvent.KEYCODE_E && event.isCtrlPressed()) {
+            //EXPORT
             UIHelper.saveFileUI(qv, this, true);
+        } else if (keyCode == KeyEvent.KEYCODE_A) {
+            //ADD GATE
+            showAddGateDialog(0, 0, null);
+        } else if (keyCode == KeyEvent.KEYCODE_B && event.isCtrlPressed()) {
+            //SHOW BLOCH SPHERE
+            displayBlochSphere();
         }
         return super.onKeyUp(keyCode, event);
     }

@@ -28,7 +28,7 @@
 
         <CheckBoxPreference
             android:key="optimize"
-            android:defaultValue="false"
+            android:defaultValue="true"
             android:title="@string/optimize_circuit"
             android:summary="@string/optimize_circuit_long" />
 
