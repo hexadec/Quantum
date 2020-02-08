@@ -106,4 +106,6 @@
     <string name="doable_move">Move</string>
     <string name="undo">Undo</string>
     <string name="redo">Redo</string>
+    <string name="title_save">Save circuit</string>
+    <string name="title_export">Export circuit</string>
 </resources>

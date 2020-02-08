@@ -22,6 +22,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -47,6 +48,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.security.Key;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -65,6 +67,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.lifecycle.ViewModelProviders;
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
 import hu.hexadecimal.quantum.graphics.ExecutionProgressDialog;
 import hu.hexadecimal.quantum.graphics.GateView;
@@ -73,6 +76,7 @@ import hu.hexadecimal.quantum.math.Complex;
 import hu.hexadecimal.quantum.math.Qubit;
 import hu.hexadecimal.quantum.math.VisualOperator;
 import hu.hexadecimal.quantum.tools.ExperimentRunner;
+import hu.hexadecimal.quantum.tools.QuantumViewModel;
 
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
@@ -110,7 +114,7 @@ public class MainActivity extends AppCompatActivity {
         qv.setBackgroundColor(0xffeeeeee);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        qv.setLayoutParams(new LinearLayout.LayoutParams(displayMetrics.widthPixels * 2, ViewGroup.LayoutParams.MATCH_PARENT));
+        qv.setLayoutParams(new LinearLayout.LayoutParams((int) (displayMetrics.widthPixels * 2.2), ViewGroup.LayoutParams.MATCH_PARENT));
         qv.saved = true;
         qv.setLongClickable(true);
 
@@ -414,60 +418,13 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(new Intent(MainActivity.this, HelpActivity.class));
                         break;
                     case R.id.clear:
-                        if (qv.getOperators().size() >= 5) {
-                            AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
-                            adb.setMessage(R.string.are_you_sure_to_delete);
-                            adb.setPositiveButton(R.string.yes, (DialogInterface dialogInterface, int i) -> qv.clearScreen());
-                            adb.setNegativeButton(R.string.cancel, null);
-                            adb.show();
-                        } else {
-                            qv.clearScreen();
-                        }
+                        UIHelper.clearScreen(qv, MainActivity.this);
                         break;
                     case R.id.matrix:
                         startActivity(new Intent(MainActivity.this, MatrixEditorActivity.class));
                         break;
                     case R.id.openqasm:
-                        if (qv.getOperators().size() < 1) {
-                            Snackbar.make(findViewById(R.id.parent2), getString(R.string.no_gates), Snackbar.LENGTH_LONG).show();
-                            return;
-                        }
-                        SimpleDateFormat sdf = new SimpleDateFormat("'exp'_yyyy-MM-dd_HHmmss'" + QuantumView.OPENQASM_FILE_EXTENSION + "'", Locale.UK);
-                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-                        String filename = sdf.format(new Date());
-                        AlertDialog.Builder adb = new AlertDialog.Builder(this);
-                        adb.setTitle(R.string.select_filename);
-                        LinearLayout container = new LinearLayout(this);
-                        container.setOrientation(LinearLayout.VERTICAL);
-                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                        params.setMargins((int) QuantumView.pxFromDp(this, 20), 0, (int) QuantumView.pxFromDp(this, 20), 0);
-                        LinearLayout.LayoutParams textViewParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                        textViewParams.setMargins((int) QuantumView.pxFromDp(this, 23), (int) QuantumView.pxFromDp(this, 3), (int) QuantumView.pxFromDp(this, 23), 0);
-                        EditText editText = new EditText(this);
-                        InputFilter[] filterArray = new InputFilter[]{new InputFilter.LengthFilter(32), (CharSequence source, int start, int end, Spanned dest, int sta, int en) -> {
-                            if (source != null && "/\\:?;!~\'\",^ˇ|+<>[]{}".contains(("" + source))) {
-                                return "";
-                            }
-                            return null;
-                        }
-                        };
-                        if (qv.name.endsWith(QuantumView.FILE_EXTENSION)) {
-                            qv.name = qv.name.replace(QuantumView.FILE_EXTENSION, "");
-                        }
-                        editText.setText(qv.name);
-                        editText.setFilters(filterArray);
-                        editText.setHint(filename);
-                        editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_CLASS_TEXT);
-                        TextView textView = new TextView(MainActivity.this);
-                        textView.setText(R.string.export_into_qasm_compatibility);
-                        container.addView(textView, textViewParams);
-                        container.addView(editText, params);
-                        adb.setView(container);
-                        adb.setPositiveButton(R.string.export, (DialogInterface dialogInterface, int i) -> {
-                            UIHelper.saveFile(MainActivity.this, editText, qv, filename, true);
-                        });
-                        adb.setNeutralButton(R.string.cancel, null);
-                        adb.show();
+                        UIHelper.saveFileUI(qv, MainActivity.this, true);
                         break;
                     default:
                 }
@@ -519,6 +476,18 @@ public class MainActivity extends AppCompatActivity {
             gateHolder.setLayoutParams(lp);
             gateHolder.bringToFront();
         }, 300);
+
+        qv.postDelayed(() -> {
+            QuantumViewModel model = ViewModelProviders.of(MainActivity.this).get(QuantumViewModel.class);
+            model.get().observe(MainActivity.this, data -> {
+                try {
+                    qv.setData(data);
+                    Log.e("X", "UR" + qv.undoList.size());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        }, 200);
     }
 
     public void displayBlochSphere() {
@@ -526,7 +495,7 @@ public class MainActivity extends AppCompatActivity {
         hasMultiQubitGate = false;
         Qubit q2 = new Qubit();
         outer:
-        for (VisualOperator v : qv.getOperators()) {
+        for (VisualOperator v : (LinkedList<VisualOperator>) qv.getOperators()) {
             for (int q : v.getQubitIDs())
                 if (q == blochSpherePos) {
                     if (v.isMultiQubit()) {
@@ -552,7 +521,7 @@ public class MainActivity extends AppCompatActivity {
                 if (++blochSpherePos >= qv.getDisplayedQubits()) blochSpherePos = 0;
                 Qubit q3 = new Qubit();
                 outer:
-                for (VisualOperator v : qv.getOperators()) {
+                for (VisualOperator v : (LinkedList<VisualOperator>) qv.getOperators()) {
                     hasMultiQubitGate = false;
                     for (int q : v.getQubitIDs())
                         if (q == blochSpherePos) {
@@ -572,7 +541,7 @@ public class MainActivity extends AppCompatActivity {
                 if (--blochSpherePos < 0) blochSpherePos = qv.getDisplayedQubits() - 1;
                 Qubit q3 = new Qubit();
                 outer:
-                for (VisualOperator v : qv.getOperators()) {
+                for (VisualOperator v : (LinkedList<VisualOperator>) qv.getOperators()) {
                     hasMultiQubitGate = false;
                     for (int q : v.getQubitIDs())
                         if (q == blochSpherePos) {
@@ -636,41 +605,7 @@ public class MainActivity extends AppCompatActivity {
                     displayBlochSphere();
                     break;
                 case R.id.save:
-                    if (qv.getOperators().size() < 1) {
-                        Snackbar.make(findViewById(R.id.parent2), getString(R.string.no_gates), Snackbar.LENGTH_LONG).show();
-                        return true;
-                    }
-                    SimpleDateFormat sdf = new SimpleDateFormat("'exp'_yyyy-MM-dd_HHmmss'" + QuantumView.FILE_EXTENSION + "'", Locale.UK);
-                    sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-                    String filename = sdf.format(new Date());
-                    AlertDialog.Builder adb = new AlertDialog.Builder(this);
-                    adb.setTitle(R.string.select_filename);
-                    LinearLayout container = new LinearLayout(this);
-                    container.setOrientation(LinearLayout.VERTICAL);
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                    params.setMargins((int) QuantumView.pxFromDp(this, 20), 0, (int) QuantumView.pxFromDp(this, 20), 0);
-                    EditText editText = new EditText(this);
-                    InputFilter[] filterArray = new InputFilter[]{new InputFilter.LengthFilter(32), (CharSequence source, int start, int end, Spanned dest, int sta, int en) -> {
-                        if (source != null && "/\\:?;!~\'\",^ˇ|+<>[]{}".contains(("" + source))) {
-                            return "";
-                        }
-                        return null;
-                    }
-                    };
-                    if (qv.name.endsWith(QuantumView.OPENQASM_FILE_EXTENSION)) {
-                        qv.name = qv.name.replace(QuantumView.OPENQASM_FILE_EXTENSION, "");
-                    }
-                    editText.setText(qv.name);
-                    editText.setFilters(filterArray);
-                    editText.setHint(filename);
-                    editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_CLASS_TEXT);
-                    container.addView(editText, params);
-                    adb.setView(container);
-                    adb.setPositiveButton(R.string.save, (DialogInterface dialogInterface, int i) -> {
-                        UIHelper.saveFile(MainActivity.this, editText, qv, filename, false);
-                    });
-                    adb.setNeutralButton(R.string.cancel, null);
-                    adb.show();
+                    UIHelper.saveFileUI(qv, this, false);
                     break;
                 default:
 
@@ -769,5 +704,35 @@ public class MainActivity extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public boolean onKeyUp(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_Z && event.isCtrlPressed()) {
+            qv.undo();
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_Y && event.isCtrlPressed()) {
+            qv.redo();
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_D && event.isCtrlPressed()) {
+            UIHelper.clearScreen(qv, MainActivity.this);
+        } else if (keyCode == KeyEvent.KEYCODE_M && event.isCtrlPressed()) {
+            navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setIcon(ContextCompat.getDrawable(MainActivity.this, probabilityMode > 0 ? R.drawable.alpha_s_box_outline : R.drawable.alpha_s_box));
+            probabilityMode = 1 - probabilityMode;
+        } else if (keyCode == KeyEvent.KEYCODE_S && event.isCtrlPressed()) {
+            UIHelper.saveFileUI(qv, this, false);
+        } else if (keyCode == KeyEvent.KEYCODE_R && event.isCtrlPressed()) {
+            findViewById(R.id.fab_matrix).callOnClick();
+        } else if (keyCode == KeyEvent.KEYCODE_E && event.isCtrlPressed()) {
+            UIHelper.saveFileUI(qv, this, true);
+        }
+        return super.onKeyUp(keyCode, event);
+    }
+
+    @Override
+    protected void onDestroy() {
+        QuantumViewModel model = ViewModelProviders.of(this).get(QuantumViewModel.class);
+        model.set(qv.getData());
+        super.onDestroy();
     }
 }

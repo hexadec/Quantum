@@ -14,6 +14,9 @@ public class Doable {
     public int oldIndex = -1;
     VisualOperator oldOp;
 
+    private Doable() {
+    }
+
     public Doable(VisualOperator visualOperator, DoableType type, Context context) {
         this.visualOperator = visualOperator.copy();
         this.type = type;
@@ -72,6 +75,23 @@ public class Doable {
 
     public VisualOperator oldOperator() {
         return oldOp;
+    }
+
+    public Doable copy() {
+        Doable d = new Doable();
+        try {
+            d.oldOp = oldOp.copy();
+        } catch (Exception e) {
+        }
+        d.index = index;
+        d.oldIndex = oldIndex;
+        d.type = type;
+        try {
+            d.visualOperator = visualOperator.copy();
+        } catch (Exception e) {
+        }
+        d.name = name;
+        return d;
     }
 
 }

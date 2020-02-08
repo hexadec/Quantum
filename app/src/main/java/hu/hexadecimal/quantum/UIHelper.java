@@ -1,10 +1,16 @@
 package hu.hexadecimal.quantum;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -13,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -27,8 +34,12 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedList;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -622,5 +633,67 @@ public class UIHelper {
             snackbar.show();
         }
         qv.saved = true;
+    }
+
+    public static void saveFileUI(QuantumView qv, AppCompatActivity context, boolean export) {
+        if (qv.getOperators().size() < 1) {
+            Snackbar.make(context.findViewById(R.id.parent2), context.getString(R.string.no_gates), Snackbar.LENGTH_LONG).show();
+            return;
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("'exp'_yyyy-MM-dd_HHmmss'" + (export ? QuantumView.OPENQASM_FILE_EXTENSION : QuantumView.FILE_EXTENSION) + "'", Locale.UK);
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String filename = sdf.format(new Date());
+        AlertDialog.Builder adb = new AlertDialog.Builder(context);
+        adb.setTitle(export ? R.string.title_export : R.string.title_save);
+        LinearLayout container = new LinearLayout(context);
+        container.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        params.setMargins((int) QuantumView.pxFromDp(context, 20), 0, (int) QuantumView.pxFromDp(context, 20), 0);
+        EditText editText = new EditText(context);
+        InputFilter[] filterArray = new InputFilter[]{new InputFilter.LengthFilter(32), (CharSequence source, int start, int end, Spanned dest, int sta, int en) -> {
+            if (source != null && "/\\:?;!~\'\",^ˇ|+<>[]{}".contains(("" + source))) {
+                return "";
+            }
+            return null;
+        }
+        };
+
+        LinearLayout.LayoutParams textViewParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        textViewParams.setMargins((int) QuantumView.pxFromDp(context, 23), (int) QuantumView.pxFromDp(context, 3), (int) QuantumView.pxFromDp(context, 23), 0);
+
+        if (export && qv.name.endsWith(QuantumView.FILE_EXTENSION)) {
+            qv.name = qv.name.replace(QuantumView.FILE_EXTENSION, "");
+        } else if (!export && qv.name.endsWith(QuantumView.OPENQASM_FILE_EXTENSION)) {
+            qv.name = qv.name.replace(QuantumView.OPENQASM_FILE_EXTENSION, "");
+        }
+
+        editText.setText(qv.name);
+        editText.setFilters(filterArray);
+        editText.setHint(filename);
+        editText.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_CLASS_TEXT);
+        if (export) {
+            TextView textView = new TextView(context);
+            textView.setText(R.string.export_into_qasm_compatibility);
+            container.addView(textView, textViewParams);
+        }
+        container.addView(editText, params);
+        adb.setView(container);
+        adb.setPositiveButton(R.string.save, (DialogInterface dialogInterface, int i) -> {
+            UIHelper.saveFile(context, editText, qv, filename, export);
+        });
+        adb.setNeutralButton(R.string.cancel, null);
+        adb.show();
+    }
+
+    public static void clearScreen(QuantumView qv, Context context) {
+        if (qv.getOperators().size() >= 5) {
+            AlertDialog.Builder adb = new AlertDialog.Builder(context);
+            adb.setMessage(R.string.are_you_sure_to_delete);
+            adb.setPositiveButton(R.string.yes, (DialogInterface dialogInterface, int i) -> qv.clearScreen());
+            adb.setNegativeButton(R.string.cancel, null);
+            adb.show();
+        } else {
+            qv.clearScreen();
+        }
     }
 }

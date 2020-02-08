@@ -43,6 +43,15 @@ A software for Android that emulates the actions of a quantum computer
 - Toffoli
 - Fredkin
 
+#### Desktop key shortcuts
+- Ctrl+Z    Undo
+- Ctrl+Y    Redo
+- Ctrl+S    Save
+- Ctrl+E    Export
+- Ctrl+D    Clear timeline
+- Ctrl+R    Run
+- Ctrl+M    Switch statevector mode
+
 ###### Planned features
 Create and run algorithms with loops and conditions  
 Display the final unitary matrix of the system

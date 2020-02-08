@@ -29,6 +29,7 @@ import hu.hexadecimal.quantum.tools.Doable;
 import hu.hexadecimal.quantum.tools.DoableType;
 import hu.hexadecimal.quantum.tools.GateSequence;
 import hu.hexadecimal.quantum.math.VisualOperator;
+import hu.hexadecimal.quantum.tools.QuantumViewData;
 
 public class QuantumView extends View {
 
@@ -281,8 +282,9 @@ public class QuantumView extends View {
         VisualOperator mm = m.copy();
         mm.setQubitIDs(qubits);
         gos.addLast(mm);
-        undoList.addLast(new Doable(mm, DoableType.ADD, getContext()));
         invalidate();
+        undoList.addLast(new Doable(mm, DoableType.ADD, getContext()));
+        redoList.clear();
         saved = false;
     }
 
@@ -339,14 +341,42 @@ public class QuantumView extends View {
         return gos;
     }
 
+    public QuantumViewData getData() {
+        return new QuantumViewData(undoList, redoList, new GateSequence<>(gos, name));
+    }
+
+    public boolean setData(QuantumViewData data) {
+        try {
+            this.name = data.operators.getName();
+            gos = new LinkedList<>();
+            measuredQubits = new short[MAX_QUBITS];
+            boolean hadError = false;
+            for (VisualOperator vo : ((LinkedList<VisualOperator>) data.operators)) {
+                if (vo == null) {
+                    hadError = true;
+                    continue;
+                }
+                addGate(vo.getQubitIDs(), vo);
+            }
+            undoList = data.undoList;
+            redoList = data.redoList;
+            invalidate();
+            return !hadError;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public boolean removeLastGate() {
         if (gos.size() > 0) {
             VisualOperator v = gos.removeLast();
             for (int i = 0; i < v.getQubitIDs().length; i++) {
                 measuredQubits[v.getQubitIDs()[i]]--;
             }
-            undoList.addLast(new Doable(v, DoableType.DELETE, getContext(), gos.size(), null));
             invalidate();
+            undoList.addLast(new Doable(v, DoableType.DELETE, getContext(), gos.size(), null));
+            redoList.clear();
             saved = false;
             return true;
         }
@@ -408,8 +438,9 @@ public class QuantumView extends View {
                     if (qubits[j] == operator.getQubitIDs()[m]) {
                         gos.remove(index);
                         gos.add(i, operator);
-                        undoList.addLast(new Doable(operator, DoableType.MOVE, getContext(), index, i));
                         invalidate();
+                        undoList.addLast(new Doable(operator, DoableType.MOVE, getContext(), index, i));
+                        redoList.clear();
                         saved = false;
                         return;
                     }
@@ -513,7 +544,6 @@ public class QuantumView extends View {
                         for (int i = 0; i < v.getQubitIDs().length; i++) {
                             measuredQubits[v.getQubitIDs()[i]]--;
                         }
-                        invalidate();
                         saved = false;
                         break;
                     }
@@ -525,7 +555,6 @@ public class QuantumView extends View {
                         measuredQubits[qubit]++;
                     }
                     gos.addLast(visualOperator);
-                    invalidate();
                     saved = false;
                     break;
                 case EDIT:
@@ -543,7 +572,6 @@ public class QuantumView extends View {
                         measuredQubits[qubit]++;
                     }
                     gos.add(d.index, d.oldOperator());
-                    invalidate();
                     saved = false;
                     break;
                 case MOVE:
@@ -551,6 +579,7 @@ public class QuantumView extends View {
                     gos.add(d.oldIndex, visualOperator);
                     break;
             }
+            invalidate();
             redoList.addLast(undoList.removeLast());
         } catch (NoSuchElementException e) {
         }
@@ -567,7 +596,6 @@ public class QuantumView extends View {
                         for (int i = 0; i < v.getQubitIDs().length; i++) {
                             measuredQubits[v.getQubitIDs()[i]]--;
                         }
-                        invalidate();
                         saved = false;
                         break;
                     }
@@ -579,7 +607,6 @@ public class QuantumView extends View {
                         measuredQubits[qubit]++;
                     }
                     gos.addLast(visualOperator);
-                    invalidate();
                     saved = false;
                     break;
                 case EDIT:
@@ -597,7 +624,6 @@ public class QuantumView extends View {
                         measuredQubits[qubit]++;
                     }
                     gos.add(d.index, visualOperator);
-                    invalidate();
                     saved = false;
                     break;
                 case MOVE:
@@ -605,6 +631,7 @@ public class QuantumView extends View {
                     gos.add(d.index, visualOperator);
                     break;
             }
+            invalidate();
             undoList.addLast(redoList.removeLast());
         } catch (NoSuchElementException e) {
 
