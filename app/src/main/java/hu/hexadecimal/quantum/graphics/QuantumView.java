@@ -241,6 +241,7 @@ public class QuantumView extends View {
                         visualOperator.setQubitIDs(qubits);
                         gos.add(i, visualOperator);
                         undoList.addLast(new Doable(visualOperator, DoableType.EDIT, getContext(), i, old));
+                        redoList.clear();
                         invalidate();
                         saved = false;
                         return true;
@@ -263,6 +264,7 @@ public class QuantumView extends View {
                         measuredQubits[qubit]--;
                     }
                     undoList.addLast(new Doable(gos.remove(i), DoableType.DELETE, getContext(), i, null));
+                    rectList.clear();
                     invalidate();
                     saved = false;
                     return true;

@@ -109,12 +109,13 @@ public class MainActivity extends AppCompatActivity {
         window.setStatusBarColor(Color.parseColor("#171717"));
 
         LinearLayout relativeLayout = findViewById(R.id.linearLayout);
+        findViewById(R.id.activity_main2).setBackgroundColor(0xffeeeeee);
         qv = new QuantumView(this);
         relativeLayout.addView(qv);
         qv.setBackgroundColor(0xffeeeeee);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        qv.setLayoutParams(new LinearLayout.LayoutParams((int) (displayMetrics.widthPixels * 2.2), ViewGroup.LayoutParams.MATCH_PARENT));
+        qv.setLayoutParams(new LinearLayout.LayoutParams((int) (displayMetrics.widthPixels * 2.2), (int) (QuantumView.pxFromDp(this, 760))));
         qv.saved = true;
         qv.setLongClickable(true);
 
@@ -482,7 +483,6 @@ public class MainActivity extends AppCompatActivity {
             model.get().observe(MainActivity.this, data -> {
                 try {
                     qv.setData(data);
-                    Log.e("X", "UR" + qv.undoList.size());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
