@@ -43,9 +43,20 @@ public class HelpActivity extends AppCompatActivity {
                 new Thread(() ->
                 {
                     try {
-                        String helpFileName = getPackageManager().getPackageInfo(getPackageName(), 0).applicationInfo.dataDir + "/help" + VisualOperator.helpVersion + ".html";
+                        String helpFileDir = getPackageManager().getPackageInfo(getPackageName(), 0).applicationInfo.dataDir + "/appHelp";
+                        String helpFileName = helpFileDir + "/v" + VisualOperator.helpVersion + ".html";
                         File f = new File(helpFileName);
                         if (!f.exists()) {
+                            try {
+                                String[] names = new File(helpFileDir).list();
+                                for (String s : names) {
+                                    File file = new File(helpFileDir, s);
+                                    file.delete();
+                                }
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            new File(helpFileDir).mkdirs();
                             BufferedReader in = new BufferedReader(new InputStreamReader(getResources().openRawResource(R.raw.info)));
                             StringBuilder total = new StringBuilder();
                             for (String line; (line = in.readLine()) != null; ) {
@@ -127,7 +138,6 @@ public class HelpActivity extends AppCompatActivity {
 
     /**
      * Source: https://stackoverflow.com/questions/41025200/android-view-inflateexception-error-inflating-class-android-webkit-webview
-     *
      */
     @Override
     public void applyOverrideConfiguration(Configuration overrideConfiguration) {

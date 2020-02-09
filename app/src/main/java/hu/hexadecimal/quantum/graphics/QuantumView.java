@@ -108,6 +108,10 @@ public class QuantumView extends View {
         return getHeight() - 1.4 * mPadding - START_Y;
     }
 
+    public void setLParams() {
+        setLayoutParams(new LinearLayout.LayoutParams((int) (getWidth() + pxFromDp(getContext(), 150)), ((int) (QuantumView.pxFromDp(getContext(), STEP * MAX_QUBITS) + START_Y + 1.4 * mPadding))));
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -235,7 +239,7 @@ public class QuantumView extends View {
                                 return false;
                             }
                             if (!canAddGate(qubit))
-                                setLayoutParams(new LinearLayout.LayoutParams(getWidth() + 400, ViewGroup.LayoutParams.MATCH_PARENT));
+                                setLParams();
                             measuredQubits[qubit]++;
                         }
                         visualOperator.setQubitIDs(qubits);
@@ -278,7 +282,7 @@ public class QuantumView extends View {
         for (int qubit : qubits) {
             if (qubit >= getDisplayedQubits()) return;
             if (!canAddGate(qubit))
-                setLayoutParams(new LinearLayout.LayoutParams(getWidth() + 400, ViewGroup.LayoutParams.MATCH_PARENT));
+                setLParams();
             measuredQubits[qubit]++;
         }
         VisualOperator mm = m.copy();
@@ -553,7 +557,7 @@ public class QuantumView extends View {
                     for (int qubit : visualOperator.getQubitIDs()) {
                         if (qubit >= getDisplayedQubits()) return;
                         if (!canAddGate(qubit))
-                            setLayoutParams(new LinearLayout.LayoutParams(getWidth() + 400, ViewGroup.LayoutParams.MATCH_PARENT));
+                            setLParams();
                         measuredQubits[qubit]++;
                     }
                     gos.addLast(visualOperator);
@@ -570,7 +574,7 @@ public class QuantumView extends View {
                             return;
                         }
                         if (!canAddGate(qubit))
-                            setLayoutParams(new LinearLayout.LayoutParams(getWidth() + 400, ViewGroup.LayoutParams.MATCH_PARENT));
+                            setLParams();
                         measuredQubits[qubit]++;
                     }
                     gos.add(d.index, d.oldOperator());
@@ -605,7 +609,7 @@ public class QuantumView extends View {
                     for (int qubit : visualOperator.getQubitIDs()) {
                         if (qubit >= getDisplayedQubits()) return;
                         if (!canAddGate(qubit))
-                            setLayoutParams(new LinearLayout.LayoutParams(getWidth() + 400, ViewGroup.LayoutParams.MATCH_PARENT));
+                            setLParams();
                         measuredQubits[qubit]++;
                     }
                     gos.addLast(visualOperator);
@@ -622,7 +626,7 @@ public class QuantumView extends View {
                             return;
                         }
                         if (!canAddGate(qubit))
-                            setLayoutParams(new LinearLayout.LayoutParams(getWidth() + 400, ViewGroup.LayoutParams.MATCH_PARENT));
+                            setLParams();
                         measuredQubits[qubit]++;
                     }
                     gos.add(d.index, visualOperator);

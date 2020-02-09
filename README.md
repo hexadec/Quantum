@@ -54,7 +54,12 @@ A software for Android that emulates the actions of a quantum computer
 | Ctrl+R  |  Run
 | Ctrl+M  |  Switch statevector mode
 | Ctrl+B  |  Show Bloch sphere
+| Ctrl+O  |  Open file
 | A       |  Add gate
+| Ctrl+&rarr; |  Scroll right
+| Ctrl+&larr; |  Scroll left
+| Ctrl+&uarr; |  Scroll up
+| Ctrl+&darr; |  Scroll down
 
 ###### Planned features
 Create and run algorithms with loops and conditions  

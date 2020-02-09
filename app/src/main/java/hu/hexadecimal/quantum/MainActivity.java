@@ -15,9 +15,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.text.InputFilter;
-import android.text.InputType;
-import android.text.Spanned;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -29,9 +26,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -48,7 +43,6 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.security.Key;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
@@ -162,6 +156,8 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("*/*");
             startActivityForResult(intent, 42);
+            findViewById(R.id.scrollView).scrollTo(0, 0);
+            findViewById(R.id.tallScrollView).scrollTo(0, 0);
         });
 
 
@@ -667,7 +663,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (!qv.saved && qv.getOperators().size() > 2) {
+        if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            drawerLayout.closeDrawers();
+        } else if (!qv.saved && qv.getOperators().size() > 2) {
             final Dialog d = new Dialog(this, android.R.style.Theme_Translucent_NoTitleBar);
             View v = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.back_dialog, null);
             v.findViewById(R.id.exit).setOnClickListener((View view) -> MainActivity.super.onBackPressed());
@@ -738,6 +736,33 @@ public class MainActivity extends AppCompatActivity {
         } else if (keyCode == KeyEvent.KEYCODE_B && event.isCtrlPressed()) {
             //SHOW BLOCH SPHERE
             displayBlochSphere();
+        } else if (keyCode == KeyEvent.KEYCODE_O && event.isCtrlPressed()) {
+            //OPEN FILE
+            findViewById(R.id.fab_main).callOnClick();
+        } else if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && event.isCtrlPressed()) {
+            //SCROLL RIGHT
+            findViewById(R.id.scrollView).scrollBy((int) QuantumView.pxFromDp(this, 250), 0);
+        } else if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && event.isCtrlPressed()) {
+            //SCROLL LEFT
+            findViewById(R.id.scrollView).scrollBy((int) -QuantumView.pxFromDp(this, 250), 0);
+        } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP && event.isCtrlPressed()) {
+            //SCROLL UP
+            findViewById(R.id.tallScrollView).scrollBy(0, (int) -QuantumView.pxFromDp(this, 150));
+        } else if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN && event.isCtrlPressed()) {
+            //SCROLL DOWN
+            findViewById(R.id.tallScrollView).scrollBy(0, (int) QuantumView.pxFromDp(this, 150));
+        } else if (keyCode == KeyEvent.KEYCODE_MOVE_HOME) {
+            //SCROLL HOME
+            findViewById(R.id.scrollView).scrollTo(0,0);
+        } else if (keyCode == KeyEvent.KEYCODE_MOVE_END) {
+            //SCROLL END
+            findViewById(R.id.scrollView).scrollTo(10000000, 0);
+        } else if (keyCode == KeyEvent.KEYCODE_PAGE_UP) {
+            //SCROLL UP A LOT
+            findViewById(R.id.tallScrollView).scrollBy(0, (int) -QuantumView.pxFromDp(this, 300));
+        } else if (keyCode == KeyEvent.KEYCODE_PAGE_DOWN) {
+            //SCROLL DOWN A LOT
+            findViewById(R.id.tallScrollView).scrollBy(0, (int) QuantumView.pxFromDp(this, 300));
         }
         return super.onKeyUp(keyCode, event);
     }
