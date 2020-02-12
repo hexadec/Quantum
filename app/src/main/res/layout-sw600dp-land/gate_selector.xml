@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#88000000"
+    android:id="@+id/gate_selector_main">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:scrollbarDefaultDelayBeforeFade="5000">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@drawable/dialog_gate_selector_bg"
+            android:gravity="center"
+            android:clickable="true"
+            android:maxWidth="500dp">
+
+            <Spinner
+                android:id="@+id/type_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:entries="@array/gate_types"
+                app:layout_constraintBottom_toTopOf="@+id/sub_layout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/type_selector_info" />
+
+            <TextView
+                android:id="@+id/type_selector_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="@string/gate_type"
+                app:autoSizeMinTextSize="16sp"
+                app:layout_constraintBottom_toTopOf="@+id/type_spinner"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/sub_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginBottom="0dp"
+                android:visibility="visible"
+                app:layout_constraintBottom_toTopOf="@+id/rot_layout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/type_spinner">
+
+                <Spinner
+                    android:id="@+id/filter_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:entries="@array/filter_gates"
+                    app:layout_constraintBottom_toTopOf="@+id/name_info"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/filter_info" />
+
+                <TextView
+                    android:id="@+id/name_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/gate_name"
+                    app:autoSizeMinTextSize="16sp"
+                    app:layout_constraintBottom_toTopOf="@+id/gate_name_spinner"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/filter_spinner" />
+
+                <TextView
+                    android:id="@+id/filter_info"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/filter"
+                    app:autoSizeMinTextSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Spinner
+                    android:id="@+id/gate_name_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="8dp"
+                    android:spinnerMode="dialog"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/name_info" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/rot_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginBottom="0dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/order_info"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/sub_layout">
+
+                <SeekBar
+                    android:id="@+id/rx"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginEnd="16dp"
+                    android:max="3141"
+                    android:progressDrawable="@drawable/seek_progress"
+                    android:thumb="@drawable/seek_thumb"
+                    app:layout_constraintBottom_toTopOf="@+id/rz"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/rx_text"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/rx_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="θ 0.000"
+                    android:typeface="monospace"
+                    app:layout_constraintBottom_toBottomOf="@id/rx"
+                    app:layout_constraintEnd_toStartOf="@+id/rx"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/rx" />
+
+                <SeekBar
+                    android:id="@+id/rz"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginEnd="16dp"
+                    android:max="6282"
+                    android:progressDrawable="@drawable/seek_progress"
+                    android:thumb="@drawable/seek_thumb"
+                    app:layout_constraintBottom_toTopOf="@+id/ry"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/rz_text"
+                    app:layout_constraintTop_toBottomOf="@+id/rx" />
+
+                <TextView
+                    android:id="@+id/rz_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="φ 0.000"
+                    android:typeface="monospace"
+                    app:layout_constraintBottom_toBottomOf="@id/rz"
+                    app:layout_constraintEnd_toStartOf="@+id/rz"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/rz" />
+
+                <SeekBar
+                    android:id="@+id/ry"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginEnd="16dp"
+                    android:max="6282"
+                    android:progressDrawable="@drawable/seek_progress"
+                    android:thumb="@drawable/seek_thumb"
+                    app:layout_constraintBottom_toTopOf="@+id/fixed_values"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/ry_text"
+                    app:layout_constraintTop_toBottomOf="@+id/rz" />
+
+                <TextView
+                    android:id="@+id/ry_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="λ 0.000"
+                    android:typeface="monospace"
+                    app:layout_constraintBottom_toBottomOf="@id/ry"
+                    app:layout_constraintEnd_toStartOf="@+id/ry"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@+id/ry" />
+
+                <CheckBox
+                    android:id="@+id/fixed_values"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="0dp"
+                    android:checked="false"
+                    android:text="@string/fixed_values"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/rz" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <TextView
+                android:id="@+id/order_info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="16dp"
+                android:text="@string/select_order_of_qubits"
+                app:layout_constraintBottom_toTopOf="@+id/order_first"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/sub_layout" />
+
+            <SeekBar
+                android:id="@+id/order_first"
+                style="@style/Widget.AppCompat.SeekBar.Discrete"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="16dp"
+                android:max="7"
+                android:progressDrawable="@drawable/seek_progress"
+                android:thumb="@drawable/seek_thumb"
+                app:layout_constraintBottom_toTopOf="@+id/order_second"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/qtext1"
+                app:layout_constraintTop_toBottomOf="@+id/order_info" />
+
+            <TextView
+                android:id="@+id/qtext1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="q1"
+                app:layout_constraintBottom_toBottomOf="@id/order_first"
+                app:layout_constraintEnd_toStartOf="@+id/order_first"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/order_first" />
+
+            <SeekBar
+                android:id="@+id/order_second"
+                style="@style/Widget.AppCompat.SeekBar.Discrete"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="12dp"
+                android:max="7"
+                android:progressDrawable="@drawable/seek_progress"
+                android:thumb="@drawable/seek_thumb"
+                app:layout_constraintBottom_toTopOf="@+id/order_third"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/qtext2"
+                app:layout_constraintTop_toBottomOf="@+id/order_first" />
+
+            <TextView
+                android:id="@+id/qtext2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="q1"
+                app:layout_constraintBottom_toBottomOf="@id/order_second"
+                app:layout_constraintEnd_toStartOf="@+id/order_second"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/order_second" />
+
+            <SeekBar
+                android:id="@+id/order_third"
+                style="@style/Widget.AppCompat.SeekBar.Discrete"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="12dp"
+                android:max="7"
+                android:progressDrawable="@drawable/seek_progress"
+                android:thumb="@drawable/seek_thumb"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/order_fourth"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/qtext3"
+                app:layout_constraintTop_toBottomOf="@+id/order_second" />
+
+            <TextView
+                android:id="@+id/qtext3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="q1"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/order_third"
+                app:layout_constraintEnd_toStartOf="@+id/order_third"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/order_third" />
+
+            <SeekBar
+                android:id="@+id/order_fourth"
+                style="@style/Widget.AppCompat.SeekBar.Discrete"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="12dp"
+                android:max="7"
+                android:progressDrawable="@drawable/seek_progress"
+                android:thumb="@drawable/seek_thumb"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/hermitianConjugate"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/qtext4"
+                app:layout_constraintTop_toBottomOf="@+id/order_third" />
+
+            <TextView
+                android:id="@+id/qtext4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="q1"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/order_fourth"
+                app:layout_constraintEnd_toStartOf="@+id/order_fourth"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/order_fourth" />
+
+            <Button
+                android:id="@+id/cancel"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="32dp"
+                android:text="@android:string/cancel"
+                app:layout_constraintEnd_toStartOf="@+id/ok"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/hermitianConjugate" />
+
+            <Button
+                android:id="@+id/ok"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="32dp"
+                android:layout_marginTop="24dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="ok"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/cancel"
+                app:layout_constraintTop_toBottomOf="@+id/hermitianConjugate" />
+
+            <CheckBox
+                android:id="@+id/hermitianConjugate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="24dp"
+                android:checked="false"
+                android:text="@string/hermitian_conjugate"
+                app:layout_constraintBottom_toTopOf="@+id/cancel"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/order_fourth" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+</LinearLayout>

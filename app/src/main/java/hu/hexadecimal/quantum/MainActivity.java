@@ -61,7 +61,7 @@ import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.lifecycle.ViewModelProvider;
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
 import hu.hexadecimal.quantum.graphics.ExecutionProgressDialog;
 import hu.hexadecimal.quantum.graphics.GateView;
@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
         qv.setBackgroundColor(0xffeeeeee);
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        qv.setLayoutParams(new LinearLayout.LayoutParams((int) (displayMetrics.widthPixels * 2.2), (int) (QuantumView.pxFromDp(this, 760))));
+        qv.setLayoutParams(new LinearLayout.LayoutParams((int) (displayMetrics.widthPixels * 2.2), qv.getRecommendedHeight()));
         qv.saved = true;
         qv.setLongClickable(true);
 
@@ -475,7 +475,7 @@ public class MainActivity extends AppCompatActivity {
         }, 300);
 
         qv.postDelayed(() -> {
-            QuantumViewModel model = ViewModelProviders.of(MainActivity.this).get(QuantumViewModel.class);
+            QuantumViewModel model = new ViewModelProvider(MainActivity.this).get(QuantumViewModel.class);
             model.get().observe(MainActivity.this, data -> {
                 try {
                     qv.setData(data);
@@ -717,59 +717,75 @@ public class MainActivity extends AppCompatActivity {
         } else if (keyCode == KeyEvent.KEYCODE_D && event.isCtrlPressed()) {
             //CLEAR TIMELINE
             UIHelper.clearScreen(qv, MainActivity.this);
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_M && event.isCtrlPressed()) {
             //CHANGE STATEVECTOR MODE
             navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setIcon(ContextCompat.getDrawable(MainActivity.this, probabilityMode > 0 ? R.drawable.alpha_s_box_outline : R.drawable.alpha_s_box));
             probabilityMode = 1 - probabilityMode;
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_S && event.isCtrlPressed()) {
             //SAVE
             UIHelper.saveFileUI(qv, this, false);
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_R && event.isCtrlPressed()) {
             //RUN
             findViewById(R.id.fab_matrix).callOnClick();
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_E && event.isCtrlPressed()) {
             //EXPORT
             UIHelper.saveFileUI(qv, this, true);
-        } else if (keyCode == KeyEvent.KEYCODE_A) {
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_A && event.isCtrlPressed()) {
             //ADD GATE
             showAddGateDialog(0, 0, null);
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_B && event.isCtrlPressed()) {
             //SHOW BLOCH SPHERE
             displayBlochSphere();
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_O && event.isCtrlPressed()) {
             //OPEN FILE
             findViewById(R.id.fab_main).callOnClick();
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && event.isCtrlPressed()) {
             //SCROLL RIGHT
             findViewById(R.id.scrollView).scrollBy((int) QuantumView.pxFromDp(this, 250), 0);
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && event.isCtrlPressed()) {
             //SCROLL LEFT
             findViewById(R.id.scrollView).scrollBy((int) -QuantumView.pxFromDp(this, 250), 0);
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP && event.isCtrlPressed()) {
             //SCROLL UP
             findViewById(R.id.tallScrollView).scrollBy(0, (int) -QuantumView.pxFromDp(this, 150));
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN && event.isCtrlPressed()) {
             //SCROLL DOWN
             findViewById(R.id.tallScrollView).scrollBy(0, (int) QuantumView.pxFromDp(this, 150));
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_MOVE_HOME) {
             //SCROLL HOME
             findViewById(R.id.scrollView).scrollTo(0,0);
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_MOVE_END) {
             //SCROLL END
             findViewById(R.id.scrollView).scrollTo(10000000, 0);
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_PAGE_UP) {
             //SCROLL UP A LOT
             findViewById(R.id.tallScrollView).scrollBy(0, (int) -QuantumView.pxFromDp(this, 300));
+            return true;
         } else if (keyCode == KeyEvent.KEYCODE_PAGE_DOWN) {
             //SCROLL DOWN A LOT
             findViewById(R.id.tallScrollView).scrollBy(0, (int) QuantumView.pxFromDp(this, 300));
+            return true;
         }
         return super.onKeyUp(keyCode, event);
     }
 
     @Override
     protected void onDestroy() {
-        QuantumViewModel model = ViewModelProviders.of(this).get(QuantumViewModel.class);
+        QuantumViewModel model = new ViewModelProvider(MainActivity.this).get(QuantumViewModel.class);
         model.set(qv.getData());
         super.onDestroy();
     }

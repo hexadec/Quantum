@@ -105,11 +105,15 @@ public class QuantumView extends View {
     }
 
     public double getLimit() {
-        return getHeight() - 1.4 * mPadding - START_Y;
+        return getHeight() - mPadding - START_Y;
     }
 
     public void setLParams() {
-        setLayoutParams(new LinearLayout.LayoutParams((int) (getWidth() + pxFromDp(getContext(), 150)), ((int) (QuantumView.pxFromDp(getContext(), STEP * MAX_QUBITS) + START_Y + 1.4 * mPadding))));
+        setLayoutParams(new LinearLayout.LayoutParams((int) (getWidth() + pxFromDp(getContext(), 150)), getRecommendedHeight()));
+    }
+
+    public int getRecommendedHeight() {
+        return (int) (QuantumView.pxFromDp(getContext(), STEP * MAX_QUBITS) + START_Y + mPadding);
     }
 
     @Override
@@ -268,7 +272,7 @@ public class QuantumView extends View {
                         measuredQubits[qubit]--;
                     }
                     undoList.addLast(new Doable(gos.remove(i), DoableType.DELETE, getContext(), i, null));
-                    rectList.clear();
+                    redoList.clear();
                     invalidate();
                     saved = false;
                     return true;
@@ -550,7 +554,6 @@ public class QuantumView extends View {
                         for (int i = 0; i < v.getQubitIDs().length; i++) {
                             measuredQubits[v.getQubitIDs()[i]]--;
                         }
-                        saved = false;
                         break;
                     }
                 case DELETE:
@@ -561,7 +564,6 @@ public class QuantumView extends View {
                         measuredQubits[qubit]++;
                     }
                     gos.addLast(visualOperator);
-                    saved = false;
                     break;
                 case EDIT:
                     VisualOperator old = gos.remove(d.index);
@@ -578,7 +580,6 @@ public class QuantumView extends View {
                         measuredQubits[qubit]++;
                     }
                     gos.add(d.index, d.oldOperator());
-                    saved = false;
                     break;
                 case MOVE:
                     gos.remove(d.index);
@@ -587,6 +588,7 @@ public class QuantumView extends View {
             }
             invalidate();
             redoList.addLast(undoList.removeLast());
+            saved = false;
         } catch (NoSuchElementException e) {
         }
     }
@@ -602,7 +604,6 @@ public class QuantumView extends View {
                         for (int i = 0; i < v.getQubitIDs().length; i++) {
                             measuredQubits[v.getQubitIDs()[i]]--;
                         }
-                        saved = false;
                         break;
                     }
                 case ADD:
@@ -613,7 +614,6 @@ public class QuantumView extends View {
                         measuredQubits[qubit]++;
                     }
                     gos.addLast(visualOperator);
-                    saved = false;
                     break;
                 case EDIT:
                     VisualOperator old = gos.remove(d.index);
@@ -630,7 +630,6 @@ public class QuantumView extends View {
                         measuredQubits[qubit]++;
                     }
                     gos.add(d.index, visualOperator);
-                    saved = false;
                     break;
                 case MOVE:
                     gos.remove(d.oldIndex);
@@ -639,6 +638,7 @@ public class QuantumView extends View {
             }
             invalidate();
             undoList.addLast(redoList.removeLast());
+            saved = false;
         } catch (NoSuchElementException e) {
 
         }
