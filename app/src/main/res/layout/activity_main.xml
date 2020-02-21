@@ -75,8 +75,7 @@
         android:id="@+id/nvParent"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:background="#FFFFFF">
+        android:layout_gravity="start">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -86,13 +85,16 @@
                 android:id="@+id/nv"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:background="#FFFFFF"
                 android:elevation="0dp"
                 app:elevation="0dp"
                 app:layout_constraintBottom_toTopOf="@id/gate_view_holder"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:menu="@menu/menu_main_drawer">
+                <!--
+                android:background="#333333"
+                app:itemIconTint="@color/nav_menu_item_color"
+                app:itemTextColor="@color/nav_menu_item_color"-->
 
             </com.google.android.material.navigation.NavigationView>
 
@@ -101,7 +103,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
-                android:background="#FFFFFF"
                 android:gravity="bottom"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

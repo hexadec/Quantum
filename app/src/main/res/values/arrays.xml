@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="shots">
-        <item>Always use probability mode</item>
+        <item>Always use statevector mode</item>
         <item>Pick a single outcome</item>
         <item>256</item>
         <item>1K</item>

@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle toggle;
     private NavigationView navigationView;
+    private TableLayout gateHolder;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,8 +108,7 @@ public class MainActivity extends AppCompatActivity {
         qv = new QuantumView(this);
         relativeLayout.addView(qv);
         qv.setBackgroundColor(0xffeeeeee);
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         qv.setLayoutParams(new LinearLayout.LayoutParams((int) (displayMetrics.widthPixels * 2.2), qv.getRecommendedHeight()));
         qv.saved = true;
         qv.setLongClickable(true);
@@ -281,6 +281,9 @@ public class MainActivity extends AppCompatActivity {
                             if (shots == 1 && probabilities[i] == 0) {
                                 continue;
                             }
+                            if (probabilities.length > Math.pow(2, 7) && probabilities[i] == 0) {
+                                continue;
+                            }
                             TableRow tr = new TableRow(MainActivity.this);
                             tr.setShowDividers(LinearLayout.SHOW_DIVIDER_MIDDLE);
                             tr.setDividerDrawable(getDrawable(R.drawable.vertical_divider));
@@ -438,40 +441,9 @@ public class MainActivity extends AppCompatActivity {
                     return false;
             }
         });
-        TableLayout gateHolder = findViewById(R.id.gate_view_holder);
+        gateHolder = findViewById(R.id.gate_view_holder);
         gateHolder.postDelayed(() -> {
-            LinkedList<VisualOperator> operators = VisualOperator.getPredefinedGates(false);
-            operators.add(0, new VisualOperator(0f, 0f));
-            operators.add(0, new VisualOperator(0f, 0f, 0f));
-            TableRow tr = new TableRow(MainActivity.this);
-            for (int i = 0; i < operators.size(); i++) {
-                GateView gw = new GateView(MainActivity.this, operators.get(i));
-                TableRow.LayoutParams params = new TableRow.LayoutParams(gw.minSize(), gw.minSize());
-                params.setMargins((int) QuantumView.pxFromDp(MainActivity.this, 6),
-                        (int) QuantumView.pxFromDp(MainActivity.this, 6),
-                        (int) QuantumView.pxFromDp(MainActivity.this, 6),
-                        (int) QuantumView.pxFromDp(MainActivity.this, 6));
-                gw.setLayoutParams(params);
-                gw.setOnClickListener((View view) -> {
-                    showAddGateDialog(-1, -1, gw.visualOperator);
-                    if (pref.getBoolean("shortcuts_autoclose", true))
-                        drawerLayout.closeDrawers();
-                });
-                tr.addView(gw);
-                if ((i + 1) % 5 == 0 || i + 1 == operators.size()) {
-                    gateHolder.addView(tr);
-                    tr = new TableRow(MainActivity.this);
-                }
-            }
-            ConstraintLayout.LayoutParams lp = ((ConstraintLayout.LayoutParams) gateHolder.getLayoutParams());
-            float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
-            int margin = dpWidth > 330 ? dpWidth > 420 ? 15 : 10 : 5;
-            lp.setMargins((int) QuantumView.pxFromDp(MainActivity.this, margin),
-                    (int) QuantumView.pxFromDp(MainActivity.this, margin),
-                    (int) QuantumView.pxFromDp(MainActivity.this, margin),
-                    (int) QuantumView.pxFromDp(MainActivity.this, margin * 2));
-            gateHolder.setLayoutParams(lp);
-            gateHolder.bringToFront();
+            setUpShortcuts(gateHolder, pref, displayMetrics, getResources().getConfiguration());
         }, 300);
 
         qv.postDelayed(() -> {
@@ -699,6 +671,8 @@ public class MainActivity extends AppCompatActivity {
                     .getPackageInfo(getPackageName(), 0).versionName);
             navigationView.removeHeaderView(navigationView.getHeaderView(0));
             navigationView.addHeaderView(v);
+            if (gateHolder != null)
+                setUpShortcuts(gateHolder, PreferenceManager.getDefaultSharedPreferences(this), getResources().getDisplayMetrics(), newConfig);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -765,7 +739,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_MOVE_HOME) {
             //SCROLL HOME
-            findViewById(R.id.scrollView).scrollTo(0,0);
+            findViewById(R.id.scrollView).scrollTo(0, 0);
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_MOVE_END) {
             //SCROLL END
@@ -788,5 +762,47 @@ public class MainActivity extends AppCompatActivity {
         QuantumViewModel model = new ViewModelProvider(MainActivity.this).get(QuantumViewModel.class);
         model.set(qv.getData());
         super.onDestroy();
+    }
+
+    public void setUpShortcuts(TableLayout gateHolder, SharedPreferences pref, DisplayMetrics displayMetrics, Configuration config) {
+        gateHolder.removeAllViews();
+        LinkedList<VisualOperator> operators = VisualOperator.getPredefinedGates(false);
+        operators.add(0, new VisualOperator(0f, 0f));
+        operators.add(0, new VisualOperator(0f, 0f, 0f));
+        TableRow tr = new TableRow(MainActivity.this);
+        for (int i = 0; i < operators.size(); i++) {
+            GateView gw = new GateView(MainActivity.this, operators.get(i));
+            TableRow.LayoutParams params = new TableRow.LayoutParams(gw.minSize(), gw.minSize());
+            params.setMargins((int) QuantumView.pxFromDp(MainActivity.this, 3),
+                    (int) QuantumView.pxFromDp(MainActivity.this, 3),
+                    (int) QuantumView.pxFromDp(MainActivity.this, 3),
+                    (int) QuantumView.pxFromDp(MainActivity.this, 3));
+            gw.setLayoutParams(params);
+            gw.setOnClickListener((View view) -> {
+                showAddGateDialog(-1, -1, gw.visualOperator);
+                if (pref.getBoolean("shortcuts_autoclose", true))
+                    drawerLayout.closeDrawers();
+            });
+            tr.addView(gw);
+            if ((i + 1) % 5 == 0 || i + 1 == operators.size()) {
+                gateHolder.addView(tr);
+                tr = new TableRow(MainActivity.this);
+            }
+        }
+        ConstraintLayout.LayoutParams lp = ((ConstraintLayout.LayoutParams) gateHolder.getLayoutParams());
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+        int margin = dpWidth > 330 ? dpWidth > 420 ? 15 : 10 : 5;
+        if (config.orientation == Configuration.ORIENTATION_PORTRAIT)
+            lp.setMargins((int) QuantumView.pxFromDp(MainActivity.this, margin),
+                    (int) QuantumView.pxFromDp(MainActivity.this, margin),
+                    (int) QuantumView.pxFromDp(MainActivity.this, margin),
+                    (int) QuantumView.pxFromDp(MainActivity.this, margin * 2));
+        else
+            lp.setMargins((int) QuantumView.pxFromDp(MainActivity.this, margin),
+                    (int) QuantumView.pxFromDp(MainActivity.this, margin),
+                    (int) QuantumView.pxFromDp(MainActivity.this, margin),
+                    (int) QuantumView.pxFromDp(MainActivity.this, margin / 2));
+        gateHolder.setLayoutParams(lp);
+        gateHolder.bringToFront();
     }
 }

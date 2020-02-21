@@ -16,7 +16,7 @@ public class GateView extends View {
 
     public final float UNIT;
     public final float PADDING;
-    public static final int GATE_SIZE = 18;
+    public static final int GATE_SIZE = 21;
     public final VisualOperator visualOperator;
 
     final Paint otherPaint, whiteTextPaint;
@@ -34,6 +34,7 @@ public class GateView extends View {
 
         otherPaint = new Paint();
         otherPaint.setStyle(Paint.Style.FILL);
+        otherPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
 
         setMinimumWidth(minSize());
         setMinimumHeight(minSize());
@@ -72,7 +73,7 @@ public class GateView extends View {
         bounds.left += (areaRect.width() - bounds.right) / 2.0f;
         bounds.top += (areaRect.height() - bounds.bottom) / 2.0f;
 
-        canvas.drawRect(areaRect, otherPaint);
+        canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2, otherPaint);
         canvas.drawText(symbol, bounds.left, bounds.top - whiteTextPaint.ascent(), whiteTextPaint);
     }
 
