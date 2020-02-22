@@ -263,7 +263,7 @@ public class MainActivity extends AppCompatActivity {
                     adb.setTitle(getString(R.string.results) + ": \t" + t);
                     ScrollView scrollView = new ScrollView(MainActivity.this);
                     TableLayout tableLayout = new TableLayout(MainActivity.this);
-                    tableLayout.setPadding(0, (int) QuantumView.pxFromDp(this, 10), 0, (int) QuantumView.pxFromDp(this, 10));
+                    tableLayout.setPadding(0, (int) UIHelper.pxFromDp(this, 10), 0, (int) UIHelper.pxFromDp(this, 10));
                     short[] measuredQubits = qv.getMeasuredQubits();
                     scrollView.addView(tableLayout);
                     adb.setView(scrollView);
@@ -293,7 +293,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                             TableRow.LayoutParams params = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
-                            params.setMargins((int) QuantumView.pxFromDp(this, dpWidth < 330 || MAX_QUBITS > 7 ? 3 : 6), 0, (int) QuantumView.pxFromDp(this, dpWidth < 330 || MAX_QUBITS > 7 ? 3 : 6), 0);
+                            params.setMargins((int) UIHelper.pxFromDp(this, dpWidth < 330 || MAX_QUBITS > 7 ? 3 : 6), 0, (int) UIHelper.pxFromDp(this, dpWidth < 330 || MAX_QUBITS > 7 ? 3 : 6), 0);
                             AppCompatTextView[] textView = new AppCompatTextView[]{
                                     new AppCompatTextView(MainActivity.this),
                                     new AppCompatTextView(MainActivity.this),
@@ -443,7 +443,8 @@ public class MainActivity extends AppCompatActivity {
         });
         gateHolder = findViewById(R.id.gate_view_holder);
         gateHolder.postDelayed(() -> {
-            setUpShortcuts(gateHolder, pref, displayMetrics, getResources().getConfiguration());
+            int navWidth = findViewById(R.id.nvParent).getWidth();
+            setUpShortcuts(gateHolder, pref, displayMetrics, getResources().getConfiguration(), navWidth);
         }, 300);
 
         qv.postDelayed(() -> {
@@ -672,7 +673,7 @@ public class MainActivity extends AppCompatActivity {
             navigationView.removeHeaderView(navigationView.getHeaderView(0));
             navigationView.addHeaderView(v);
             if (gateHolder != null)
-                setUpShortcuts(gateHolder, PreferenceManager.getDefaultSharedPreferences(this), getResources().getDisplayMetrics(), newConfig);
+                setUpShortcuts(gateHolder, PreferenceManager.getDefaultSharedPreferences(this), getResources().getDisplayMetrics(), newConfig, findViewById(R.id.nvParent).getWidth());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -723,19 +724,19 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_DPAD_RIGHT && event.isCtrlPressed()) {
             //SCROLL RIGHT
-            findViewById(R.id.scrollView).scrollBy((int) QuantumView.pxFromDp(this, 250), 0);
+            findViewById(R.id.scrollView).scrollBy((int) UIHelper.pxFromDp(this, 250), 0);
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_DPAD_LEFT && event.isCtrlPressed()) {
             //SCROLL LEFT
-            findViewById(R.id.scrollView).scrollBy((int) -QuantumView.pxFromDp(this, 250), 0);
+            findViewById(R.id.scrollView).scrollBy((int) -UIHelper.pxFromDp(this, 250), 0);
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_DPAD_UP && event.isCtrlPressed()) {
             //SCROLL UP
-            findViewById(R.id.tallScrollView).scrollBy(0, (int) -QuantumView.pxFromDp(this, 150));
+            findViewById(R.id.tallScrollView).scrollBy(0, (int) -UIHelper.pxFromDp(this, 150));
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_DPAD_DOWN && event.isCtrlPressed()) {
             //SCROLL DOWN
-            findViewById(R.id.tallScrollView).scrollBy(0, (int) QuantumView.pxFromDp(this, 150));
+            findViewById(R.id.tallScrollView).scrollBy(0, (int) UIHelper.pxFromDp(this, 150));
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_MOVE_HOME) {
             //SCROLL HOME
@@ -747,11 +748,11 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_PAGE_UP) {
             //SCROLL UP A LOT
-            findViewById(R.id.tallScrollView).scrollBy(0, (int) -QuantumView.pxFromDp(this, 300));
+            findViewById(R.id.tallScrollView).scrollBy(0, (int) -UIHelper.pxFromDp(this, 300));
             return true;
         } else if (keyCode == KeyEvent.KEYCODE_PAGE_DOWN) {
             //SCROLL DOWN A LOT
-            findViewById(R.id.tallScrollView).scrollBy(0, (int) QuantumView.pxFromDp(this, 300));
+            findViewById(R.id.tallScrollView).scrollBy(0, (int) UIHelper.pxFromDp(this, 300));
             return true;
         }
         return super.onKeyUp(keyCode, event);
@@ -764,19 +765,23 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    public void setUpShortcuts(TableLayout gateHolder, SharedPreferences pref, DisplayMetrics displayMetrics, Configuration config) {
+    public void setUpShortcuts(TableLayout gateHolder, SharedPreferences pref, DisplayMetrics displayMetrics, Configuration config, int navWidth) {
         gateHolder.removeAllViews();
         LinkedList<VisualOperator> operators = VisualOperator.getPredefinedGates(false);
         operators.add(0, new VisualOperator(0f, 0f));
         operators.add(0, new VisualOperator(0f, 0f, 0f));
         TableRow tr = new TableRow(MainActivity.this);
+        int gwMargin = 3;
+        float dpWidth = UIHelper.dpFromPx(MainActivity.this, navWidth);
+        int margin = dpWidth > 270 ? dpWidth > 300 ? 15 : 10 : 5;
+        int gateWidth = (int) (dpWidth - gwMargin * 10 - 2 * (margin + 1)) / 10;
         for (int i = 0; i < operators.size(); i++) {
-            GateView gw = new GateView(MainActivity.this, operators.get(i));
+            GateView gw = new GateView(MainActivity.this, operators.get(i), gateWidth);
             TableRow.LayoutParams params = new TableRow.LayoutParams(gw.minSize(), gw.minSize());
-            params.setMargins((int) QuantumView.pxFromDp(MainActivity.this, 3),
-                    (int) QuantumView.pxFromDp(MainActivity.this, 3),
-                    (int) QuantumView.pxFromDp(MainActivity.this, 3),
-                    (int) QuantumView.pxFromDp(MainActivity.this, 3));
+            params.setMargins((int) UIHelper.pxFromDp(MainActivity.this, gwMargin),
+                    (int) UIHelper.pxFromDp(MainActivity.this, gwMargin),
+                    (int) UIHelper.pxFromDp(MainActivity.this, gwMargin),
+                    (int) UIHelper.pxFromDp(MainActivity.this, gwMargin));
             gw.setLayoutParams(params);
             gw.setOnClickListener((View view) -> {
                 showAddGateDialog(-1, -1, gw.visualOperator);
@@ -790,18 +795,16 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         ConstraintLayout.LayoutParams lp = ((ConstraintLayout.LayoutParams) gateHolder.getLayoutParams());
-        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
-        int margin = dpWidth > 330 ? dpWidth > 420 ? 15 : 10 : 5;
         if (config.orientation == Configuration.ORIENTATION_PORTRAIT)
-            lp.setMargins((int) QuantumView.pxFromDp(MainActivity.this, margin),
-                    (int) QuantumView.pxFromDp(MainActivity.this, margin),
-                    (int) QuantumView.pxFromDp(MainActivity.this, margin),
-                    (int) QuantumView.pxFromDp(MainActivity.this, margin * 2));
+            lp.setMargins((int) UIHelper.pxFromDp(MainActivity.this, margin),
+                    (int) UIHelper.pxFromDp(MainActivity.this, margin),
+                    (int) UIHelper.pxFromDp(MainActivity.this, margin),
+                    (int) UIHelper.pxFromDp(MainActivity.this, margin * 2));
         else
-            lp.setMargins((int) QuantumView.pxFromDp(MainActivity.this, margin),
-                    (int) QuantumView.pxFromDp(MainActivity.this, margin),
-                    (int) QuantumView.pxFromDp(MainActivity.this, margin),
-                    (int) QuantumView.pxFromDp(MainActivity.this, margin / 2));
+            lp.setMargins((int) UIHelper.pxFromDp(MainActivity.this, margin),
+                    (int) UIHelper.pxFromDp(MainActivity.this, margin / 2),
+                    (int) UIHelper.pxFromDp(MainActivity.this, margin),
+                    (int) UIHelper.pxFromDp(MainActivity.this, margin / 2));
         gateHolder.setLayoutParams(lp);
         gateHolder.bringToFront();
     }

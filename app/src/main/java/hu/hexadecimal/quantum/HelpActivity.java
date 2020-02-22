@@ -114,10 +114,10 @@ public class HelpActivity extends AppCompatActivity {
         Log.i("dpWidth", "" + dpWidth);
         int padding = dpWidth > 450 ? dpWidth > 600 ? dpWidth >= 800 ? 40 : 30 : 20 : 10;
         ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        lp.setMargins((int) QuantumView.pxFromDp(this, padding),
-                (int) QuantumView.pxFromDp(this, padding / 2),
-                (int) QuantumView.pxFromDp(this, padding),
-                (int) QuantumView.pxFromDp(this, padding / 2));
+        lp.setMargins((int) UIHelper.pxFromDp(this, padding),
+                (int) UIHelper.pxFromDp(this, padding / 2),
+                (int) UIHelper.pxFromDp(this, padding),
+                (int) UIHelper.pxFromDp(this, padding / 2));
         webView.setLayoutParams(lp);
     }
 
@@ -129,10 +129,10 @@ public class HelpActivity extends AppCompatActivity {
         Log.i("dpWidth", "" + dpWidth);
         int padding = dpWidth > 400 ? dpWidth > 600 ? 30 : 20 : 10;
         ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        lp.setMargins((int) QuantumView.pxFromDp(this, padding),
-                (int) QuantumView.pxFromDp(this, padding / 2),
-                (int) QuantumView.pxFromDp(this, padding),
-                (int) QuantumView.pxFromDp(this, padding / 2));
+        lp.setMargins((int) UIHelper.pxFromDp(this, padding),
+                (int) UIHelper.pxFromDp(this, padding / 2),
+                (int) UIHelper.pxFromDp(this, padding),
+                (int) UIHelper.pxFromDp(this, padding / 2));
         webView.setLayoutParams(lp);
     }
 

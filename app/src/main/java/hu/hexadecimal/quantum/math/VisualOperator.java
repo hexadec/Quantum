@@ -54,7 +54,7 @@ public class VisualOperator {
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(1)},
                             {new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
-                    }, "CNOT", new String[]{"●", "⊕", "cX"}, 0xff009E5F);
+                    }, "CNOT", new String[]{"●", "＋", "cX"}, 0xff009E5F);
 
     public static final VisualOperator CY =
             new VisualOperator(4,
@@ -121,7 +121,7 @@ public class VisualOperator {
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1)},
                             {new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(0), new Complex(1), new Complex(0)}
-                    }, "Toffoli", new String[]{"●", "●", "⊕", "TOF"}, 0xff9200D1);
+                    }, "Toffoli", new String[]{"●", "●", "＋", "TOF"}, 0xff9200D1);
 
     public static final VisualOperator FREDKIN =
             new VisualOperator(8,
@@ -1100,6 +1100,10 @@ public class VisualOperator {
             line += "h qubit[" + getQubitIDs()[0] + "];\n";
             line += "sdg qubit[" + getQubitIDs()[0] + "];\n";
             line += "ry(pi/2) qubit[" + getQubitIDs()[0] + "];";
+        } else if (equals3Decimals(hermitianConjugate(SQRT_NOT.copy()))) {
+            line += "ry(-pi/2) qubit[" + getQubitIDs()[0] + "];\n";
+            line += "s qubit[" + getQubitIDs()[0] + "];\n";
+            line += "h qubit[" + getQubitIDs()[0] + "];";
         } else if (isU3()) {
             line += "u3(" + theta + "," + phi + "," + lambda + ") qubit[" + getQubitIDs()[0] + "];";
         } else if (isRotation()) {

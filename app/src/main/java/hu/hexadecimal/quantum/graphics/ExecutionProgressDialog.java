@@ -13,6 +13,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 import hu.hexadecimal.quantum.R;
+import hu.hexadecimal.quantum.UIHelper;
 
 public class ExecutionProgressDialog extends AlertDialog {
 
@@ -23,10 +24,10 @@ public class ExecutionProgressDialog extends AlertDialog {
         super(context);
         LinearLayout l = new LinearLayout(context);
         l.setOrientation(LinearLayout.VERTICAL);
-        l.setPadding((int) QuantumView.pxFromDp(context, 10),
-                (int) QuantumView.pxFromDp(context, 15),
-                (int) QuantumView.pxFromDp(context, 10),
-                (int) QuantumView.pxFromDp(context, 5));
+        l.setPadding((int) UIHelper.pxFromDp(context, 10),
+                (int) UIHelper.pxFromDp(context, 15),
+                (int) UIHelper.pxFromDp(context, 10),
+                (int) UIHelper.pxFromDp(context, 5));
         TextView tv = new TextView(context);
         tv.setText(text);
         tv.setTextSize(16);
@@ -34,11 +35,11 @@ public class ExecutionProgressDialog extends AlertDialog {
         progressBar = new ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal);
         progressBar.setIndeterminate(false);
         progressBar.setProgressDrawable(context.getResources().getDrawable(R.drawable.progress_style));
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) QuantumView.pxFromDp(context, 6));
-        layoutParams.setMargins((int) QuantumView.pxFromDp(context, 2),
-                (int) QuantumView.pxFromDp(context, 8),
-                (int) QuantumView.pxFromDp(context, 2),
-                (int) QuantumView.pxFromDp(context, 8));
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, (int) UIHelper.pxFromDp(context, 6));
+        layoutParams.setMargins((int) UIHelper.pxFromDp(context, 2),
+                (int) UIHelper.pxFromDp(context, 8),
+                (int) UIHelper.pxFromDp(context, 2),
+                (int) UIHelper.pxFromDp(context, 8));
         progressBar.setLayoutParams(layoutParams);
         l.addView(progressBar);
         progressText = new TextView(context);

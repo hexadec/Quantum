@@ -25,6 +25,7 @@ import java.util.stream.IntStream;
 
 import androidx.core.graphics.PaintCompat;
 import hu.hexadecimal.quantum.R;
+import hu.hexadecimal.quantum.UIHelper;
 import hu.hexadecimal.quantum.tools.Doable;
 import hu.hexadecimal.quantum.tools.DoableType;
 import hu.hexadecimal.quantum.tools.GateSequence;
@@ -66,9 +67,9 @@ public class QuantumView extends View {
 
     public QuantumView(Context context) {
         super(context);
-        UNIT = pxFromDp(super.getContext(), 1);
-        START_Y = pxFromDp(super.getContext(), 20);
-        START_X = pxFromDp(super.getContext(), 40);
+        UNIT = UIHelper.pxFromDp(super.getContext(), 1);
+        START_Y = UIHelper.pxFromDp(super.getContext(), 20);
+        START_X = UIHelper.pxFromDp(super.getContext(), 40);
         gos = new LinkedList<>();
 
         undoList = new LinkedList<>();
@@ -85,23 +86,23 @@ public class QuantumView extends View {
 
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setColor(Color.BLUE);
-        mPaint.setStrokeWidth(pxFromDp(context, 2.5f));
+        mPaint.setStrokeWidth(UIHelper.pxFromDp(context, 2.5f));
 
         measuredQubits = new short[MAX_QUBITS];
 
         mTextPaint = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setColor(Color.DKGRAY);
-        mTextPaint.setTextSize(pxFromDp(context, 24));
+        mTextPaint.setTextSize(UIHelper.pxFromDp(context, 24));
 
         whiteTextPaint = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
         whiteTextPaint.setColor(0xffffffff);
-        whiteTextPaint.setTextSize(pxFromDp(context, 24));
+        whiteTextPaint.setTextSize(UIHelper.pxFromDp(context, 24));
         whiteTextPaint.setTypeface(Typeface.MONOSPACE);
 
         otherPaint = new Paint();
         otherPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
 
-        mPadding = (int) pxFromDp(context, 32);
+        mPadding = (int) UIHelper.pxFromDp(context, 32);
         saved = true;
     }
 
@@ -110,11 +111,11 @@ public class QuantumView extends View {
     }
 
     public void setLParams() {
-        setLayoutParams(new LinearLayout.LayoutParams((int) (getWidth() + pxFromDp(getContext(), 150)), getRecommendedHeight()));
+        setLayoutParams(new LinearLayout.LayoutParams((int) (getWidth() + UIHelper.pxFromDp(getContext(), 150)), getRecommendedHeight()));
     }
 
     public int getRecommendedHeight() {
-        return (int) (QuantumView.pxFromDp(getContext(), STEP * MAX_QUBITS) + START_Y + mPadding);
+        return (int) (UIHelper.pxFromDp(getContext(), STEP * MAX_QUBITS) + START_Y + mPadding);
     }
 
     @Override
@@ -126,25 +127,25 @@ public class QuantumView extends View {
         otherPaint.setStyle(Paint.Style.FILL);
         int qubitPos = 0;
         char verticalBar = PaintCompat.hasGlyph(whiteTextPaint, "⎥") ? '⎥' : '|';
-        for (int i = (int) START_Y; i < getLimit() && i <= pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
+        for (int i = (int) START_Y; i < getLimit() && i <= UIHelper.pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) UIHelper.pxFromDp(super.getContext(), STEP)) {
             canvas.drawLine(START_X, mPadding + i, getWidth() - mPadding, mPadding + i, mPaint);
 
             mPath.reset();
-            mPath.moveTo(getWidth() - mPadding - pxFromDp(super.getContext(), 5), mPadding + i - pxFromDp(super.getContext(), 5));
+            mPath.moveTo(getWidth() - mPadding - UIHelper.pxFromDp(super.getContext(), 5), mPadding + i - UIHelper.pxFromDp(super.getContext(), 5));
             mPath.lineTo(getWidth() - mPadding + UNIT / 2, mPadding + i);
-            mPath.lineTo(getWidth() - mPadding - pxFromDp(super.getContext(), 5), mPadding + i + pxFromDp(super.getContext(), 5));
+            mPath.lineTo(getWidth() - mPadding - UIHelper.pxFromDp(super.getContext(), 5), mPadding + i + UIHelper.pxFromDp(super.getContext(), 5));
             mPath.close();
             canvas.drawPath(mPath, mPaint);
 
             otherPaint.setColor(measuredQubits[qubitPos] > 0 ? 0xffBA2121 : 0xff555555);
             canvas.drawRect(START_X,
-                    mPadding + i - pxFromDp(super.getContext(), GATE_SIZE),
-                    START_X + pxFromDp(super.getContext(), GATE_SIZE * 2),
-                    mPadding + i + pxFromDp(super.getContext(), GATE_SIZE),
+                    mPadding + i - UIHelper.pxFromDp(super.getContext(), GATE_SIZE),
+                    START_X + UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 2),
+                    mPadding + i + UIHelper.pxFromDp(super.getContext(), GATE_SIZE),
                     otherPaint);
-            String qText = "q" + Math.round((i + START_Y) / pxFromDp(super.getContext(), STEP));
-            canvas.drawText(qText, (START_X - mTextPaint.measureText(qText)) / 2, mPadding + i + pxFromDp(super.getContext(), 6), mTextPaint);
-            canvas.drawText(verticalBar + "0⟩", START_X + (verticalBar == '|' ? -pxFromDp(super.getContext(), 2.8f) : pxFromDp(super.getContext(), 2f)), mPadding + i + pxFromDp(super.getContext(), 8f), whiteTextPaint);
+            String qText = "q" + Math.round((i + START_Y) / UIHelper.pxFromDp(super.getContext(), STEP));
+            canvas.drawText(qText, (START_X - mTextPaint.measureText(qText)) / 2, mPadding + i + UIHelper.pxFromDp(super.getContext(), 6), mTextPaint);
+            canvas.drawText(verticalBar + "0⟩", START_X + (verticalBar == '|' ? -UIHelper.pxFromDp(super.getContext(), 2.8f) : UIHelper.pxFromDp(super.getContext(), 2f)), mPadding + i + UIHelper.pxFromDp(super.getContext(), 8f), whiteTextPaint);
             qubitPos++;
         }
         int[] gatesNumber = new int[MAX_QUBITS];
@@ -157,26 +158,26 @@ public class QuantumView extends View {
             for (int j = 0; j < qubitIDs.length; j++) {
                 gatesNumber[qubitIDs[j]]++;
                 otherPaint.setColor(v.getColor());
-                bounds.left = (START_X + pxFromDp(super.getContext(), 2) + gatesNumber[qubitIDs[j]] * pxFromDp(super.getContext(), GATE_SIZE * 3));
-                bounds.top = (mPadding + pxFromDp(super.getContext(), 2) + (pxFromDp(super.getContext(), STEP) * (qubitIDs[j])));
+                bounds.left = (START_X + UIHelper.pxFromDp(super.getContext(), 2) + gatesNumber[qubitIDs[j]] * UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 3));
+                bounds.top = (mPadding + UIHelper.pxFromDp(super.getContext(), 2) + (UIHelper.pxFromDp(super.getContext(), STEP) * (qubitIDs[j])));
                 RectF areaRect = new RectF(bounds.left,
                         bounds.top,
-                        bounds.left + pxFromDp(super.getContext(), GATE_SIZE * 2),
-                        bounds.top + pxFromDp(super.getContext(), GATE_SIZE * 2));
+                        bounds.left + UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 2),
+                        bounds.top + UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 2));
                 String symbol = v.getSymbols()[j];
                 switch (symbol.length()) {
                     case 1:
                     case 2:
-                        whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 24));
+                        whiteTextPaint.setTextSize(UIHelper.pxFromDp(super.getContext(), 24));
                         break;
                     case 3:
-                        whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 18));
+                        whiteTextPaint.setTextSize(UIHelper.pxFromDp(super.getContext(), 18));
                         break;
                     case 4:
-                        whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 14));
+                        whiteTextPaint.setTextSize(UIHelper.pxFromDp(super.getContext(), 14));
                         break;
                     default:
-                        whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 12));
+                        whiteTextPaint.setTextSize(UIHelper.pxFromDp(super.getContext(), 12));
                 }
                 v.addRect(areaRect);
                 bounds.right = whiteTextPaint.measureText(symbol, 0, symbol.length());
@@ -185,10 +186,10 @@ public class QuantumView extends View {
                 bounds.top += (areaRect.height() - bounds.bottom) / 2.0f;
 
                 if (symbol.equals(VisualOperator.CNOT.getSymbols()[0])) {
-                    float minus = pxFromDp(getContext(), 6f);
+                    float minus = UIHelper.pxFromDp(getContext(), 6f);
                     canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus, otherPaint);
-                } else if (symbol.equals(VisualOperator.CNOT.getSymbols()[1])) {
-                    float minus = pxFromDp(getContext(), -1.5f);
+                } else if (symbol.equals(VisualOperator.CNOT.getSymbols()[1]) || symbol.equals("⊕")) {
+                    float minus = UIHelper.pxFromDp(getContext(), -1.5f);
                     canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus, otherPaint);
                 } else {
                     canvas.drawRect(areaRect, otherPaint);
@@ -200,25 +201,23 @@ public class QuantumView extends View {
                     RectF a = v.getRect().get(j - 1);
                     float center2x = a.centerX();
                     float center2y = a.centerY();
-                    center2x += (pxFromDp(super.getContext(), GATE_SIZE / (controlled ? 1.55f : 1.15f)) * (center1x - center2x) / Math.sqrt(Math.pow((center2x - center1x), 2) + Math.pow((center2y - center1y), 2)));
-                    center2y += pxFromDp(super.getContext(), GATE_SIZE / (controlled ? 1.55f : 1.15f)) * (center1y - center2y) / Math.sqrt(Math.pow((center2x - center1x), 2) + Math.pow((center2y - center1y), 2));
+                    center2x += (UIHelper.pxFromDp(super.getContext(), GATE_SIZE / (controlled ? 1.55f : 1.15f)) * (center1x - center2x) / Math.sqrt(Math.pow((center2x - center1x), 2) + Math.pow((center2y - center1y), 2)));
+                    center2y += UIHelper.pxFromDp(super.getContext(), GATE_SIZE / (controlled ? 1.55f : 1.15f)) * (center1y - center2y) / Math.sqrt(Math.pow((center2x - center1x), 2) + Math.pow((center2y - center1y), 2));
                     canvas.drawLine(center1x, center1y, center2x, center2y, mPaint);
                 }
 
                 if (symbol.equals("●")) {
                     controlled = true;
-                    //whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 11));
-                    //canvas.drawText("C", areaRect.right - (whiteTextPaint.measureText("C") * 1.3f), bounds.top - (whiteTextPaint.ascent() / 1.3f), whiteTextPaint);
-                } else if (!symbol.equals(VisualOperator.CNOT.getSymbols()[1])) {
+                } else {
                     canvas.drawText(symbol, bounds.left, bounds.top - whiteTextPaint.ascent(), whiteTextPaint);
-                    if (controlled) {
-                        whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 11));
+                    if (controlled && !(symbol.equals(VisualOperator.CNOT.getSymbols()[1]) || symbol.equals("⊕"))) {
+                        whiteTextPaint.setTextSize(UIHelper.pxFromDp(super.getContext(), 11));
                         canvas.drawText("T", areaRect.right - (whiteTextPaint.measureText("T") * 1.3f), bounds.top - (whiteTextPaint.ascent() / 1.3f), whiteTextPaint);
                     }
                 }
             }
         }
-        whiteTextPaint.setTextSize(pxFromDp(super.getContext(), 24));
+        whiteTextPaint.setTextSize(UIHelper.pxFromDp(super.getContext(), 24));
 
     }
 
@@ -330,7 +329,7 @@ public class QuantumView extends View {
             } catch (IndexOutOfBoundsException e) {
             }
             gateNumber++;
-            if (START_X + pxFromDp(super.getContext(), 2) + pxFromDp(super.getContext(), GATE_SIZE * 3) + gateNumber * pxFromDp(super.getContext(), GATE_SIZE * 3) > width)
+            if (START_X + UIHelper.pxFromDp(super.getContext(), 2) + UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 3) + gateNumber * UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 3) > width)
                 return false;
         }
         return true;
@@ -338,7 +337,7 @@ public class QuantumView extends View {
 
     public int getDisplayedQubits() {
         int count = 0;
-        for (int i = (int) START_Y; i < getLimit() && i <= pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
+        for (int i = (int) START_Y; i < getLimit() && i <= UIHelper.pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) UIHelper.pxFromDp(super.getContext(), STEP)) {
             count++;
         }
         return count;
@@ -346,8 +345,8 @@ public class QuantumView extends View {
 
     public int whichQubit(float posy) {
         int count = 0;
-        for (int i = (int) START_Y; i < getLimit() && i <= pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) pxFromDp(super.getContext(), STEP)) {
-            if (posy > i && posy < i + (int) pxFromDp(super.getContext(), STEP)) return count;
+        for (int i = (int) START_Y; i < getLimit() && i <= UIHelper.pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) UIHelper.pxFromDp(super.getContext(), STEP)) {
+            if (posy > i && posy < i + (int) UIHelper.pxFromDp(super.getContext(), STEP)) return count;
             count++;
         }
         return -1;
@@ -467,10 +466,6 @@ public class QuantumView extends View {
                 }
             }
         }
-    }
-
-    public static float pxFromDp(final Context context, final float dp) {
-        return dp * context.getResources().getDisplayMetrics().density;
     }
 
     public JSONObject exportGates(String name) {
@@ -610,7 +605,7 @@ public class QuantumView extends View {
             switch (d.getType()) {
                 case DELETE:
                     if (gos.size() > 0) {
-                        VisualOperator v = gos.removeLast();
+                        VisualOperator v = gos.remove(d.index);
                         for (int i = 0; i < v.getQubitIDs().length; i++) {
                             measuredQubits[v.getQubitIDs()[i]]--;
                         }

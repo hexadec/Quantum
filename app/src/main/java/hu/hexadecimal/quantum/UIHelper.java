@@ -192,8 +192,20 @@ public class UIHelper {
                                 tX[3].setVisibility(GONE);
                             default:
                         }
+                        {
+                            int qubits = prevOperator.getQubits();
+                            if (qubits > 1)
+                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
+                            ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(qubits == 1);
+                        }
                     }
                 } else {
+                    {
+                        int qubits = VisualOperator.findGateByName(gateAdapter.getItem(0)).getQubits();
+                        if (qubits > 1)
+                            ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
+                        ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(qubits == 1);
+                    }
                     int which = qv.whichQubit(posy);
                     qX[0].setProgress(which);
                     tX[0].setText("q" + (which + 1));
@@ -409,11 +421,13 @@ public class UIHelper {
                                     Log.e("Unknown error", "Gate name index is unacceptably large");
                                     gateName.setSelection(0);
                                 }
-
                                 int qubits = gateType.getSelectedItemPosition() == 0 ?
                                         VisualOperator.findGateByName(adapter.getItem(i)).getQubits() :
                                         gateType.getSelectedItemPosition() == 1 ?
                                                 operators.get(i).getQubits() : 1;
+                                if (qubits > 1)
+                                    ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
+                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(qubits == 1);
                                 switch (qubits) {
                                     case 4:
                                         qX[3].setVisibility(View.VISIBLE);
@@ -648,7 +662,7 @@ public class UIHelper {
         LinearLayout container = new LinearLayout(context);
         container.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        params.setMargins((int) QuantumView.pxFromDp(context, 20), 0, (int) QuantumView.pxFromDp(context, 20), 0);
+        params.setMargins((int) pxFromDp(context, 20), 0, (int) pxFromDp(context, 20), 0);
         EditText editText = new EditText(context);
         InputFilter[] filterArray = new InputFilter[]{new InputFilter.LengthFilter(32), (CharSequence source, int start, int end, Spanned dest, int sta, int en) -> {
             if (source != null && "/\\:?;!~\'\",^ˇ|+<>[]{}".contains(("" + source))) {
@@ -659,7 +673,7 @@ public class UIHelper {
         };
 
         LinearLayout.LayoutParams textViewParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        textViewParams.setMargins((int) QuantumView.pxFromDp(context, 23), (int) QuantumView.pxFromDp(context, 3), (int) QuantumView.pxFromDp(context, 23), 0);
+        textViewParams.setMargins((int) pxFromDp(context, 23), (int) pxFromDp(context, 3), (int) pxFromDp(context, 23), 0);
 
         if (export && qv.name.endsWith(QuantumView.FILE_EXTENSION)) {
             qv.name = qv.name.replace(QuantumView.FILE_EXTENSION, "");
@@ -695,5 +709,13 @@ public class UIHelper {
         } else {
             qv.clearScreen();
         }
+    }
+
+    public static float pxFromDp(final Context context, final float dp) {
+        return dp * context.getResources().getDisplayMetrics().density;
+    }
+
+    public static float dpFromPx(final Context context, final int px) {
+        return px / context.getResources().getDisplayMetrics().density;
     }
 }
