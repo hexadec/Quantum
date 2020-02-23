@@ -2,6 +2,7 @@ package hu.hexadecimal.quantum.graphics;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -15,6 +16,7 @@ public class GateView extends View {
 
     public final float UNIT;
     public final float PADDING;
+    public static final float PADDING_DP = 1.5f;
     public final int GATE_SIZE;
     public final VisualOperator visualOperator;
 
@@ -23,7 +25,7 @@ public class GateView extends View {
     public GateView(Context context, @NonNull VisualOperator v, int size) {
         super(context);
         UNIT = UIHelper.pxFromDp(super.getContext(), 1);
-        PADDING = UIHelper.pxFromDp(super.getContext(), 1);
+        PADDING = UIHelper.pxFromDp(super.getContext(), PADDING_DP);
         GATE_SIZE = size;
         visualOperator = v;
 
@@ -35,6 +37,8 @@ public class GateView extends View {
         otherPaint = new Paint();
         otherPaint.setStyle(Paint.Style.FILL);
         otherPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
+        otherPaint.setShadowLayer(UIHelper.pxFromDp(context, 1), UIHelper.pxFromDp(context, 0.5f), UIHelper.pxFromDp(context, 0.5f), Color.GRAY);
+        setLayerType(LAYER_TYPE_SOFTWARE, otherPaint);
 
         setMinimumWidth(minSize());
         setMinimumHeight(minSize());
@@ -50,8 +54,8 @@ public class GateView extends View {
         bounds.top = getHeight() / 2 - UIHelper.pxFromDp(super.getContext(), GATE_SIZE);
         RectF areaRect = new RectF(bounds.left,
                 bounds.top,
-                bounds.left + UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 2),
-                bounds.top + UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 2));
+                bounds.left + UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 2) - PADDING,
+                bounds.top + UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 2) - PADDING);
         String symbol = visualOperator.getSymbols()[visualOperator.getSymbols().length - 1];
         switch (symbol.length()) {
             case 1:
@@ -78,6 +82,6 @@ public class GateView extends View {
     }
 
     public int minSize() {
-        return (int) UIHelper.pxFromDp(getContext(), GATE_SIZE * 2 + PADDING);
+        return (int) UIHelper.pxFromDp(getContext(), GATE_SIZE * 2 + PADDING_DP);
     }
 }

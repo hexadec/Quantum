@@ -21,4 +21,8 @@
         <item name="android:background">?android:attr/dividerVertical</item>
     </style>
 
+    <style name="NavigationDrawerStyle" parent="AppTheme">
+        <item name="android:textSize">15sp</item>
+    </style>
+
 </resources>

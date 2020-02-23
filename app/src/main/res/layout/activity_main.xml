@@ -86,11 +86,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:elevation="0dp"
+                android:theme="@style/NavigationDrawerStyle"
                 app:elevation="0dp"
                 app:layout_constraintBottom_toTopOf="@id/gate_view_holder"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:menu="@menu/menu_main_drawer">
+                app:menu="@menu/menu_main_drawer"
+                app:itemIconTint="@color/nav_menu_icon_color"
+                app:itemTextColor="@color/nav_menu_item_color">
                 <!--
                 android:background="#333333"
                 app:itemIconTint="@color/nav_menu_item_color"

@@ -673,7 +673,9 @@ public class MainActivity extends AppCompatActivity {
             navigationView.removeHeaderView(navigationView.getHeaderView(0));
             navigationView.addHeaderView(v);
             if (gateHolder != null)
-                setUpShortcuts(gateHolder, PreferenceManager.getDefaultSharedPreferences(this), getResources().getDisplayMetrics(), newConfig, findViewById(R.id.nvParent).getWidth());
+                new Handler().postDelayed(() -> {
+                    setUpShortcuts(gateHolder, PreferenceManager.getDefaultSharedPreferences(this), getResources().getDisplayMetrics(), newConfig, findViewById(R.id.nvParent).getWidth());
+                }, 200);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -773,8 +775,9 @@ public class MainActivity extends AppCompatActivity {
         TableRow tr = new TableRow(MainActivity.this);
         int gwMargin = 3;
         float dpWidth = UIHelper.dpFromPx(MainActivity.this, navWidth);
+        if (dpWidth <= 0) dpWidth = 256;
         int margin = dpWidth > 270 ? dpWidth > 300 ? 15 : 10 : 5;
-        int gateWidth = (int) (dpWidth - gwMargin * 10 - 2 * (margin + 1)) / 10;
+        int gateWidth = (int) (dpWidth - gwMargin * 10 - 2 * (margin + 1) - GateView.PADDING_DP * 5) / 10;
         for (int i = 0; i < operators.size(); i++) {
             GateView gw = new GateView(MainActivity.this, operators.get(i), gateWidth);
             TableRow.LayoutParams params = new TableRow.LayoutParams(gw.minSize(), gw.minSize());
