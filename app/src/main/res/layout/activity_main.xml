@@ -94,10 +94,6 @@
                 app:menu="@menu/menu_main_drawer"
                 app:itemIconTint="@color/nav_menu_icon_color"
                 app:itemTextColor="@color/nav_menu_item_color">
-                <!--
-                android:background="#333333"
-                app:itemIconTint="@color/nav_menu_item_color"
-                app:itemTextColor="@color/nav_menu_item_color"-->
 
             </com.google.android.material.navigation.NavigationView>
 

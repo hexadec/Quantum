@@ -9,11 +9,11 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Build;
+import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import org.json.JSONObject;
@@ -40,6 +40,8 @@ public class QuantumView extends View {
 
     private LinkedList<VisualOperator> gos;
     private short[] measuredQubits;
+    private int[] highlight = new int[]{-1, -1};
+    private RectF hightlightRect;
     public boolean saved;
 
     public volatile boolean shouldStop;
@@ -227,6 +229,62 @@ public class QuantumView extends View {
             for (int j = 0; j < rectList.size(); j++) {
                 if (rectList.get(j).contains(posx, posy)) {
                     return gos.get(i);
+                }
+            }
+        }
+        return null;
+    }
+
+    public int[] getHighlight() {
+        return highlight;
+    }
+
+    public void highlightOperator(int[] gridPos) {
+        this.highlight = gridPos;
+        this.hightlightRect = getRectInGrid(gridPos);
+        invalidate();
+    }
+
+    public VisualOperator getGateInGrid(int[] gridPos) {
+        int qubit = gridPos[0];
+        int pos = gridPos[1];
+        int currentPos = 0;
+        if (qubit >= MAX_QUBITS || pos >= measuredQubits[qubit]) {
+            return null;
+        }
+        for (int i = 0; i < gos.size(); i++) {
+            VisualOperator op = gos.get(i);
+            int[] qubits = op.getQubitIDs();
+            for (int j = 0; j < qubits.length; j++) {
+                if (qubits[j] != qubit) {
+                    continue;
+                } else {
+                    if (currentPos++ == pos) {
+                        return op;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public RectF getRectInGrid(int[] gridPos) {
+        int qubit = gridPos[0];
+        int pos = gridPos[1];
+        int currentPos = 0;
+        if (qubit >= MAX_QUBITS || pos >= measuredQubits[qubit]) {
+            return null;
+        }
+        for (int i = 0; i < gos.size(); i++) {
+            VisualOperator op = gos.get(i);
+            int[] qubits = op.getQubitIDs();
+            for (int j = 0; j < qubits.length; j++) {
+                if (qubits[j] != qubit) {
+                    continue;
+                } else {
+                    if (currentPos++ == pos) {
+                        return op.getRect().get(j);
+                    }
                 }
             }
         }
@@ -652,9 +710,10 @@ public class QuantumView extends View {
     View.OnCreateContextMenuListener contextMenuListener = new View.OnCreateContextMenuListener() {
         @Override
         public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+            contextMenu.setHeaderTitle(getContext().getString(R.string.doable_edit_menu));
             try {
                 contextMenu.add(0, 0, 0,
-                        QuantumView.this.getContext().getString(R.string.undo) + " \"" + undoList.getLast().name + "\"")
+                        Html.fromHtml("<b>"+QuantumView.this.getContext().getString(R.string.undo) + "</b> " + undoList.getLast().name + ""))
                         .setOnMenuItemClickListener(menuItemClickListener);
             } catch (NoSuchElementException e) {
                 contextMenu.add(0, 0, 0, QuantumView.this.getContext().getString(R.string.undo));
@@ -663,7 +722,7 @@ public class QuantumView extends View {
 
             try {
                 contextMenu.add(1, 1, 1,
-                        QuantumView.this.getContext().getString(R.string.redo) + " \"" + redoList.getLast().name + "\"")
+                        Html.fromHtml("<b>"+QuantumView.this.getContext().getString(R.string.redo) + "</b> " + redoList.getLast().name + ""))
                         .setOnMenuItemClickListener(menuItemClickListener);
             } catch (NoSuchElementException e) {
                 contextMenu.add(1, 1, 1, QuantumView.this.getContext().getString(R.string.redo));

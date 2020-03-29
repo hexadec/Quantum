@@ -27,6 +27,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TableLayout;
@@ -65,6 +66,7 @@ import androidx.lifecycle.ViewModelProvider;
 import hu.hexadecimal.quantum.graphics.BlochSphereView;
 import hu.hexadecimal.quantum.graphics.ExecutionProgressDialog;
 import hu.hexadecimal.quantum.graphics.GateView;
+import hu.hexadecimal.quantum.graphics.GraphView;
 import hu.hexadecimal.quantum.graphics.QuantumView;
 import hu.hexadecimal.quantum.math.Complex;
 import hu.hexadecimal.quantum.math.Qubit;
@@ -222,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
                     AlertDialog.Builder adb = new AlertDialog.Builder(MainActivity.this);
                     adb.setCancelable(false);
                     adb.setPositiveButton("OK", null);
+                    adb.setNegativeButton(R.string.graph, null);
                     adb.setNeutralButton(R.string.export_csv, (DialogInterface dialogInterface, int i) -> {
                         try {
                             Uri uri = getContentResolver().getPersistedUriPermissions().get(0).getUri();
@@ -327,6 +330,15 @@ public class MainActivity extends AppCompatActivity {
                             progressDialog = null;
                             e.printStackTrace();
                         }
+                        ad.getButton(DialogInterface.BUTTON_NEGATIVE).setOnClickListener((View v) -> {
+                            View layout = getLayoutInflater().inflate(R.layout.graph_layout, null);
+                            int size = (int) Math.ceil(Math.pow(2, qv.getLastUsedQubit() + 1));
+                            ((GraphView) layout.findViewById(R.id.graphView)).setData(probabilities, size == 0 ? 2 : size);
+                            ((Button) layout.findViewById(R.id.closeButton)).setOnClickListener((View button) -> {
+                                ad.dismiss();
+                            });
+                            ad.setContentView(layout);
+                        });
                     });
                     ad.show();
                 });
