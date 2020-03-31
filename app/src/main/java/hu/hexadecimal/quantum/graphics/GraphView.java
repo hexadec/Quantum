@@ -20,8 +20,7 @@ public class GraphView extends View {
 
     protected float min, max, size;
     protected float[] positions, values;
-    protected Paint axisPaint, gridPaint, gridMarkerPaint, gridMarker2Paint, linePaint, labelPaint, labelMarkPaint, naPaint;
-    protected boolean guidingLinesEnabled = false;
+    protected Paint axisPaint, gridPaint, linePaint, labelPaint, rectPaint, naPaint;
     protected float START_X, START_Y, END_X, END_Y;
 
     public GraphView(Context context, AttributeSet attrs) {
@@ -73,8 +72,6 @@ public class GraphView extends View {
     }
 
     protected void setupView() {
-        guidingLinesEnabled = false;
-
         axisPaint = new Paint();
         axisPaint.setColor(Color.GRAY);
         axisPaint.setStyle(Paint.Style.STROKE);
@@ -87,33 +84,21 @@ public class GraphView extends View {
         gridPaint.setAntiAlias(true);
         gridPaint.setStrokeWidth(pxFromDp(getContext(), 0.7f));
 
-        gridMarkerPaint = new Paint();
-        gridMarkerPaint.setColor(0xffbbbbbb);
-        gridMarkerPaint.setStyle(Paint.Style.STROKE);
-        gridMarkerPaint.setAntiAlias(true);
-        gridMarkerPaint.setStrokeWidth(pxFromDp(getContext(), 1f));
-
-        gridMarker2Paint = new Paint();
-        gridMarker2Paint.setColor(0xffbbbbbb);
-        gridMarker2Paint.setStyle(Paint.Style.STROKE);
-        gridMarker2Paint.setAntiAlias(true);
-        gridMarker2Paint.setStrokeWidth(pxFromDp(getContext(), 1.3f));
-
         linePaint = new Paint();
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setColor(Color.RED);
         linePaint.setAntiAlias(true);
         linePaint.setStrokeWidth(pxFromDp(getContext(), 1f));
 
+        rectPaint = new Paint();
+        rectPaint.setStyle(Paint.Style.FILL);
+        rectPaint.setColor(Color.BLUE);
+        rectPaint.setAntiAlias(true);
+
         labelPaint = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
         labelPaint.setTypeface(Typeface.MONOSPACE);
         labelPaint.setColor(Color.DKGRAY);
         labelPaint.setTextSize(pxFromDp(getContext(), 10));
-
-        labelMarkPaint = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
-        labelMarkPaint.setTypeface((Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)));
-        labelMarkPaint.setColor(Color.DKGRAY);
-        labelMarkPaint.setTextSize(pxFromDp(getContext(), 10));
 
         naPaint = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
         naPaint.setColor(Color.DKGRAY);
@@ -124,10 +109,11 @@ public class GraphView extends View {
 
     protected void setupPadding() {
         float niceNumber = new BigDecimal((max - min) / 10).round(new MathContext(1, RoundingMode.HALF_UP)).floatValue();
-        START_X = labelPaint.measureText(formatNumber(niceNumber)) + pxFromDp(getContext(), 2);
+        String text = String.format("%" + Math.round(Math.log(size == 0 ? 8 : size) / Math.log(2)) + "s", Integer.toBinaryString(5)).replace(' ', '0');
+        START_X = labelPaint.measureText(formatNumber(niceNumber)) + pxFromDp(getContext(), 4);
         START_Y = pxFromDp(getContext(), 10);
         END_X = getWidth() - pxFromDp(getContext(), 10);
-        END_Y = getHeight() - pxFromDp(getContext(), 15);
+        END_Y = getHeight() - labelPaint.measureText(text) - pxFromDp(getContext(), 5);
     }
 
     @Override
@@ -137,7 +123,7 @@ public class GraphView extends View {
 
         setupPadding();
 
-        if (values == null || values.length == 0) {
+        if (values == null || values.length == 0 || size == 0) {
             drawAxes(canvas);
             canvas.drawText("N/A", (getWidth() - naPaint.measureText("N/A")) / 2, (getHeight() - naPaint.ascent()) / 2, naPaint);
             return;
@@ -148,35 +134,46 @@ public class GraphView extends View {
         float astroke2 = axisPaint.getStrokeWidth() / 2f;
         float width = END_X - START_X - astroke2;
         float height = END_Y - START_Y - astroke2;
-        //Step size for larger data sets
-        final int step = 1;
-        for (int i = 0; i < size - step; i += step) {
-            final float current = values[i];
-            final float next = values[i + step];
-            positions[4 * i + 1] = height + START_Y - ((current - min) / (max - min)) * (height * 1f);
-            positions[4 * i] = size - 1 == 0 ? 0 : (START_X + astroke2 + (i * 1f) / (size - 1) * (width * 1f));
-            positions[4 * i + 3] = height + START_Y - ((next - min) / (max - min)) * (height * 1f);
-            positions[4 * i + 2] = (START_X + astroke2 + (i + step * 1f) / (size - 1) * (width * 1f));
-        }
 
-        drawTimeGuidingLines(canvas, width);
+        drawStateGuidingLines(canvas, width);
         drawDataGuidingLines(canvas, height);
-        canvas.drawLines(positions, linePaint);
+
+        //Step size
+        final int step = 1;
+        if (size >= 32 /*2^5*/) {
+            for (int i = 0; i < size - step; i += step) {
+                final float current = values[i];
+                final float next = values[i + step];
+                positions[4 * i + 1] = height + START_Y - ((current - min) / (max - min)) * (height * 1f);
+                positions[4 * i] = size - 1 == 0 ? 0 : (START_X + astroke2 + (i * 1f) / (size - 1) * (width * 1f));
+                positions[4 * i + 3] = height + START_Y - ((next - min) / (max - min)) * (height * 1f);
+                positions[4 * i + 2] = (START_X + astroke2 + (i + step * 1f) / (size - 1) * (width * 1f));
+            }
+            canvas.drawLines(positions, linePaint);
+        } else {
+            float avWidth = width / size;
+            for (int j = 0; j < size; j++) {
+                String text = String.format("%" + Math.round(Math.log(size) / Math.log(2)) + "s", Integer.toBinaryString(j)).replace(' ', '0');
+                final float current = values[j];
+                float t = height + START_Y - ((current - min) / (max - min)) * (height * 1f);
+                float w = avWidth / 1.2f;
+                float l = START_X + astroke2 + avWidth * j + (avWidth - w) / 2;
+                float r = l + w;
+                canvas.drawRect(l, t, r, height + START_Y, rectPaint);
+                canvas.save();
+                canvas.rotate(-90, (l + r) / 2, getHeight());
+                canvas.drawText(text, (l + r) / 2, getHeight() + pxFromDp(getContext(), 2), labelPaint);
+                canvas.restore();
+            }
+        }
     }
 
     public void drawAxes(Canvas canvas) {
-        float step = pxFromDp(getContext(), 15);
-        if (guidingLinesEnabled) {
-            for (float i = START_X + step; i <= END_X; i += step)
-                canvas.drawLine(i, START_Y, i, END_Y, gridPaint);
-            for (float i = END_Y - step; i >= START_Y; i -= step)
-                canvas.drawLine(START_X, i, END_X, i, gridPaint);
-        }
         canvas.drawLine(START_X, END_Y, END_X, END_Y, axisPaint);
         canvas.drawLine(START_X, START_Y, START_X, END_Y, axisPaint);
     }
 
-    public void drawTimeGuidingLines(Canvas canvas, float width) {
+    public void drawStateGuidingLines(Canvas canvas, float width) {
         //This method is responsible for printing out vertical lines marking some values
 
     }
@@ -234,11 +231,6 @@ public class GraphView extends View {
         linePaint.setColor(lineColor);
         labelPaint.setColor(labelColor);
         gridPaint.setColor(guidingLineColor);
-        invalidate();
-    }
-
-    public void setGuidingLinesEnabled(boolean guidingLinesEnabled) {
-        this.guidingLinesEnabled = guidingLinesEnabled;
         invalidate();
     }
 
