@@ -60,6 +60,11 @@ A software for Android that emulates the actions of a quantum computer
 | Ctrl+&larr; |  Scroll left
 | Ctrl+&uarr; |  Scroll up
 | Ctrl+&darr; |  Scroll down
+| W |  Go up
+| A |  Go left
+| S |  Go down
+| D |  Go right
+| E |  Edit selected
 
 ###### Planned features
 Create and run algorithms with loops and conditions  

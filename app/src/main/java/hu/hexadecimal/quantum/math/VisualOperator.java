@@ -14,9 +14,13 @@ import java.util.Random;
 
 import androidx.annotation.NonNull;
 
+/**
+ * Class used to represent a Linear Operator for quantum systems, and as such
+ * it has some related limitations and additional features to a mathematical linear operator
+ */
 public class VisualOperator {
 
-    public static final long helpVersion = 39L;
+    public static final long helpVersion = 40L;
     private Complex[][] matrix;
     //last one is to clarify meaning for navbar, so length is +1 to qubits
     private String[] symbols;

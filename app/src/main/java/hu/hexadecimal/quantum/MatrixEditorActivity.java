@@ -48,6 +48,9 @@ import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+/**
+ * Activity used to edit and store user defined VisualOperators
+ */
 public class MatrixEditorActivity extends AppCompatActivity {
 
     RecyclerViewAdapter adapter;

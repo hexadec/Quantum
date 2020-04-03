@@ -11,6 +11,9 @@ import android.util.Log;
 import android.view.Window;
 import androidx.documentfile.provider.DocumentFile;
 
+/**
+ * Activity used to view and edit current settings
+ */
 public class PreferenceActivity extends android.preference.PreferenceActivity {
 
     Uri treeUri;

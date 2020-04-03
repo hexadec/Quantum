@@ -24,6 +24,9 @@ import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Class displaying the help message
+ */
 public class HelpActivity extends AppCompatActivity {
 
     WebView webView;

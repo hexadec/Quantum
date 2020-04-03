@@ -12,6 +12,9 @@ import hu.hexadecimal.quantum.R;
 import hu.hexadecimal.quantum.math.VisualOperator;
 import hu.hexadecimal.quantum.math.Qubit;
 
+/**
+ * View displaying the Bloch sphere with the state of a selected qubit
+ */
 public class BlochSphereView extends View {
 
     final Paint mPaint, otherPaint, textPaint, textPaintW;

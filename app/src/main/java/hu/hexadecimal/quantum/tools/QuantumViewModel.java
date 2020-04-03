@@ -5,6 +5,9 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+/**
+ * Needed to keep the QuantumView state after a configuration change
+ */
 public class QuantumViewModel extends ViewModel {
     private MutableLiveData<QuantumViewData> mutableLiveData;
 

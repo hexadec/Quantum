@@ -8,6 +8,9 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.TextView;
 
+/**
+ * Preference used to display a long multiline text
+ */
 public class BigPreference extends Preference {
     public BigPreference(Context context) {
         super(context);

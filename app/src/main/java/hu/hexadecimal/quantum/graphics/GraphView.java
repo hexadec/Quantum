@@ -16,6 +16,9 @@ import java.text.DecimalFormat;
 
 import androidx.annotation.NonNull;
 
+/**
+ * A view used to display the probabilities/results as a graph
+ */
 public class GraphView extends View {
 
     protected float min, max, size;

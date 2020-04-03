@@ -4,6 +4,10 @@ import java.util.LinkedList;
 
 import hu.hexadecimal.quantum.math.VisualOperator;
 
+/**
+ * Class used to hold the changing properties of a QuantumView while a configuration change is occurring
+ * TODO use it to store these data at all times
+ */
 public class QuantumViewData {
 
     public LinkedList<Doable> undoList;

@@ -4,6 +4,9 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+/**
+ * Class representing a complex number (hopefully perfectly)
+ */
 public class Complex {
 
     public double real = 0;

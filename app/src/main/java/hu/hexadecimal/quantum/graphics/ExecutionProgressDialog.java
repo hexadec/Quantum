@@ -15,6 +15,10 @@ import java.util.Locale;
 import hu.hexadecimal.quantum.R;
 import hu.hexadecimal.quantum.UIHelper;
 
+/**
+ * A dialog which is shown while the application is executing the circuit
+ * As the name suggests, it shows the progress in the meantime
+ */
 public class ExecutionProgressDialog extends AlertDialog {
 
     private ProgressBar progressBar;

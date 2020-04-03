@@ -5,6 +5,9 @@ import android.content.Context;
 import hu.hexadecimal.quantum.R;
 import hu.hexadecimal.quantum.math.VisualOperator;
 
+/**
+ * An action that can either be done or undone
+ */
 public class Doable {
 
     VisualOperator visualOperator;

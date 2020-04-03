@@ -4,6 +4,10 @@ import android.util.Log;
 
 import java.util.Random;
 
+/**
+ * Class representing a qubit
+ * Basically worthless without VisualOperator(s)
+ */
 public class Qubit {
 
     public Complex[] matrix;

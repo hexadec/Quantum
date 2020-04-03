@@ -11,6 +11,9 @@ import hu.hexadecimal.quantum.math.Complex;
 import hu.hexadecimal.quantum.math.Qubit;
 import hu.hexadecimal.quantum.math.VisualOperator;
 
+/**
+ * Class responsible for running the circuits
+ */
 public class ExperimentRunner {
     private final LinkedList<VisualOperator> v;
     private final QuantumView quantumView;

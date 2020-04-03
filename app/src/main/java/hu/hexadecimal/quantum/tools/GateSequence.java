@@ -9,6 +9,10 @@ import java.util.LinkedList;
 
 import hu.hexadecimal.quantum.math.VisualOperator;
 
+/**
+ * Class used to save and load a quantum circuit to and from storage
+ * @param <T> ALWAYS has to be a VisualOperator
+ */
 public class GateSequence<T> extends LinkedList {
 
     final String name;

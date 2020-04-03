@@ -14,6 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import hu.hexadecimal.quantum.R;
 import hu.hexadecimal.quantum.math.VisualOperator;
 
+/**
+ * Used in the gate editor to display the gates
+ */
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
     private final List<VisualOperator> operators;

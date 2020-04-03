@@ -12,6 +12,9 @@ import androidx.annotation.NonNull;
 import hu.hexadecimal.quantum.UIHelper;
 import hu.hexadecimal.quantum.math.VisualOperator;
 
+/**
+ * A view used to display the gate shortcuts on the navigation bar
+ */
 public class GateView extends View {
 
     public final float UNIT;

@@ -50,6 +50,9 @@ import hu.hexadecimal.quantum.math.VisualOperator;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+/**
+ * Helper class containing a lot of methods responsible for user interaction
+ */
 public class UIHelper {
 
     private static final double[] importantAngles = new double[]{0, Math.PI / 8, Math.PI / 6, Math.PI / 5, Math.PI / 4, Math.PI / 3, Math.PI / 8 * 3, Math.PI / 5 * 2, Math.PI / 2, Math.PI / 3 * 2, Math.PI / 4 * 3, Math.PI};

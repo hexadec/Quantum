@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -77,6 +78,10 @@ import hu.hexadecimal.quantum.tools.QuantumViewModel;
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
+/**
+ * Main screen of the app
+ * Let's say it's responsible for almost everything (no)
+ */
 public class MainActivity extends AppCompatActivity {
 
     QuantumView qv;
@@ -115,8 +120,6 @@ public class MainActivity extends AppCompatActivity {
         qv.saved = true;
         qv.setLongClickable(true);
 
-        VisualOperator.S_GATE.getAngles();
-
         FloatingActionButton fab = findViewById(R.id.fab_main);
         FloatingActionButton execute = findViewById(R.id.fab_matrix);
 
@@ -145,6 +148,7 @@ public class MainActivity extends AppCompatActivity {
                 float ry = e.getRawY();
                 int[] loc = new int[2];
                 execute.getLocationOnScreen(loc);
+                qv.highlightOperator(new int[]{-1, -1});
                 if (loc[0] < rx && loc[1] < ry) return false;
                 showAddGateDialog(x, y, null);
                 return true;
@@ -767,6 +771,28 @@ public class MainActivity extends AppCompatActivity {
         } else if (keyCode == KeyEvent.KEYCODE_PAGE_DOWN) {
             //SCROLL DOWN A LOT
             findViewById(R.id.tallScrollView).scrollBy(0, (int) UIHelper.pxFromDp(this, 300));
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_W) {
+            //MOVE SELECTION UP
+            qv.moveHighlight(0);
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_A) {
+            //MOVE SELECTION LEFT
+            qv.moveHighlight(1);
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_S) {
+            //MOVE SELECTION DOWN
+            qv.moveHighlight(2);
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_D) {
+            //MOVE SELECTION RIGHT
+            qv.moveHighlight(3);
+            return true;
+        } else if (keyCode == KeyEvent.KEYCODE_E) {
+            //OPEN SELECTION
+            RectF rect = qv.getRectInGrid(qv.getHighlight());
+            if (rect != null)
+                showAddGateDialog(rect.centerX(), rect.centerY(), null);
             return true;
         }
         return super.onKeyUp(keyCode, event);

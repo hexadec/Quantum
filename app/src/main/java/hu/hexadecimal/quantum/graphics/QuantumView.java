@@ -11,6 +11,7 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.text.Html;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -32,16 +33,20 @@ import hu.hexadecimal.quantum.tools.GateSequence;
 import hu.hexadecimal.quantum.math.VisualOperator;
 import hu.hexadecimal.quantum.tools.QuantumViewData;
 
+/**
+ * Main view of the application
+ * The user can place/edit gates in this view and execute the circuit displayed
+ */
 public class QuantumView extends View {
 
-    final Paint mPaint, otherPaint, mTextPaint, whiteTextPaint;
+    final Paint mPaint, otherPaint, mTextPaint, whiteTextPaint, hlPaint;
     final int mPadding;
     final Path mPath;
 
     private LinkedList<VisualOperator> gos;
     private short[] measuredQubits;
     private int[] highlight = new int[]{-1, -1};
-    private RectF hightlightRect;
+    private RectF highlightRect;
     public boolean saved;
 
     public volatile boolean shouldStop;
@@ -85,10 +90,15 @@ public class QuantumView extends View {
 
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
-
         mPaint.setStyle(Paint.Style.STROKE);
         mPaint.setColor(Color.BLUE);
         mPaint.setStrokeWidth(UIHelper.pxFromDp(context, 2.5f));
+
+        hlPaint = new Paint();
+        hlPaint.setAntiAlias(true);
+        hlPaint.setStyle(Paint.Style.STROKE);
+        hlPaint.setColor(Color.BLUE);
+        hlPaint.setStrokeWidth(UIHelper.pxFromDp(context, 1.5f));
 
         measuredQubits = new short[MAX_QUBITS];
 
@@ -187,14 +197,33 @@ public class QuantumView extends View {
                 bounds.left += (areaRect.width() - bounds.right) / 2.0f;
                 bounds.top += (areaRect.height() - bounds.bottom) / 2.0f;
 
+                boolean isHighlighted = highlightRect != null && highlightRect.contains(areaRect);
                 if (symbol.equals(VisualOperator.CNOT.getSymbols()[0])) {
                     float minus = UIHelper.pxFromDp(getContext(), 6f);
                     canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus, otherPaint);
+                    if (isHighlighted) {
+                        int color = ((otherPaint.getColor() & 0xff000000) | ((int) (((otherPaint.getColor() & 0xff0000) >> 16) * 0.6) << 16) | ((int) (((otherPaint.getColor() & 0xff00) >> 8) * 0.6) << 8) | ((int) ((otherPaint.getColor() & 0xff) * 0.6)));
+                        hlPaint.setColor(color);
+                        canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus + hlPaint.getStrokeWidth(), hlPaint);
+                    }
                 } else if (symbol.equals(VisualOperator.CNOT.getSymbols()[1]) || symbol.equals("⊕")) {
                     float minus = UIHelper.pxFromDp(getContext(), -1.5f);
                     canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus, otherPaint);
+                    if (isHighlighted) {
+                        int color = ((otherPaint.getColor() & 0xff000000) | ((int) (((otherPaint.getColor() & 0xff0000) >> 16) * 0.6) << 16) | ((int) (((otherPaint.getColor() & 0xff00) >> 8) * 0.6) << 8) | ((int) ((otherPaint.getColor() & 0xff) * 0.6)));
+                        hlPaint.setColor(color);
+                        canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus + hlPaint.getStrokeWidth(), hlPaint);
+                    }
                 } else {
                     canvas.drawRect(areaRect, otherPaint);
+                    if (isHighlighted) {
+                        int color = ((otherPaint.getColor() & 0xff000000) | ((int) (((otherPaint.getColor() & 0xff0000) >> 16) * 0.6) << 16) | ((int) (((otherPaint.getColor() & 0xff00) >> 8) * 0.6) << 8) | ((int) ((otherPaint.getColor() & 0xff) * 0.6)));
+                        hlPaint.setColor(color);
+                        canvas.drawRect(areaRect.centerX() - areaRect.width() / 2 - hlPaint.getStrokeWidth(),
+                                areaRect.centerY() - areaRect.height() / 2 - hlPaint.getStrokeWidth(),
+                                areaRect.centerX() + areaRect.width() / 2 + hlPaint.getStrokeWidth(),
+                                areaRect.centerY() + areaRect.height() / 2 + hlPaint.getStrokeWidth(), hlPaint);
+                    }
                 }
                 if (j != 0) {
                     mPaint.setColor(v.getColor());
@@ -241,8 +270,51 @@ public class QuantumView extends View {
 
     public void highlightOperator(int[] gridPos) {
         this.highlight = gridPos;
-        this.hightlightRect = getRectInGrid(gridPos);
+        this.highlightRect = getRectInGrid(gridPos);
         invalidate();
+    }
+
+    public void moveHighlight(int where) {
+        if (highlight[0] < 0 || highlight[1] < 0) {
+            highlightOperator(new int[]{0, 0});
+            return;
+        }
+        switch (where) {
+            case 0:
+                //UP
+                if (highlight[0] == 0)
+                    return;
+                else if (measuredQubits[highlight[0] - 1] == 0) {
+                    highlight[0]--;
+                    moveHighlight(0);
+                    return;
+                }
+                highlightOperator(new int[]{--highlight[0], highlight[1] > measuredQubits[highlight[0]] - 1 ? measuredQubits[highlight[0]] - 1 : highlight[1]});
+                break;
+            case 2:
+                //DOWN
+                if (highlight[0] == getLastUsedQubit())
+                    return;
+                else if (measuredQubits[highlight[0] + 1] == 0) {
+                    highlight[0]++;
+                    moveHighlight(2);
+                    return;
+                }
+                highlightOperator(new int[]{++highlight[0], highlight[1] > measuredQubits[highlight[0]] - 1 ? measuredQubits[highlight[0]] - 1 : highlight[1]});
+                break;
+            case 1:
+                //LEFT
+                if (highlight[1] == 0)
+                    return;
+                highlightOperator(new int[]{highlight[0], --highlight[1]});
+                break;
+            case 3:
+                //RIGHT
+                if (highlight[1] == measuredQubits[highlight[0]] - 1)
+                    return;
+                highlightOperator(new int[]{highlight[0], ++highlight[1]});
+                break;
+        }
     }
 
     public VisualOperator getGateInGrid(int[] gridPos) {
@@ -272,7 +344,7 @@ public class QuantumView extends View {
         int qubit = gridPos[0];
         int pos = gridPos[1];
         int currentPos = 0;
-        if (qubit >= MAX_QUBITS || pos >= measuredQubits[qubit]) {
+        if (qubit > MAX_QUBITS || qubit < 0 || pos >= measuredQubits[qubit]) {
             return null;
         }
         for (int i = 0; i < gos.size(); i++) {
@@ -317,6 +389,9 @@ public class QuantumView extends View {
                         gos.add(i, visualOperator);
                         undoList.addLast(new Doable(visualOperator, DoableType.EDIT, getContext(), i, old));
                         redoList.clear();
+                        if (getRectInGrid(highlight) == null) {
+                            moveHighlight(0);
+                        }
                         invalidate();
                         saved = false;
                         return true;
@@ -325,6 +400,9 @@ public class QuantumView extends View {
             }
             gos.addLast(visualOperator);
             undoList.addLast(new Doable(visualOperator, DoableType.ADD, getContext()));
+            if (getRectInGrid(highlight) == null) {
+                moveHighlight(0);
+            }
             invalidate();
             return false;
         }
@@ -340,6 +418,9 @@ public class QuantumView extends View {
                     }
                     undoList.addLast(new Doable(gos.remove(i), DoableType.DELETE, getContext(), i, null));
                     redoList.clear();
+                    if (getRectInGrid(highlight) == null) {
+                        moveHighlight(0);
+                    }
                     invalidate();
                     saved = false;
                     return true;
@@ -404,7 +485,8 @@ public class QuantumView extends View {
     public int whichQubit(float posy) {
         int count = 0;
         for (int i = (int) START_Y; i < getLimit() && i <= UIHelper.pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) UIHelper.pxFromDp(super.getContext(), STEP)) {
-            if (posy > i && posy < i + (int) UIHelper.pxFromDp(super.getContext(), STEP)) return count;
+            if (posy > i && posy < i + (int) UIHelper.pxFromDp(super.getContext(), STEP))
+                return count;
             count++;
         }
         return -1;
@@ -713,7 +795,7 @@ public class QuantumView extends View {
             contextMenu.setHeaderTitle(getContext().getString(R.string.doable_edit_menu));
             try {
                 contextMenu.add(0, 0, 0,
-                        Html.fromHtml("<b>"+QuantumView.this.getContext().getString(R.string.undo) + "</b> " + undoList.getLast().name + ""))
+                        Html.fromHtml("<b>" + QuantumView.this.getContext().getString(R.string.undo) + "</b> " + undoList.getLast().name + ""))
                         .setOnMenuItemClickListener(menuItemClickListener);
             } catch (NoSuchElementException e) {
                 contextMenu.add(0, 0, 0, QuantumView.this.getContext().getString(R.string.undo));
@@ -722,7 +804,7 @@ public class QuantumView extends View {
 
             try {
                 contextMenu.add(1, 1, 1,
-                        Html.fromHtml("<b>"+QuantumView.this.getContext().getString(R.string.redo) + "</b> " + redoList.getLast().name + ""))
+                        Html.fromHtml("<b>" + QuantumView.this.getContext().getString(R.string.redo) + "</b> " + redoList.getLast().name + ""))
                         .setOnMenuItemClickListener(menuItemClickListener);
             } catch (NoSuchElementException e) {
                 contextMenu.add(1, 1, 1, QuantumView.this.getContext().getString(R.string.redo));

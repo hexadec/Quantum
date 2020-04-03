@@ -10,11 +10,12 @@ import android.view.View;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+/**
+ * Necessary for showing delete action in gate editor
+ */
 public class ContextMenuRecyclerView extends RecyclerView {
 
     private RecyclerContextMenuInfo mContextMenuInfo;
-
-
 
     public ContextMenuRecyclerView(Context context) {
         super(context);
