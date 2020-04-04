@@ -111,4 +111,5 @@
     <string name="title_export">Export circuit</string>
     <string name="graph">Graph</string>
     <string name="close">Close</string>
+    <string name="invalid_gate_short">Invalid</string>
 </resources>

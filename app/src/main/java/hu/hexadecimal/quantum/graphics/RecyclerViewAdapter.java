@@ -41,8 +41,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         VisualOperator operator = operators.get(position);
-        holder.gateName.setText(operator.getName());
-        holder.color.setBackgroundColor(operator.getColor());
+        if (!operator.isSpecial() || ! operator.isUnitary()) {
+            holder.gateName.setText(operator.getName() + ": " + holder.gateName.getContext().getString(R.string.invalid_gate_short));
+            holder.itemView.setBackgroundColor(0xffff8888);
+            holder.color.setBackgroundColor(0xffff8888);
+            holder.gateMatrix.setBackgroundColor(0xffff8888);
+        } else {
+            holder.gateName.setText(operator.getName());
+            holder.color.setBackgroundColor(operator.getColor());
+        }
         StringBuilder symbol = new StringBuilder();
         for (int i = 0; i < operator.getSymbols().length; i++) {
             if (i != 0) symbol.append('\u2003');

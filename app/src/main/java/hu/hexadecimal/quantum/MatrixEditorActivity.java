@@ -462,22 +462,29 @@ public class MatrixEditorActivity extends AppCompatActivity {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View view, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, view, menuInfo);
-        menu.add(Menu.NONE, view.getId(), Menu.NONE, getString(R.string.delete_gate));
+        menu.add(2, view.getId(), Menu.NONE, getString(R.string.delete_gate));
+        menu.add(3, view.getId(), Menu.NONE, getString(R.string.edit_gate));
     }
 
     @Override
     public boolean onContextItemSelected(MenuItem item) {
         ContextMenuRecyclerView.RecyclerContextMenuInfo info = (ContextMenuRecyclerView.RecyclerContextMenuInfo) item.getMenuInfo();
         VisualOperator vo = operators.get(info.position);
-        String name = vo.getName();
-        for (String s : FILENAME_RESERVED_CHARS)
-            name = name.replace(s, "_");
-        try {
-            DocumentFile gate = pickedDir.findFile(name + VisualOperator.FILE_EXTENSION);
-            gate.delete();
-            recreate();
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (item.getGroupId() == 2) {
+            String name = vo.getName();
+            for (String s : FILENAME_RESERVED_CHARS)
+                name = name.replace(s, "_");
+            try {
+                DocumentFile gate = pickedDir.findFile(name + VisualOperator.FILE_EXTENSION);
+                gate.delete();
+                recreate();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return true;
+        } else if (item.getGroupId() == 3) {
+            displayGateEditorDialog(operators, vo);
+            return true;
         }
         return false;
     }

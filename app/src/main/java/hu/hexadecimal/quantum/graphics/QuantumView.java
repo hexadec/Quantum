@@ -197,32 +197,29 @@ public class QuantumView extends View {
                 bounds.left += (areaRect.width() - bounds.right) / 2.0f;
                 bounds.top += (areaRect.height() - bounds.bottom) / 2.0f;
 
+                int hlColor = ((otherPaint.getColor() & 0xff000000) | ((int) (((otherPaint.getColor() & 0xff0000) >> 16) * 0.8) << 16) | ((int) (((otherPaint.getColor() & 0xff00) >> 8) * 0.8) << 8) | ((int) ((otherPaint.getColor() & 0xff) * 0.8)));
+                hlPaint.setColor(hlColor);
                 boolean isHighlighted = highlightRect != null && highlightRect.contains(areaRect);
+
                 if (symbol.equals(VisualOperator.CNOT.getSymbols()[0])) {
                     float minus = UIHelper.pxFromDp(getContext(), 6f);
                     canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus, otherPaint);
                     if (isHighlighted) {
-                        int color = ((otherPaint.getColor() & 0xff000000) | ((int) (((otherPaint.getColor() & 0xff0000) >> 16) * 0.6) << 16) | ((int) (((otherPaint.getColor() & 0xff00) >> 8) * 0.6) << 8) | ((int) ((otherPaint.getColor() & 0xff) * 0.6)));
-                        hlPaint.setColor(color);
                         canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus + hlPaint.getStrokeWidth(), hlPaint);
                     }
                 } else if (symbol.equals(VisualOperator.CNOT.getSymbols()[1]) || symbol.equals("⊕")) {
                     float minus = UIHelper.pxFromDp(getContext(), -1.5f);
                     canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus, otherPaint);
                     if (isHighlighted) {
-                        int color = ((otherPaint.getColor() & 0xff000000) | ((int) (((otherPaint.getColor() & 0xff0000) >> 16) * 0.6) << 16) | ((int) (((otherPaint.getColor() & 0xff00) >> 8) * 0.6) << 8) | ((int) ((otherPaint.getColor() & 0xff) * 0.6)));
-                        hlPaint.setColor(color);
                         canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus + hlPaint.getStrokeWidth(), hlPaint);
                     }
                 } else {
                     canvas.drawRect(areaRect, otherPaint);
                     if (isHighlighted) {
-                        int color = ((otherPaint.getColor() & 0xff000000) | ((int) (((otherPaint.getColor() & 0xff0000) >> 16) * 0.6) << 16) | ((int) (((otherPaint.getColor() & 0xff00) >> 8) * 0.6) << 8) | ((int) ((otherPaint.getColor() & 0xff) * 0.6)));
-                        hlPaint.setColor(color);
-                        canvas.drawRect(areaRect.centerX() - areaRect.width() / 2 - hlPaint.getStrokeWidth(),
-                                areaRect.centerY() - areaRect.height() / 2 - hlPaint.getStrokeWidth(),
-                                areaRect.centerX() + areaRect.width() / 2 + hlPaint.getStrokeWidth(),
-                                areaRect.centerY() + areaRect.height() / 2 + hlPaint.getStrokeWidth(), hlPaint);
+                        canvas.drawRect(areaRect.left - hlPaint.getStrokeWidth(),
+                                areaRect.top - hlPaint.getStrokeWidth(),
+                                areaRect.right + hlPaint.getStrokeWidth(),
+                                areaRect.bottom + hlPaint.getStrokeWidth(), hlPaint);
                     }
                 }
                 if (j != 0) {
