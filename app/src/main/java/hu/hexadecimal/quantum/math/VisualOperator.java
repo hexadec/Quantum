@@ -261,7 +261,7 @@ public class VisualOperator {
         rectangle = new LinkedList<>();
         color = 0xffDEAC38;
         symbols = new String[]{"R" + (theta == 0 ? "" : "\u03B8") + (phi == 0 ? "" : "\u03C6")};
-        name = "CustRot";
+        name = "Custom Rotation";
         this.theta = theta;
         this.phi = phi;
         lambda = NULL_ANGLE;
@@ -281,6 +281,39 @@ public class VisualOperator {
         this.theta = theta;
         this.phi = phi;
         this.lambda = lambda;
+    }
+
+    public VisualOperator(int omega, int qubits) {
+        if (qubits < 2 || qubits > 4) {
+            throw new IllegalArgumentException("Invalid value for qubits: " + qubits);
+        }
+        MATRIX_DIM = (int) Math.round(Math.pow(2, qubits));
+        if (omega < 0 || omega >= MATRIX_DIM) {
+            throw new IllegalArgumentException("Invalid value for omega: " + omega + " qubits:" + qubits);
+        }
+        name = "QFT";
+        qubit_ids = new int[NQBITS = qubits];
+        rectangle = new LinkedList<>();
+        color = 0xffbce500;
+        this.lambda = omega;
+        this.theta = NULL_ANGLE;
+        this.phi = NULL_ANGLE;
+        Complex complexOmega = new Complex(Math.PI * 2 / MATRIX_DIM * omega);
+        if (qubits == 2) {
+            matrix = new Complex[][]{
+                    new Complex[]{new Complex(1), new Complex(1), new Complex(1), new Complex(1)},
+                    new Complex[]{new Complex(1), complexOmega, Complex.exponent(complexOmega, new Complex(2)), Complex.exponent(complexOmega, new Complex(3))},
+                    new Complex[]{new Complex(1), Complex.exponent(complexOmega, new Complex(2)), new Complex(1), Complex.exponent(complexOmega, new Complex(2))},
+                    new Complex[]{new Complex(1), Complex.exponent(complexOmega, new Complex(3)), Complex.exponent(complexOmega, new Complex(2)), complexOmega}};
+        } else {
+            matrix = generateQFTMatrix(complexOmega);
+        }
+        symbols = new String[qubits + 1];
+        for (int i = 1; i <= qubits; i++) {
+            symbols[i - 1] = "QF" + i;
+        }
+        symbols[qubits] = "QFT";
+        this.multiply(new Complex(1 / Math.sqrt(MATRIX_DIM), 0));
     }
 
     public String[] getSymbols() {
@@ -377,11 +410,22 @@ public class VisualOperator {
     }
 
     public boolean isRotation() {
-        return lambda == NULL_ANGLE && theta != NULL_ANGLE && phi != NULL_ANGLE && !isMultiQubit() && name.equals("CustRot");
+        return lambda == NULL_ANGLE && theta != NULL_ANGLE && phi != NULL_ANGLE && !isMultiQubit() && (name.equals("CustRot") || name.equals("Custom Rotation"));
     }
 
     public boolean isU3() {
         return lambda != NULL_ANGLE && theta != NULL_ANGLE && phi != NULL_ANGLE && !isMultiQubit() && name.equals("U3");
+    }
+
+    public boolean isQFT() {
+        return lambda != NULL_ANGLE && theta == NULL_ANGLE && phi == NULL_ANGLE && isMultiQubit() && name.equals("QFT");
+    }
+
+    public double getOmega() {
+        if (isQFT())
+            return lambda;
+        else
+            throw new UnsupportedOperationException("Non-QFT operator does not have omega parameter");
     }
 
     public double[] getAngles() {
@@ -627,17 +671,12 @@ public class VisualOperator {
     private static Complex[][] getQubitTensor(int qubits, VisualOperator v) {
         if (v.getQubitIDs().length != v.getQubits() || v.getQubits() < 1) return null;
         if (v.getQubits() == 1) return getSingleQubitTensor(qubits, v.getQubitIDs()[0], v);
-        if (v.getQubits() == qubits) return v.matrix;
-        Complex[][] tensor = new Complex[1][1];
-        for (int i = 0; i < qubits; i++) {
-            if (v.getQubits() == qubits) {
-                return v.copy().matrix;
-            }
-            if (i + v.getQubits() == qubits - 1) {
+        if (v.getQubits() == qubits) return v.copy().matrix;
+        Complex[][] tensor = new Complex[][]{new Complex[]{new Complex(1)}};
+        for (int i = 0; i <= qubits; i++) {
+            if (i + v.getQubits() == qubits) {
                 tensor = tensorProduct(tensor, v.matrix);
                 i += v.getQubits();
-            } else if (i == 0) {
-                tensor = tensorProduct(ID.matrix, ID.matrix);
             } else
                 tensor = tensorProduct(tensor, ID.matrix);
         }
@@ -962,6 +1001,20 @@ public class VisualOperator {
             }
             return prob;
         }
+    }
+
+    private Complex[][] generateQFTMatrix(Complex complexOmega) {
+        Complex[][] mat = new Complex[MATRIX_DIM][MATRIX_DIM];
+        for (int i = 0; i < MATRIX_DIM; i++) {
+            for (int j = 0; j < MATRIX_DIM; j++) {
+                if (i == 0 || j == 0)
+                    mat[i][j] = new Complex(1);
+                else {
+                    mat[i][j] = Complex.exponent(complexOmega, new Complex((i * j) % MATRIX_DIM));
+                }
+            }
+        }
+        return mat;
     }
 
     public boolean isSpecial() {

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Html;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
@@ -41,6 +42,7 @@ import java.util.LinkedList;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
@@ -63,7 +65,7 @@ public class UIHelper {
     private static final String[] importantAngleNames2PI = new String[]{"0", "π/8", "π/6", "π/5", "π/4", "π/3", "3π/8", "2π/5", "π/2", "2π/3", "3π/4", "π",
             "5π/4", "4π/3", "3π/2", "5π/3", "7π/4"};
 
-    public void runnableForGateSelection(AppCompatActivity context, QuantumView qv, VisualOperator prevOperator, float posx, float posy, Dialog d) {
+    void runnableForGateSelection(AppCompatActivity context, QuantumView qv, VisualOperator prevOperator, float posx, float posy, @NonNull Dialog d) {
         final LinkedList<VisualOperator> operators = new LinkedList<>();
         final LinkedList<String> operatorNames = new LinkedList<>();
         new Thread(() -> {
@@ -115,13 +117,17 @@ public class UIHelper {
             final Spinner filter = mainView.findViewById(R.id.filter_spinner);
             final Spinner gateName = mainView.findViewById(R.id.gate_name_spinner);
             final ConstraintLayout subLayout = mainView.findViewById(R.id.sub_layout);
+            final ConstraintLayout qftLayout = mainView.findViewById(R.id.qft_layout);
             final ConstraintLayout rotLayout = mainView.findViewById(R.id.rot_layout);
+            final Spinner qftQubits = qftLayout.findViewById(R.id.qft_qubit_spinner);
+            final SeekBar omegaBar = qftLayout.findViewById(R.id.omegaBar);
             final SeekBar thetaBar = mainView.findViewById(R.id.rx);
             final SeekBar phiBar = mainView.findViewById(R.id.rz);
             final SeekBar lamdaBar = mainView.findViewById(R.id.ry);
             final TextView thetaText = mainView.findViewById(R.id.rx_text);
             final TextView phiText = mainView.findViewById(R.id.rz_text);
             final TextView lambdaText = mainView.findViewById(R.id.ry_text);
+            final TextView omegaText = qftLayout.findViewById(R.id.omega_text);
             final CheckBox fixedValues = mainView.findViewById(R.id.fixed_values);
             final SeekBar[] qX = new SeekBar[]{
                     mainView.findViewById(R.id.order_first),
@@ -213,69 +219,115 @@ public class UIHelper {
                     qX[0].setProgress(which);
                     tX[0].setText("q" + (which + 1));
                 }
-                gateType.post(() ->
-                        gateType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                                if (i == 0) {
-                                    filter.setEnabled(true);
-                                    subLayout.setVisibility(VISIBLE);
-                                    rotLayout.setVisibility(GONE);
-                                    if (filter.getSelectedItemPosition() == 0) {
-                                        ArrayAdapter<String> gateAdapter =
-                                                new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, mGates);
+                gateType.post(() -> {
+                    gateType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                            if (i == 0) {
+                                filter.setEnabled(true);
+                                subLayout.setVisibility(VISIBLE);
+                                rotLayout.setVisibility(GONE);
+                                qftLayout.setVisibility(GONE);
+                                if (filter.getSelectedItemPosition() == 0) {
+                                    ArrayAdapter<String> gateAdapter =
+                                            new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, mGates);
 
-                                        gateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                        gateName.setAdapter(gateAdapter);
-                                    } else {
-                                        LinkedList<String> mGates = VisualOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
-                                        Collections.sort(mGates);
-                                        ArrayAdapter<String> gateAdapter =
-                                                new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, mGates);
+                                    gateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                    gateName.setAdapter(gateAdapter);
+                                } else {
+                                    LinkedList<String> mGates = VisualOperator.getPredefinedGateNames(filter.getSelectedItemPosition() == 1);
+                                    Collections.sort(mGates);
+                                    ArrayAdapter<String> gateAdapter =
+                                            new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, mGates);
 
-                                        gateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                        gateName.setAdapter(gateAdapter);
-                                    }
-                                } else if (i == 1) {
-                                    synchronized (UIHelper.this) {
-                                        if (operators.size() > 0) {
-                                            filter.setEnabled(false);
-                                            filter.setSelection(0);
-                                            subLayout.setVisibility(VISIBLE);
-                                            rotLayout.setVisibility(GONE);
-                                            ArrayAdapter<String> gateAdapter =
-                                                    new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, operatorNames);
-                                            gateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                                            gateName.setAdapter(gateAdapter);
-                                        } else {
-                                            gateType.setSelection(0);
-                                            Toast t = Toast.makeText(context, R.string.no_user_gates, Toast.LENGTH_SHORT);
-                                            t.setGravity(Gravity.CENTER, 0, 0);
-                                            t.show();
-                                        }
-                                    }
-                                } else if (i == 2 || i == 3) {
-                                    for (int k = 1; k < qX.length; k++) {
-                                        qX[k].setVisibility(GONE);
-                                        tX[k].setVisibility(GONE);
-                                    }
-                                    if (i == 2) {
-                                        lambdaText.setVisibility(GONE);
-                                        lamdaBar.setVisibility(GONE);
-                                    } else {
-                                        lambdaText.setVisibility(VISIBLE);
-                                        lamdaBar.setVisibility(VISIBLE);
-                                    }
-                                    subLayout.setVisibility(GONE);
-                                    rotLayout.setVisibility(VISIBLE);
-                                    filter.setSelection(0);
+                                    gateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                    gateName.setAdapter(gateAdapter);
                                 }
+                            } else if (i == 1) {
+                                synchronized (UIHelper.this) {
+                                    if (operators.size() > 0) {
+                                        filter.setEnabled(false);
+                                        filter.setSelection(0);
+                                        subLayout.setVisibility(VISIBLE);
+                                        rotLayout.setVisibility(GONE);
+                                        qftLayout.setVisibility(GONE);
+                                        ArrayAdapter<String> gateAdapter =
+                                                new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, operatorNames);
+                                        gateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                                        gateName.setAdapter(gateAdapter);
+                                    } else {
+                                        gateType.setSelection(0);
+                                        Toast t = Toast.makeText(context, R.string.no_user_gates, Toast.LENGTH_SHORT);
+                                        t.setGravity(Gravity.CENTER, 0, 0);
+                                        t.show();
+                                    }
+                                }
+                            } else if (i == 2 || i == 3) {
+                                for (int k = 1; k < qX.length; k++) {
+                                    qX[k].setVisibility(GONE);
+                                    tX[k].setVisibility(GONE);
+                                }
+                                if (i == 2) {
+                                    lambdaText.setVisibility(GONE);
+                                    lamdaBar.setVisibility(GONE);
+                                } else {
+                                    lambdaText.setVisibility(VISIBLE);
+                                    lamdaBar.setVisibility(VISIBLE);
+                                }
+                                subLayout.setVisibility(GONE);
+                                qftLayout.setVisibility(GONE);
+                                rotLayout.setVisibility(VISIBLE);
+                                filter.setSelection(0);
+                            } else if (i == 4) {
+                                filter.setSelection(0);
+                                subLayout.setVisibility(GONE);
+                                rotLayout.setVisibility(GONE);
+                                qftLayout.setVisibility(VISIBLE);
+                                if (prevOperator == null || !prevOperator.isQFT())
+                                    omegaText.setText(Html.fromHtml(context.getString(R.string.omega_value, 0, 4)));
                             }
+                        }
 
-                            @Override
-                            public void onNothingSelected(AdapterView<?> adapterView) {
+                        @Override
+                        public void onNothingSelected(AdapterView<?> adapterView) {
+                        }
+                    });
+                    omegaBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                        @Override
+                        public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                            omegaText.setText(Html.fromHtml(context.getString(R.string.omega_value, i, (int) Math.round(Math.pow(2, qftQubits.getSelectedItemPosition() + 2)))));
+                        }
+
+                        @Override
+                        public void onStartTrackingTouch(SeekBar seekBar) {
+
+                        }
+
+                        @Override
+                        public void onStopTrackingTouch(SeekBar seekBar) {
+
+                        }
+                    });
+                    qftQubits.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                        @Override
+                        public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                            for (int j = 0; j < i + 2; j++) {
+                                qX[j].setVisibility(VISIBLE);
+                                tX[j].setVisibility(VISIBLE);
                             }
-                        }));
+                            for (int m = 3; m >= i + 2; m--) {
+                                qX[m].setVisibility(GONE);
+                                tX[m].setVisibility(GONE);
+                            }
+                            omegaBar.setMax((int) Math.round(Math.pow(2, i + 2)) - 1);
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> adapterView) {
+
+                        }
+                    });
+                });
                 filter.post(() ->
                         filter.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                             @Override
@@ -384,6 +436,7 @@ public class UIHelper {
 
                         }
                     });
+                    //Edit selected gate
                     if (prevOperator != null && prevOperator.isRotation()) {
                         gateType.setSelection(2);
                         qX[0].setProgress(prevOperator.getQubitIDs()[0]);
@@ -402,9 +455,23 @@ public class UIHelper {
                         if (prevOperator.getAngles()[0] < 0 || prevOperator.getAngles()[1] < 0 || prevOperator.getAngles()[2] < 0) {
                             ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(true);
                         }
+                    } else if (prevOperator != null && prevOperator.isQFT()) {
+                        gateType.setSelection(4);
+                        for (int i = 0; i < prevOperator.getQubits(); i++) {
+                            qX[i].setProgress(prevOperator.getQubitIDs()[i]);
+                        }
+                        qftQubits.setSelection(prevOperator.getQubits() - 2);
+                        omegaBar.setMax((int) Math.round(Math.pow(2, qftQubits.getSelectedItemPosition() + 2)) - 1);
+                        omegaText.setText(
+                                Html.fromHtml(context.getString(R.string.omega_value, (int) Math.round(prevOperator.getOmega()), (int) Math.round(Math.pow(2, qftQubits.getSelectedItemPosition() + 2)))));
+                        omegaBar.setProgress((int) Math.round(prevOperator.getOmega()));
+                        ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(false);
+                        ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
+
                     } else {
                         subLayout.setVisibility(VISIBLE);
                     }
+                    //End of selection
                     gateName.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
@@ -542,6 +609,30 @@ public class UIHelper {
                             else
                                 qv.replaceGateAt(new int[]{qX[0].getProgress()}, gate, posx, posy);
                             d.cancel();
+                        } else if (gateType.getSelectedItemPosition() == 4) {
+                            int omega = omegaBar.getProgress();
+                            int qubits = qftQubits.getSelectedItemPosition() + 2;
+                            VisualOperator gate = new VisualOperator(omega, qubits);
+                            int[] quids = new int[qubits];
+                            for (int i = 0; i < qubits; i++) {
+                                quids[i] = qX[i].getProgress();
+                            }
+                            for (int i = 0; i < qubits; i++) {
+                                for (int j = i + 1; j < qubits; j++) {
+                                    if (quids[i] == quids[j]) {
+                                        d.cancel();
+                                        Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), R.string.use_different_qubits, Snackbar.LENGTH_LONG);
+                                        snackbar.getView().setBackgroundColor(0xffD81010);
+                                        snackbar.show();
+                                        return;
+                                    }
+                                }
+                            }
+                            if (prevOperator == null)
+                                qv.addGate(quids, gate);
+                            else
+                                qv.replaceGateAt(quids, gate, posx, posy);
+                            d.cancel();
                         }
                     });
                     mainView.findViewById(R.id.gate_selector_main).setOnClickListener((View v) -> d.cancel());
@@ -556,7 +647,7 @@ public class UIHelper {
         }).start();
     }
 
-    public void applyActions(AppCompatActivity context, QuantumView qv, VisualOperator prevOperator, float posx, float posy, Dialog d, View layout) {
+    void applyActions(AppCompatActivity context, QuantumView qv, VisualOperator prevOperator, float posx, float posy, @NonNull Dialog d, View layout) {
         layout.findViewById(R.id.delete_selected_gate).setOnClickListener((View view) -> {
             qv.deleteGateAt(posx, posy);
             d.cancel();
@@ -584,7 +675,7 @@ public class UIHelper {
     }
 
 
-    public static void saveFileActivityResult(Uri treeUri, AppCompatActivity context, QuantumView qv, boolean export) {
+    static void saveFileActivityResult(Uri treeUri, AppCompatActivity context, QuantumView qv, boolean export) {
         DocumentFile pickedDir = DocumentFile.fromTreeUri(context, treeUri);
         try {
             DocumentFile newFile = pickedDir.createFile("application/octet-stream", qv.name + (export ? QuantumView.OPENQASM_FILE_EXTENSION : ""));
@@ -608,7 +699,7 @@ public class UIHelper {
     }
 
 
-    public static void saveFile(AppCompatActivity context, EditText editText, QuantumView qv, String filename, boolean export) {
+    static void saveFile(AppCompatActivity context, EditText editText, QuantumView qv, String filename, boolean export) {
         try {
             String name = qv.name = editText.getText().toString().length() < 1 ? filename : editText.getText().toString();
             if (!export && !name.endsWith(QuantumView.FILE_EXTENSION)) {
@@ -652,7 +743,7 @@ public class UIHelper {
         qv.saved = true;
     }
 
-    public static void saveFileUI(QuantumView qv, AppCompatActivity context, boolean export) {
+    static void saveFileUI(QuantumView qv, AppCompatActivity context, boolean export) {
         if (qv.getOperators().size() < 1) {
             Snackbar.make(context.findViewById(R.id.parent2), context.getString(R.string.no_gates), Snackbar.LENGTH_LONG).show();
             return;
@@ -702,7 +793,7 @@ public class UIHelper {
         adb.show();
     }
 
-    public static void clearScreen(QuantumView qv, Context context) {
+    static void clearScreen(QuantumView qv, Context context) {
         if (qv.getOperators().size() >= 5) {
             AlertDialog.Builder adb = new AlertDialog.Builder(context);
             adb.setMessage(R.string.are_you_sure_to_delete);

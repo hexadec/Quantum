@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.media.AudioFormat;
 import android.os.Build;
 import android.text.Html;
 import android.util.DisplayMetrics;
@@ -352,7 +353,12 @@ public class QuantumView extends View {
                     continue;
                 } else {
                     if (currentPos++ == pos) {
-                        return op.getRect().get(j);
+                        try {
+                            return op.getRect().get(j);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return null;
+                        }
                     }
                 }
             }
@@ -386,7 +392,7 @@ public class QuantumView extends View {
                         gos.add(i, visualOperator);
                         undoList.addLast(new Doable(visualOperator, DoableType.EDIT, getContext(), i, old));
                         redoList.clear();
-                        if (getRectInGrid(highlight) == null) {
+                        if (getRectInGrid(highlight) == null && highlight[0] != -1 && highlight[1] != -1) {
                             moveHighlight(0);
                         }
                         invalidate();
@@ -397,7 +403,7 @@ public class QuantumView extends View {
             }
             gos.addLast(visualOperator);
             undoList.addLast(new Doable(visualOperator, DoableType.ADD, getContext()));
-            if (getRectInGrid(highlight) == null) {
+            if (getRectInGrid(highlight) == null && highlight[0] != -1 && highlight[1] != -1) {
                 moveHighlight(0);
             }
             invalidate();
@@ -415,7 +421,7 @@ public class QuantumView extends View {
                     }
                     undoList.addLast(new Doable(gos.remove(i), DoableType.DELETE, getContext(), i, null));
                     redoList.clear();
-                    if (getRectInGrid(highlight) == null) {
+                    if (getRectInGrid(highlight) == null && highlight[0] != -1 && highlight[1] != -1) {
                         moveHighlight(0);
                     }
                     invalidate();

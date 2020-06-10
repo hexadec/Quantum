@@ -47,6 +47,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
@@ -281,8 +282,12 @@ public class MainActivity extends AppCompatActivity {
                         Log.i("Debug", "Dialog dpwidth: " + dpWidth);
                         int decimalPoints = dpWidth > 280 ? dpWidth > 300 ? dpWidth > 365 ? dpWidth > 420 ? dpWidth > 450 ? dpWidth > 520 ? 10 : 8 : 7 : 6 : 5 : 4 : 3;
                         String decimals = new String(new char[decimalPoints]).replace("\0", "#");
-                        DecimalFormat df = new DecimalFormat(stateVector == null ? "0.########" : "0." + decimals);
-                        DecimalFormat sf = new DecimalFormat(stateVector == null ? "0.########" : "0." + (decimalPoints < 4 ? decimals.substring(2) : decimals.substring(3)) + "E0");
+                        NumberFormat nf1 = NumberFormat.getInstance(Locale.US);
+                        NumberFormat nf2 = NumberFormat.getInstance(Locale.US);
+                        DecimalFormat df = (DecimalFormat) nf1;
+                        DecimalFormat sf = (DecimalFormat) nf2;
+                        df.applyPattern(stateVector == null ? "0.########" : "0." + decimals);
+                        sf.applyPattern(stateVector == null ? "0.########" : "0." + (decimalPoints < 4 ? decimals.substring(2) : decimals.substring(3)) + "E0");
                         outerFor:
                         for (int i = 0; i < probabilities.length; i++) {
                             if (shots == 1 && probabilities[i] == 0) {
@@ -810,6 +815,7 @@ public class MainActivity extends AppCompatActivity {
         LinkedList<VisualOperator> operators = VisualOperator.getPredefinedGates(false);
         operators.add(0, new VisualOperator(0f, 0f));
         operators.add(0, new VisualOperator(0f, 0f, 0f));
+        operators.add(0, new VisualOperator(0, 2));
         TableRow tr = new TableRow(MainActivity.this);
         int gwMargin = 3;
         float dpWidth = UIHelper.dpFromPx(MainActivity.this, navWidth);

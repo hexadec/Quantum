@@ -47,6 +47,7 @@
         <item>User defined</item>
         <item>Rotation</item>
         <item>U3</item>
+        <item>Quantum Fourier T.</item>
     </string-array>
     <string-array name="filter_gates">
         <item>All gates</item>
@@ -62,5 +63,10 @@
         <item>\t</item>
         <item>;</item>
         <item>,</item>
+    </string-array>
+    <string-array name="qft_qubits">
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
     </string-array>
 </resources>

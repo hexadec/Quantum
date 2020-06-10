@@ -1,10 +1,16 @@
 package hu.hexadecimal.quantum.graphics;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.renderscript.Allocation;
+import android.renderscript.Element;
+import android.renderscript.RenderScript;
+import android.renderscript.ScriptIntrinsicBlur;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -13,6 +19,8 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 
@@ -25,6 +33,9 @@ public class GraphView extends View {
     protected float[] positions, values;
     protected Paint axisPaint, gridPaint, linePaint, labelPaint, rectPaint, naPaint;
     protected float START_X, START_Y, END_X, END_Y;
+
+    private final int OVERSAMPLING_MULTIPLIER = 3;
+    private RenderScript rs;
 
     public GraphView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -79,33 +90,37 @@ public class GraphView extends View {
         axisPaint.setColor(Color.GRAY);
         axisPaint.setStyle(Paint.Style.STROKE);
         axisPaint.setAntiAlias(true);
-        axisPaint.setStrokeWidth(pxFromDp(getContext(), 2.5f));
+        axisPaint.setStrokeWidth(pxFromDp(getContext(), 2.5f) * OVERSAMPLING_MULTIPLIER);
 
         gridPaint = new Paint();
         gridPaint.setColor(0xffbbbbbb);
         gridPaint.setStyle(Paint.Style.STROKE);
         gridPaint.setAntiAlias(true);
-        gridPaint.setStrokeWidth(pxFromDp(getContext(), 0.7f));
+        gridPaint.setStrokeWidth(pxFromDp(getContext(), 0.7f) * OVERSAMPLING_MULTIPLIER);
 
         linePaint = new Paint();
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setColor(Color.RED);
         linePaint.setAntiAlias(true);
-        linePaint.setStrokeWidth(pxFromDp(getContext(), 1f));
+        linePaint.setStrokeWidth(pxFromDp(getContext(), 1f) * OVERSAMPLING_MULTIPLIER);
 
         rectPaint = new Paint();
         rectPaint.setStyle(Paint.Style.FILL);
         rectPaint.setColor(Color.BLUE);
+        rectPaint.setDither(true);
         rectPaint.setAntiAlias(true);
 
         labelPaint = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
         labelPaint.setTypeface(Typeface.MONOSPACE);
         labelPaint.setColor(Color.DKGRAY);
-        labelPaint.setTextSize(pxFromDp(getContext(), 10));
+        labelPaint.setTextSize(pxFromDp(getContext(), 10) * OVERSAMPLING_MULTIPLIER);
 
         naPaint = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
         naPaint.setColor(Color.DKGRAY);
         naPaint.setTextSize(pxFromDp(getContext(), 32));
+
+        rs = RenderScript.create(getContext());
+        setLayerType(LAYER_TYPE_SOFTWARE, null);
 
         setupPadding();
     }
@@ -113,22 +128,23 @@ public class GraphView extends View {
     protected void setupPadding() {
         float niceNumber = new BigDecimal((max - min) / 10).round(new MathContext(1, RoundingMode.HALF_UP)).floatValue();
         String text = String.format("%" + Math.round(Math.log(size == 0 ? 8 : size) / Math.log(2)) + "s", Integer.toBinaryString(5)).replace(' ', '0');
-        START_X = labelPaint.measureText(formatNumber(niceNumber)) + pxFromDp(getContext(), 4);
-        START_Y = pxFromDp(getContext(), 10);
-        END_X = getWidth() - pxFromDp(getContext(), 10);
-        END_Y = getHeight() - labelPaint.measureText(text) - pxFromDp(getContext(), 5);
+        START_X = labelPaint.measureText(formatNumber(niceNumber)) + pxFromDp(getContext(), 4) * OVERSAMPLING_MULTIPLIER;
+        START_Y = pxFromDp(getContext(), 10) * OVERSAMPLING_MULTIPLIER;
+        END_X = getWidth() * OVERSAMPLING_MULTIPLIER - pxFromDp(getContext(), 10) * OVERSAMPLING_MULTIPLIER;
+        END_Y = getHeight() * OVERSAMPLING_MULTIPLIER - labelPaint.measureText(text) - pxFromDp(getContext(), 5) * OVERSAMPLING_MULTIPLIER;
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(Canvas c) {
         Log.i("DisplayView", "onDraw was called");
-        super.onDraw(canvas);
+        super.onDraw(c);
+        Bitmap bitmap = Bitmap.createBitmap(c.getWidth() * 3, c.getHeight() * 3, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
 
         setupPadding();
 
         if (values == null || values.length == 0 || size == 0) {
-            drawAxes(canvas);
-            canvas.drawText("N/A", (getWidth() - naPaint.measureText("N/A")) / 2, (getHeight() - naPaint.ascent()) / 2, naPaint);
+            c.drawText("N/A", (getWidth() - naPaint.measureText("N/A")) / 2, (getHeight() - naPaint.ascent()) / 2, naPaint);
             return;
         }
 
@@ -143,7 +159,7 @@ public class GraphView extends View {
 
         //Step size
         final int step = 1;
-        if (size >= 32 /*2^5*/) {
+        if (size >= 256 /*2^5*/) {
             for (int i = 0; i < size - step; i += step) {
                 final float current = values[i];
                 final float next = values[i + step];
@@ -163,12 +179,26 @@ public class GraphView extends View {
                 float l = START_X + astroke2 + avWidth * j + (avWidth - w) / 2;
                 float r = l + w;
                 canvas.drawRect(l, t, r, height + START_Y, rectPaint);
-                canvas.save();
-                canvas.rotate(-90, (l + r) / 2, getHeight());
-                canvas.drawText(text, (l + r) / 2, getHeight() + pxFromDp(getContext(), 2), labelPaint);
-                canvas.restore();
+                if (size < 32) {
+                    canvas.save();
+                    canvas.rotate(-90, (l + r) / 2, canvas.getHeight());
+                    canvas.drawText(text, (l + r) / 2, canvas.getHeight() + pxFromDp(getContext(), 2) * OVERSAMPLING_MULTIPLIER, labelPaint);
+                    canvas.restore();
+                }
             }
         }
+        blurBitmap(bitmap, 1.2f);
+        c.drawBitmap(bitmap, new Rect(0, 0, canvas.getWidth(), canvas.getHeight()), new Rect(0, 0, c.getWidth(), c.getHeight()), rectPaint);
+    }
+
+    private void blurBitmap(Bitmap bitmap, float radius) {
+        final Allocation input = Allocation.createFromBitmap(rs, bitmap, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
+        final Allocation output = Allocation.createTyped(rs, input.getType());
+        final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
+        script.setRadius(radius);
+        script.setInput(input);
+        script.forEach(output);
+        output.copyTo(bitmap);
     }
 
     public void drawAxes(Canvas canvas) {
@@ -242,7 +272,9 @@ public class GraphView extends View {
     }
 
     public String formatNumber(float number) {
-        DecimalFormat df = new DecimalFormat(" #.####");
+        NumberFormat nf = NumberFormat.getInstance(Locale.US);
+        DecimalFormat df = (DecimalFormat) nf;
+        df.applyPattern(" #.####");
         BigDecimal bd = new BigDecimal(number);
         bd = bd.round(new MathContext(5));
         number = bd.floatValue();

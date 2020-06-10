@@ -112,4 +112,6 @@
     <string name="graph">Graph</string>
     <string name="close">Close</string>
     <string name="invalid_gate_short">Invalid</string>
+    <string name="qft_qubits">Number of qubits for QFT</string>
+    <string name="omega_value">\u03C9=e&lt;sup>i%1$d\u03C0/%2$d&lt;/sup></string>
 </resources>
