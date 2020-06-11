@@ -36,6 +36,9 @@
                 <a href="#u3">U3 gate</a>
             </li>
             <li>
+                <a href="#qft">Quantum Fourier Transform</a>
+            </li>
+            <li>
                 <a href="#single_qubit">Single Qubit Gates</a>
             </li>
             <li>
@@ -184,6 +187,15 @@
         </p>
         <p
                 style="font-size:18px"
+                id="qft"
+                name="qft">
+            <i>Quantum Fourier Transform</i>
+        </p>
+        <p style="text-align: justify;">
+            The Quantum Fourier Transform is the quantum form of the discrete Fourier transform.
+        </p>
+        <p
+                style="font-size:18px"
                 id="single_qubit"
                 name="single_qubit">
             <i>Single Qubit Gates</i>
@@ -328,7 +340,8 @@
             user-defined gate that uses more than one qubit. If the application encounters any such
             gate, it will leave a remark in the QASM file. Single-qubit user-defined gates will be
             converted into U3 when saving. Some special gates may also be converted into a
-            combination of other gates, such as the &radic;NOT.
+            combination of other gates, such as the &radic;NOT. Quantum Fourier Transform cannot be
+            saved currently.
         </p>
         <br />
         <h4

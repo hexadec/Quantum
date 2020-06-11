@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/gate_selector_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#88000000"
-    android:id="@+id/gate_selector_main">
+    android:background="#88000000">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -18,8 +18,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:background="@drawable/dialog_gate_selector_bg"
-            android:gravity="center"
             android:clickable="true"
+            android:gravity="center"
             android:maxWidth="500dp">
 
             <Spinner
@@ -58,7 +58,7 @@
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
                 android:visibility="visible"
-                app:layout_constraintBottom_toTopOf="@+id/rot_layout"
+                app:layout_constraintBottom_toTopOf="@+id/qft_layout"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/type_spinner">
@@ -117,6 +117,78 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/qft_layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="0dp"
+                android:layout_marginTop="0dp"
+                android:layout_marginEnd="0dp"
+                android:layout_marginBottom="0dp"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/rot_layout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/sub_layout">
+
+                <TextView
+                    android:id="@+id/qft_qubit_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/qft_qubits"
+                    app:autoSizeMinTextSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <Spinner
+                    android:id="@+id/qft_qubit_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:entries="@array/qft_qubits"
+                    app:layout_constraintBottom_toTopOf="@+id/omega_text"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/qft_qubit_text" />
+
+                <SeekBar
+                    android:id="@+id/omegaBar"
+                    style="@style/Widget.AppCompat.SeekBar.Discrete"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_marginEnd="16dp"
+                    android:max="3"
+                    android:progressDrawable="@drawable/seek_progress"
+                    android:thumb="@drawable/seek_thumb"
+                    android:visibility="gone"
+                    app:layout_constraintBottom_toBottomOf="@id/omega_text"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/omega_text"
+                    app:layout_constraintTop_toTopOf="@+id/omega_text" />
+
+                <TextView
+                    android:id="@+id/omega_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:layout_marginStart="16dp"
+                    android:gravity="bottom|center_horizontal"
+                    android:text=""
+                    android:visibility="gone"
+                    android:typeface="normal"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/omegaBar"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/qft_qubit_spinner" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/rot_layout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -128,7 +200,7 @@
                 app:layout_constraintBottom_toTopOf="@+id/order_info"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/sub_layout">
+                app:layout_constraintTop_toBottomOf="@+id/qft_layout">
 
                 <SeekBar
                     android:id="@+id/rx"

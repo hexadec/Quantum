@@ -120,14 +120,12 @@ public class UIHelper {
             final ConstraintLayout qftLayout = mainView.findViewById(R.id.qft_layout);
             final ConstraintLayout rotLayout = mainView.findViewById(R.id.rot_layout);
             final Spinner qftQubits = qftLayout.findViewById(R.id.qft_qubit_spinner);
-            final SeekBar omegaBar = qftLayout.findViewById(R.id.omegaBar);
             final SeekBar thetaBar = mainView.findViewById(R.id.rx);
             final SeekBar phiBar = mainView.findViewById(R.id.rz);
             final SeekBar lamdaBar = mainView.findViewById(R.id.ry);
             final TextView thetaText = mainView.findViewById(R.id.rx_text);
             final TextView phiText = mainView.findViewById(R.id.rz_text);
             final TextView lambdaText = mainView.findViewById(R.id.ry_text);
-            final TextView omegaText = qftLayout.findViewById(R.id.omega_text);
             final CheckBox fixedValues = mainView.findViewById(R.id.fixed_values);
             final SeekBar[] qX = new SeekBar[]{
                     mainView.findViewById(R.id.order_first),
@@ -243,6 +241,7 @@ public class UIHelper {
                                     gateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                     gateName.setAdapter(gateAdapter);
                                 }
+                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.hermitian_conjugate);
                             } else if (i == 1) {
                                 synchronized (UIHelper.this) {
                                     if (operators.size() > 0) {
@@ -261,6 +260,7 @@ public class UIHelper {
                                         t.setGravity(Gravity.CENTER, 0, 0);
                                         t.show();
                                     }
+                                    ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.hermitian_conjugate);
                                 }
                             } else if (i == 2 || i == 3) {
                                 for (int k = 1; k < qX.length; k++) {
@@ -278,34 +278,29 @@ public class UIHelper {
                                 qftLayout.setVisibility(GONE);
                                 rotLayout.setVisibility(VISIBLE);
                                 filter.setSelection(0);
+                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.hermitian_conjugate);
+                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(true);
                             } else if (i == 4) {
                                 filter.setSelection(0);
                                 subLayout.setVisibility(GONE);
                                 rotLayout.setVisibility(GONE);
                                 qftLayout.setVisibility(VISIBLE);
-                                if (prevOperator == null || !prevOperator.isQFT())
-                                    omegaText.setText(Html.fromHtml(context.getString(R.string.omega_value, 0, 4)));
+                                int qftPosition = qftQubits.getSelectedItemPosition();
+                                for (int j = 0; j < qftPosition + 2; j++) {
+                                    qX[j].setVisibility(VISIBLE);
+                                    tX[j].setVisibility(VISIBLE);
+                                }
+                                for (int m = 3; m >= qftPosition + 2; m--) {
+                                    qX[m].setVisibility(GONE);
+                                    tX[m].setVisibility(GONE);
+                                }
+                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.inverse_qft);
+                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(true);
                             }
                         }
 
                         @Override
                         public void onNothingSelected(AdapterView<?> adapterView) {
-                        }
-                    });
-                    omegaBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                        @Override
-                        public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                            omegaText.setText(Html.fromHtml(context.getString(R.string.omega_value, i, (int) Math.round(Math.pow(2, qftQubits.getSelectedItemPosition() + 2)))));
-                        }
-
-                        @Override
-                        public void onStartTrackingTouch(SeekBar seekBar) {
-
-                        }
-
-                        @Override
-                        public void onStopTrackingTouch(SeekBar seekBar) {
-
                         }
                     });
                     qftQubits.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -319,7 +314,6 @@ public class UIHelper {
                                 qX[m].setVisibility(GONE);
                                 tX[m].setVisibility(GONE);
                             }
-                            omegaBar.setMax((int) Math.round(Math.pow(2, i + 2)) - 1);
                         }
 
                         @Override
@@ -461,12 +455,9 @@ public class UIHelper {
                             qX[i].setProgress(prevOperator.getQubitIDs()[i]);
                         }
                         qftQubits.setSelection(prevOperator.getQubits() - 2);
-                        omegaBar.setMax((int) Math.round(Math.pow(2, qftQubits.getSelectedItemPosition() + 2)) - 1);
-                        omegaText.setText(
-                                Html.fromHtml(context.getString(R.string.omega_value, (int) Math.round(prevOperator.getOmega()), (int) Math.round(Math.pow(2, qftQubits.getSelectedItemPosition() + 2)))));
-                        omegaBar.setProgress((int) Math.round(prevOperator.getOmega()));
-                        ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(false);
-                        ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
+                        ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.inverse_qft);
+                        ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(true);
+                        ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(prevOperator.getAngles()[2] == -1);
 
                     } else {
                         subLayout.setVisibility(VISIBLE);
@@ -610,9 +601,8 @@ public class UIHelper {
                                 qv.replaceGateAt(new int[]{qX[0].getProgress()}, gate, posx, posy);
                             d.cancel();
                         } else if (gateType.getSelectedItemPosition() == 4) {
-                            int omega = omegaBar.getProgress();
                             int qubits = qftQubits.getSelectedItemPosition() + 2;
-                            VisualOperator gate = new VisualOperator(omega, qubits);
+                            VisualOperator gate = new VisualOperator(qubits, ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked());
                             int[] quids = new int[qubits];
                             for (int i = 0; i < qubits; i++) {
                                 quids[i] = qX[i].getProgress();

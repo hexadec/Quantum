@@ -815,7 +815,7 @@ public class MainActivity extends AppCompatActivity {
         LinkedList<VisualOperator> operators = VisualOperator.getPredefinedGates(false);
         operators.add(0, new VisualOperator(0f, 0f));
         operators.add(0, new VisualOperator(0f, 0f, 0f));
-        operators.add(0, new VisualOperator(0, 2));
+        operators.add(0, new VisualOperator(2, false));
         TableRow tr = new TableRow(MainActivity.this);
         int gwMargin = 3;
         float dpWidth = UIHelper.dpFromPx(MainActivity.this, navWidth);

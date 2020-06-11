@@ -20,7 +20,7 @@ import androidx.annotation.NonNull;
  */
 public class VisualOperator {
 
-    public static final long helpVersion = 40L;
+    public static final long helpVersion = 41L;
     private Complex[][] matrix;
     //last one is to clarify meaning for navbar, so length is +1 to qubits
     private String[] symbols;
@@ -283,37 +283,30 @@ public class VisualOperator {
         this.lambda = lambda;
     }
 
-    public VisualOperator(int omega, int qubits) {
+    public VisualOperator(int qubits, boolean inverse) {
         if (qubits < 2 || qubits > 4) {
             throw new IllegalArgumentException("Invalid value for qubits: " + qubits);
         }
         MATRIX_DIM = (int) Math.round(Math.pow(2, qubits));
-        if (omega < 0 || omega >= MATRIX_DIM) {
-            throw new IllegalArgumentException("Invalid value for omega: " + omega + " qubits:" + qubits);
-        }
         name = "QFT";
         qubit_ids = new int[NQBITS = qubits];
         rectangle = new LinkedList<>();
         color = 0xffbce500;
-        this.lambda = omega;
+        this.lambda = inverse ? -1 : 1;
         this.theta = NULL_ANGLE;
         this.phi = NULL_ANGLE;
-        Complex complexOmega = new Complex(Math.PI * 2 / MATRIX_DIM * omega);
+        Complex complexOmega = new Complex(1, Math.PI * 2 / MATRIX_DIM, true);
         if (qubits == 2) {
-            matrix = new Complex[][]{
-                    new Complex[]{new Complex(1), new Complex(1), new Complex(1), new Complex(1)},
-                    new Complex[]{new Complex(1), complexOmega, Complex.exponent(complexOmega, new Complex(2)), Complex.exponent(complexOmega, new Complex(3))},
-                    new Complex[]{new Complex(1), Complex.exponent(complexOmega, new Complex(2)), new Complex(1), Complex.exponent(complexOmega, new Complex(2))},
-                    new Complex[]{new Complex(1), Complex.exponent(complexOmega, new Complex(3)), Complex.exponent(complexOmega, new Complex(2)), complexOmega}};
+            matrix = generateQFTMatrix(complexOmega, inverse);
         } else {
-            matrix = generateQFTMatrix(complexOmega);
+            matrix = generateQFTMatrix(complexOmega, inverse);
         }
         symbols = new String[qubits + 1];
         for (int i = 1; i <= qubits; i++) {
             symbols[i - 1] = "QF" + i;
         }
         symbols[qubits] = "QFT";
-        this.multiply(new Complex(1 / Math.sqrt(MATRIX_DIM), 0));
+        this.multiply(new Complex(1.0 / Math.sqrt(MATRIX_DIM), 0));
     }
 
     public String[] getSymbols() {
@@ -418,14 +411,7 @@ public class VisualOperator {
     }
 
     public boolean isQFT() {
-        return lambda != NULL_ANGLE && theta == NULL_ANGLE && phi == NULL_ANGLE && isMultiQubit() && name.equals("QFT");
-    }
-
-    public double getOmega() {
-        if (isQFT())
-            return lambda;
-        else
-            throw new UnsupportedOperationException("Non-QFT operator does not have omega parameter");
+        return (lambda == 1 || lambda == -1) && theta == NULL_ANGLE && phi == NULL_ANGLE && isMultiQubit() && name.equals("QFT");
     }
 
     public double[] getAngles() {
@@ -516,6 +502,10 @@ public class VisualOperator {
             angles.put("phi", phi);
             angles.put("lambda", lambda);
             jsonObject.put("angles", angles);
+        } else if (isQFT()) {
+            JSONObject angles = new JSONObject();
+            angles.put("omega", lambda);
+            jsonObject.put("angles", angles);
         }
         jsonObject.put("qubits", qubits);
         jsonObject.put("symbols", symbols);
@@ -540,9 +530,13 @@ public class VisualOperator {
             double lambda = NULL_ANGLE;
             try {
                 JSONObject angles = jsonObject.getJSONObject("angles");
-                theta = angles.getDouble("theta");
-                phi = angles.getDouble("phi");
-                lambda = angles.getDouble("lambda");
+                if (angles.has("omega")) {
+                    lambda = angles.getDouble("omega");
+                } else {
+                    theta = angles.getDouble("theta");
+                    phi = angles.getDouble("phi");
+                    lambda = angles.getDouble("lambda");
+                }
             } catch (Exception e) {
                 Log.i("VisualOperator fromJSON", "No angles?");
             }
@@ -1003,14 +997,14 @@ public class VisualOperator {
         }
     }
 
-    private Complex[][] generateQFTMatrix(Complex complexOmega) {
+    private Complex[][] generateQFTMatrix(Complex complexOmega, boolean inverse) {
         Complex[][] mat = new Complex[MATRIX_DIM][MATRIX_DIM];
         for (int i = 0; i < MATRIX_DIM; i++) {
             for (int j = 0; j < MATRIX_DIM; j++) {
                 if (i == 0 || j == 0)
                     mat[i][j] = new Complex(1);
                 else {
-                    mat[i][j] = Complex.exponent(complexOmega, new Complex((i * j) % MATRIX_DIM));
+                    mat[i][j] = Complex.exponent(complexOmega, new Complex((i * j * (inverse ? -1 : 1)) % MATRIX_DIM));
                 }
             }
         }
