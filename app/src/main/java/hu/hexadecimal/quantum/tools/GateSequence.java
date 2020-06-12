@@ -13,7 +13,7 @@ import hu.hexadecimal.quantum.math.VisualOperator;
  * Class used to save and load a quantum circuit to and from storage
  * @param <T> ALWAYS has to be a VisualOperator
  */
-public class GateSequence<T> extends LinkedList {
+public class GateSequence<T> extends LinkedList<T> {
 
     final String name;
 
@@ -22,8 +22,8 @@ public class GateSequence<T> extends LinkedList {
         this.name = name;
     }
 
-    public GateSequence(Collection c, String name) {
-        super(c);
+    public GateSequence(Collection<VisualOperator> c, String name) {
+        super((Collection<? extends T>) c);
         this.name = name;
     }
 
