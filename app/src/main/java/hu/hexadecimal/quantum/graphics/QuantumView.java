@@ -8,11 +8,9 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.media.AudioFormat;
 import android.os.Build;
 import android.text.Html;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -40,7 +38,7 @@ import hu.hexadecimal.quantum.tools.QuantumViewData;
  */
 public class QuantumView extends View {
 
-    final Paint mPaint, otherPaint, mTextPaint, whiteTextPaint, hlPaint;
+    final Paint linePaint, otherPaint, mTextPaint, whiteTextPaint, hlPaint, strokePaint;
     final int mPadding;
     final Path mPath;
 
@@ -89,11 +87,14 @@ public class QuantumView extends View {
         mPath = new Path();
         mPath.setFillType(Path.FillType.EVEN_ODD);
 
-        mPaint = new Paint();
-        mPaint.setAntiAlias(true);
-        mPaint.setStyle(Paint.Style.STROKE);
-        mPaint.setColor(Color.BLUE);
-        mPaint.setStrokeWidth(UIHelper.pxFromDp(context, 2.5f));
+        linePaint = new Paint();
+        linePaint.setAntiAlias(true);
+        linePaint.setStyle(Paint.Style.STROKE);
+        linePaint.setColor(Color.BLUE);
+        linePaint.setStrokeWidth(UIHelper.pxFromDp(context, 2.5f));
+
+        strokePaint = new Paint(linePaint);
+        strokePaint.setStrokeWidth(UIHelper.pxFromDp(context, 7.5f));
 
         hlPaint = new Paint();
         hlPaint.setAntiAlias(true);
@@ -135,20 +136,20 @@ public class QuantumView extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        mPaint.setColor(0xff888888);
+        linePaint.setColor(0xff888888);
 
         otherPaint.setStyle(Paint.Style.FILL);
         int qubitPos = 0;
         char verticalBar = PaintCompat.hasGlyph(whiteTextPaint, "⎥") ? '⎥' : '|';
-        for (int i = (int) START_Y; i < getLimit() && i <= UIHelper.pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += (int) UIHelper.pxFromDp(super.getContext(), STEP)) {
-            canvas.drawLine(START_X, mPadding + i, getWidth() - mPadding, mPadding + i, mPaint);
+        for (float i = START_Y; i < getLimit() && i <= UIHelper.pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += UIHelper.pxFromDp(super.getContext(), STEP)) {
+            canvas.drawLine(START_X, mPadding + i, getWidth() - mPadding, mPadding + i, linePaint);
 
             mPath.reset();
             mPath.moveTo(getWidth() - mPadding - UIHelper.pxFromDp(super.getContext(), 5), mPadding + i - UIHelper.pxFromDp(super.getContext(), 5));
             mPath.lineTo(getWidth() - mPadding + UNIT / 2, mPadding + i);
             mPath.lineTo(getWidth() - mPadding - UIHelper.pxFromDp(super.getContext(), 5), mPadding + i + UIHelper.pxFromDp(super.getContext(), 5));
             mPath.close();
-            canvas.drawPath(mPath, mPaint);
+            canvas.drawPath(mPath, linePaint);
 
             otherPaint.setColor(measuredQubits[qubitPos] > 0 ? 0xffBA2121 : 0xff555555);
             canvas.drawRect(START_X,
@@ -214,6 +215,17 @@ public class QuantumView extends View {
                     if (isHighlighted) {
                         canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus + hlPaint.getStrokeWidth(), hlPaint);
                     }
+                } else if (symbol.equals(VisualOperator.SWAP.getSymbols()[0])) {
+                    strokePaint.setColor(v.getColor());
+                    float padding = strokePaint.getStrokeWidth() / 2;
+                    canvas.drawLine(areaRect.left + padding, areaRect.top + padding, areaRect.right - padding, areaRect.bottom - padding, strokePaint);
+                    canvas.drawLine(areaRect.right - padding, areaRect.top + padding, areaRect.left + padding, areaRect.bottom - padding, strokePaint);
+                    if (isHighlighted) {
+                        canvas.drawRect(areaRect.left - hlPaint.getStrokeWidth(),
+                                areaRect.top - hlPaint.getStrokeWidth(),
+                                areaRect.right + hlPaint.getStrokeWidth(),
+                                areaRect.bottom + hlPaint.getStrokeWidth(), hlPaint);
+                    }
                 } else {
                     canvas.drawRect(areaRect, otherPaint);
                     if (isHighlighted) {
@@ -224,19 +236,23 @@ public class QuantumView extends View {
                     }
                 }
                 if (j != 0) {
-                    mPaint.setColor(v.getColor());
+                    linePaint.setColor(v.getColor());
                     float center1x = areaRect.centerX();
                     float center1y = areaRect.centerY();
                     RectF a = v.getRect().get(j - 1);
                     float center2x = a.centerX();
                     float center2y = a.centerY();
-                    center2x += (UIHelper.pxFromDp(super.getContext(), GATE_SIZE / (controlled ? 1.55f : 1.15f)) * (center1x - center2x) / Math.sqrt(Math.pow((center2x - center1x), 2) + Math.pow((center2y - center1y), 2)));
-                    center2y += UIHelper.pxFromDp(super.getContext(), GATE_SIZE / (controlled ? 1.55f : 1.15f)) * (center1y - center2y) / Math.sqrt(Math.pow((center2x - center1x), 2) + Math.pow((center2y - center1y), 2));
-                    canvas.drawLine(center1x, center1y, center2x, center2y, mPaint);
+                    if (!v.getSymbols()[j - 1].equals(VisualOperator.SWAP.getSymbols()[0])) {
+                        center2x += (UIHelper.pxFromDp(super.getContext(), GATE_SIZE / (controlled ? 1.55f : 1.15f)) * (center1x - center2x) / Math.sqrt(Math.pow((center2x - center1x), 2) + Math.pow((center2y - center1y), 2)));
+                        center2y += UIHelper.pxFromDp(super.getContext(), GATE_SIZE / (controlled ? 1.55f : 1.15f)) * (center1y - center2y) / Math.sqrt(Math.pow((center2x - center1x), 2) + Math.pow((center2y - center1y), 2));
+                    }
+                    canvas.drawLine(center1x, center1y, center2x, center2y, linePaint);
                 }
 
                 if (symbol.equals("●")) {
                     controlled = true;
+                } else if (symbol.equals(VisualOperator.SWAP.getSymbols()[0])) {
+                    //Do nothing
                 } else {
                     canvas.drawText(symbol, bounds.left, bounds.top - whiteTextPaint.ascent(), whiteTextPaint);
                     if (controlled && !(symbol.equals(VisualOperator.CNOT.getSymbols()[1]) || symbol.equals("⊕"))) {
