@@ -140,6 +140,10 @@ public class QuantumView extends View {
 
         otherPaint.setStyle(Paint.Style.FILL);
         int qubitPos = 0;
+
+        float roundRectRadius = UIHelper.pxFromDp(getContext(), 1.6f);
+        float hlPaintStrokeWidth = hlPaint.getStrokeWidth();
+
         char verticalBar = PaintCompat.hasGlyph(whiteTextPaint, "⎥") ? '⎥' : '|';
         for (float i = START_Y; i < getLimit() && i <= UIHelper.pxFromDp(super.getContext(), STEP * MAX_QUBITS); i += UIHelper.pxFromDp(super.getContext(), STEP)) {
             canvas.drawLine(START_X, mPadding + i, getWidth() - mPadding, mPadding + i, linePaint);
@@ -152,11 +156,11 @@ public class QuantumView extends View {
             canvas.drawPath(mPath, linePaint);
 
             otherPaint.setColor(measuredQubits[qubitPos] > 0 ? 0xffBA2121 : 0xff555555);
-            canvas.drawRect(START_X,
+            canvas.drawRoundRect(START_X,
                     mPadding + i - UIHelper.pxFromDp(super.getContext(), GATE_SIZE),
                     START_X + UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 2),
                     mPadding + i + UIHelper.pxFromDp(super.getContext(), GATE_SIZE),
-                    otherPaint);
+                    roundRectRadius, roundRectRadius, otherPaint);
             String qText = "q" + Math.round((i + START_Y) / UIHelper.pxFromDp(super.getContext(), STEP));
             canvas.drawText(qText, (START_X - mTextPaint.measureText(qText)) / 2, mPadding + i + UIHelper.pxFromDp(super.getContext(), 6), mTextPaint);
             canvas.drawText(verticalBar + "0⟩", START_X + (verticalBar == '|' ? -UIHelper.pxFromDp(super.getContext(), 2.8f) : UIHelper.pxFromDp(super.getContext(), 2f)), mPadding + i + UIHelper.pxFromDp(super.getContext(), 8f), whiteTextPaint);
@@ -207,13 +211,13 @@ public class QuantumView extends View {
                     float minus = UIHelper.pxFromDp(getContext(), 6f);
                     canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus, otherPaint);
                     if (isHighlighted) {
-                        canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus + hlPaint.getStrokeWidth(), hlPaint);
+                        canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus + hlPaintStrokeWidth, hlPaint);
                     }
                 } else if (symbol.equals(VisualOperator.CNOT.getSymbols()[1]) || symbol.equals("⊕")) {
                     float minus = UIHelper.pxFromDp(getContext(), -1.5f);
                     canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus, otherPaint);
                     if (isHighlighted) {
-                        canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus + hlPaint.getStrokeWidth(), hlPaint);
+                        canvas.drawCircle(areaRect.centerX(), areaRect.centerY(), areaRect.width() / 2 - minus + hlPaintStrokeWidth, hlPaint);
                     }
                 } else if (symbol.equals(VisualOperator.SWAP.getSymbols()[0])) {
                     strokePaint.setColor(v.getColor());
@@ -221,18 +225,20 @@ public class QuantumView extends View {
                     canvas.drawLine(areaRect.left + padding, areaRect.top + padding, areaRect.right - padding, areaRect.bottom - padding, strokePaint);
                     canvas.drawLine(areaRect.right - padding, areaRect.top + padding, areaRect.left + padding, areaRect.bottom - padding, strokePaint);
                     if (isHighlighted) {
-                        canvas.drawRect(areaRect.left - hlPaint.getStrokeWidth(),
-                                areaRect.top - hlPaint.getStrokeWidth(),
-                                areaRect.right + hlPaint.getStrokeWidth(),
-                                areaRect.bottom + hlPaint.getStrokeWidth(), hlPaint);
+                        canvas.drawRoundRect(areaRect.left - hlPaintStrokeWidth,
+                                areaRect.top - hlPaintStrokeWidth,
+                                areaRect.right + hlPaintStrokeWidth,
+                                areaRect.bottom + hlPaintStrokeWidth,
+                                roundRectRadius + hlPaintStrokeWidth, roundRectRadius + hlPaintStrokeWidth, hlPaint);
                     }
                 } else {
-                    canvas.drawRect(areaRect, otherPaint);
+                    canvas.drawRoundRect(areaRect, roundRectRadius, roundRectRadius, otherPaint);
                     if (isHighlighted) {
-                        canvas.drawRect(areaRect.left - hlPaint.getStrokeWidth(),
-                                areaRect.top - hlPaint.getStrokeWidth(),
-                                areaRect.right + hlPaint.getStrokeWidth(),
-                                areaRect.bottom + hlPaint.getStrokeWidth(), hlPaint);
+                        canvas.drawRoundRect(areaRect.left - hlPaintStrokeWidth,
+                                areaRect.top - hlPaintStrokeWidth,
+                                areaRect.right + hlPaintStrokeWidth,
+                                areaRect.bottom + hlPaintStrokeWidth,
+                                roundRectRadius + hlPaintStrokeWidth, roundRectRadius + hlPaintStrokeWidth, hlPaint);
                     }
                 }
                 if (j != 0) {
