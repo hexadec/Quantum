@@ -11,6 +11,7 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.text.Html;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.MenuItem;
 import android.view.View;
@@ -348,9 +349,7 @@ public class QuantumView extends View {
             VisualOperator op = gos.get(i);
             int[] qubits = op.getQubitIDs();
             for (int j = 0; j < qubits.length; j++) {
-                if (qubits[j] != qubit) {
-                    continue;
-                } else {
+                if (qubits[j] == qubit) {
                     if (currentPos++ == pos) {
                         return op;
                     }
@@ -371,9 +370,7 @@ public class QuantumView extends View {
             VisualOperator op = gos.get(i);
             int[] qubits = op.getQubitIDs();
             for (int j = 0; j < qubits.length; j++) {
-                if (qubits[j] != qubit) {
-                    continue;
-                } else {
+                if (qubits[j] == qubit) {
                     if (currentPos++ == pos) {
                         try {
                             return op.getRect().get(j);
@@ -491,6 +488,7 @@ public class QuantumView extends View {
                     }
                 }
             } catch (IndexOutOfBoundsException e) {
+                Log.v("QuantumView", "Controlled error");
             }
             gateNumber++;
             if (START_X + UIHelper.pxFromDp(super.getContext(), 2) + UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 3) + gateNumber * UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 3) > width)
@@ -535,7 +533,7 @@ public class QuantumView extends View {
             gos = new LinkedList<>();
             measuredQubits = new short[MAX_QUBITS];
             boolean hadError = false;
-            for (VisualOperator vo : ((LinkedList<VisualOperator>) data.operators)) {
+            for (VisualOperator vo : data.operators) {
                 if (vo == null) {
                     hadError = true;
                     continue;
@@ -599,6 +597,7 @@ public class QuantumView extends View {
 
     public void moveGate(float posx, float posy, boolean toRight) {
         int index = 0;
+        int qubit = 0;
         VisualOperator operator = null;
         outer:
         for (int i = 0; i < gos.size(); i++) {
@@ -606,6 +605,8 @@ public class QuantumView extends View {
             for (int j = 0; j < rectList.size(); j++) {
                 if (rectList.get(j).contains(posx, posy)) {
                     operator = gos.get(i);
+                    qubit = operator.getQubitIDs()[j];
+                    Log.e("X", "" + qubit);
                     index = i;
                     break outer;
                 }
@@ -618,16 +619,14 @@ public class QuantumView extends View {
         for (int i = index + direction; i < gos.size() && i > -1; i += direction) {
             int[] qubits = gos.get(i).getQubitIDs();
             for (int j = 0; j < qubits.length; j++) {
-                for (int m = 0; m < operator.getQubitIDs().length; m++) {
-                    if (qubits[j] == operator.getQubitIDs()[m]) {
-                        gos.remove(index);
-                        gos.add(i, operator);
-                        invalidate();
-                        undoList.addLast(new Doable(operator, DoableType.MOVE, getContext(), index, i));
-                        redoList.clear();
-                        saved = false;
-                        return;
-                    }
+                if (qubits[j] == qubit) {
+                    gos.remove(index);
+                    gos.add(i, operator);
+                    invalidate();
+                    undoList.addLast(new Doable(operator, DoableType.MOVE, getContext(), index, i));
+                    redoList.clear();
+                    saved = false;
+                    return;
                 }
             }
         }
@@ -649,7 +648,7 @@ public class QuantumView extends View {
             gos = new LinkedList<>();
             measuredQubits = new short[MAX_QUBITS];
             boolean hadError = false;
-            for (VisualOperator vo : ((LinkedList<VisualOperator>) visualOperators)) {
+            for (VisualOperator vo : visualOperators) {
                 if (vo == null) {
                     hadError = true;
                     continue;
@@ -838,18 +837,15 @@ public class QuantumView extends View {
         }
     };
 
-    MenuItem.OnMenuItemClickListener menuItemClickListener = new MenuItem.OnMenuItemClickListener() {
-        @Override
-        public boolean onMenuItemClick(MenuItem menuItem) {
-            switch (menuItem.getItemId()) {
-                case 0:
-                    undo();
-                    return true;
-                case 1:
-                    redo();
-                    return true;
-            }
-            return false;
+    MenuItem.OnMenuItemClickListener menuItemClickListener = (MenuItem menuItem) -> {
+        switch (menuItem.getItemId()) {
+            case 0:
+                undo();
+                return true;
+            case 1:
+                redo();
+                return true;
         }
+        return false;
     };
 }

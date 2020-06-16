@@ -173,8 +173,8 @@ public class MainActivity extends AppCompatActivity {
             //To prevent double clicking
             execute.setClickable(false);
             new Handler().postDelayed(() -> execute.setClickable(true), 500);
-            final int shots = Integer.valueOf(pref.getString("shots", "4096"));
-            final int threads = Integer.valueOf(pref.getString("threads", "8"));
+            final int shots = Integer.parseInt(pref.getString("shots", "4096"));
+            final int threads = Integer.parseInt(pref.getString("threads", "8"));
             final String separator = pref.getString("separator", ",");
             final boolean scientific = pref.getBoolean("sci_form", false);
             qv.shouldStop = false;
@@ -343,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
                             View layout = getLayoutInflater().inflate(R.layout.graph_layout, null);
                             int size = (int) Math.ceil(Math.pow(2, qv.getLastUsedQubit() + 1));
                             ((GraphView) layout.findViewById(R.id.graphView)).setData(probabilities, size == 0 ? 2 : size);
-                            ((Button) layout.findViewById(R.id.closeButton)).setOnClickListener((View button) -> {
+                            layout.findViewById(R.id.closeButton).setOnClickListener((View button) -> {
                                 ad.dismiss();
                             });
                             ad.setContentView(layout);
@@ -463,10 +463,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         gateHolder = findViewById(R.id.gate_view_holder);
-        gateHolder.postDelayed(() -> {
-            int navWidth = findViewById(R.id.nvParent).getWidth();
-            setUpShortcuts(gateHolder, pref, displayMetrics, getResources().getConfiguration(), navWidth);
-        }, 300);
 
         qv.postDelayed(() -> {
             QuantumViewModel model = new ViewModelProvider(MainActivity.this).get(QuantumViewModel.class);
@@ -485,7 +481,7 @@ public class MainActivity extends AppCompatActivity {
         hasMultiQubitGate = false;
         Qubit q2 = new Qubit();
         outer:
-        for (VisualOperator v : (LinkedList<VisualOperator>) qv.getOperators()) {
+        for (VisualOperator v : qv.getOperators()) {
             for (int q : v.getQubitIDs())
                 if (q == blochSpherePos) {
                     if (v.isMultiQubit()) {
@@ -511,7 +507,7 @@ public class MainActivity extends AppCompatActivity {
                 if (++blochSpherePos >= qv.getDisplayedQubits()) blochSpherePos = 0;
                 Qubit q3 = new Qubit();
                 outer:
-                for (VisualOperator v : (LinkedList<VisualOperator>) qv.getOperators()) {
+                for (VisualOperator v : qv.getOperators()) {
                     hasMultiQubitGate = false;
                     for (int q : v.getQubitIDs())
                         if (q == blochSpherePos) {
@@ -531,7 +527,7 @@ public class MainActivity extends AppCompatActivity {
                 if (--blochSpherePos < 0) blochSpherePos = qv.getDisplayedQubits() - 1;
                 Qubit q3 = new Qubit();
                 outer:
-                for (VisualOperator v : (LinkedList<VisualOperator>) qv.getOperators()) {
+                for (VisualOperator v : qv.getOperators()) {
                     hasMultiQubitGate = false;
                     for (int q : v.getQubitIDs())
                         if (q == blochSpherePos) {
@@ -564,15 +560,12 @@ public class MainActivity extends AppCompatActivity {
             d.setContentView(layout);
         }
 
-        Runnable r = () -> {
-            new UIHelper().runnableForGateSelection(MainActivity.this, qv, prevOperator, posx, posy, d);
-        };
+        Runnable r = () ->
+                new UIHelper().runnableForGateSelection(MainActivity.this, qv, prevOperator, posx, posy, d);
         d.setCancelable(true);
         d.setCanceledOnTouchOutside(true);
 
-        if (prevOperator != null && vo == null) {
-
-        } else {
+        if (!(prevOperator != null && vo == null)) {
             runOnUiThread(r);
         }
         d.show();
@@ -608,7 +601,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         super.onActivityResult(requestCode, resultCode, resultData);
-        if (resultCode == RESULT_OK && requestCode == 42) {
+        if (resultCode == RESULT_OK && requestCode == 42 && resultData.getData() != null) {
             Uri uri = resultData.getData();
             DocumentFile pickedFile = DocumentFile.fromSingleUri(this, uri);
             try {
@@ -640,13 +633,13 @@ public class MainActivity extends AppCompatActivity {
                 snackbar.getView().setBackgroundColor(0xffD81010);
                 snackbar.show();
             }
-        } else if (resultCode == RESULT_OK && requestCode == 43) {
+        } else if (resultCode == RESULT_OK && requestCode == 43 && resultData.getData() != null) {
             Uri treeUri = resultData.getData();
             getContentResolver().takePersistableUriPermission(treeUri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION |
                             Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
             UIHelper.saveFileActivityResult(treeUri, this, qv, false);
-        } else if (resultCode == RESULT_OK && requestCode == 44) {
+        } else if (resultCode == RESULT_OK && requestCode == 44 && resultData.getData() != null) {
             Uri treeUri = resultData.getData();
             getContentResolver().takePersistableUriPermission(treeUri,
                     Intent.FLAG_GRANT_READ_URI_PERMISSION |
@@ -682,24 +675,13 @@ public class MainActivity extends AppCompatActivity {
         navigationView.getMenu().getItem(navigationView.getMenu().size() - 2).setEnabled(probabilityMode != 2);
         findViewById(R.id.gate_view_holder).setVisibility(PreferenceManager.getDefaultSharedPreferences(this).getBoolean("enable_shortcuts", true) ? VISIBLE : GONE);
         super.onResume();
+        setUpNavbar(getResources().getConfiguration());
     }
 
     @Override
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        try {
-            View v = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.navigation_header, null, false);
-            ((TextView) v.findViewById(R.id.version)).setText(getPackageManager()
-                    .getPackageInfo(getPackageName(), 0).versionName);
-            navigationView.removeHeaderView(navigationView.getHeaderView(0));
-            navigationView.addHeaderView(v);
-            if (gateHolder != null)
-                new Handler().postDelayed(() -> {
-                    setUpShortcuts(gateHolder, PreferenceManager.getDefaultSharedPreferences(this), getResources().getDisplayMetrics(), newConfig, findViewById(R.id.nvParent).getWidth());
-                }, 200);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        setUpNavbar(newConfig);
     }
 
     @Override
@@ -810,6 +792,22 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    private void setUpNavbar(Configuration config) {
+        try {
+            View v = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.navigation_header, null, false);
+            ((TextView) v.findViewById(R.id.version)).setText(getPackageManager()
+                    .getPackageInfo(getPackageName(), 0).versionName);
+            navigationView.removeHeaderView(navigationView.getHeaderView(0));
+            navigationView.addHeaderView(v);
+            if (gateHolder != null)
+                new Handler().postDelayed(() -> {
+                    setUpShortcuts(gateHolder, PreferenceManager.getDefaultSharedPreferences(this), getResources().getDisplayMetrics(), config, findViewById(R.id.nvParent).getWidth());
+                }, 200);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public void setUpShortcuts(TableLayout gateHolder, SharedPreferences pref, DisplayMetrics displayMetrics, Configuration config, int navWidth) {
         gateHolder.removeAllViews();
         LinkedList<VisualOperator> operators = VisualOperator.getPredefinedGates(false);
@@ -846,12 +844,12 @@ public class MainActivity extends AppCompatActivity {
             lp.setMargins((int) UIHelper.pxFromDp(MainActivity.this, margin),
                     (int) UIHelper.pxFromDp(MainActivity.this, margin),
                     (int) UIHelper.pxFromDp(MainActivity.this, margin),
-                    (int) UIHelper.pxFromDp(MainActivity.this, margin * 2));
+                    (int) UIHelper.pxFromDp(MainActivity.this, margin * 2f));
         else
             lp.setMargins((int) UIHelper.pxFromDp(MainActivity.this, margin),
-                    (int) UIHelper.pxFromDp(MainActivity.this, margin / 2),
+                    (int) UIHelper.pxFromDp(MainActivity.this, margin / 2f),
                     (int) UIHelper.pxFromDp(MainActivity.this, margin),
-                    (int) UIHelper.pxFromDp(MainActivity.this, margin / 2));
+                    (int) UIHelper.pxFromDp(MainActivity.this, margin / 2f));
         gateHolder.setLayoutParams(lp);
         gateHolder.bringToFront();
     }

@@ -211,7 +211,7 @@ public class UIHelper {
                         int qubits = VisualOperator.findGateByName(gateAdapter.getItem(0)).getQubits();
                         if (qubits > 1)
                             ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
-                        ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(qubits == 1);
+                        mainView.findViewById(R.id.hermitianConjugate).setEnabled(qubits == 1);
                     }
                     int which = qv.whichQubit(posy);
                     qX[0].setProgress(which);
@@ -279,7 +279,7 @@ public class UIHelper {
                                 rotLayout.setVisibility(VISIBLE);
                                 filter.setSelection(0);
                                 ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.hermitian_conjugate);
-                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(true);
+                                mainView.findViewById(R.id.hermitianConjugate).setEnabled(true);
                             } else if (i == 4) {
                                 filter.setSelection(0);
                                 subLayout.setVisibility(GONE);
@@ -295,7 +295,7 @@ public class UIHelper {
                                     tX[m].setVisibility(GONE);
                                 }
                                 ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.inverse_qft);
-                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(true);
+                                mainView.findViewById(R.id.hermitianConjugate).setEnabled(true);
                             }
                         }
 
@@ -456,8 +456,8 @@ public class UIHelper {
                         }
                         qftQubits.setSelection(prevOperator.getQubits() - 2);
                         ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.inverse_qft);
-                        ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(true);
                         ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(prevOperator.getAngles()[2] == -1);
+                        mainView.findViewById(R.id.hermitianConjugate).setEnabled(true);
 
                     } else {
                         subLayout.setVisibility(VISIBLE);
@@ -749,7 +749,7 @@ public class UIHelper {
         params.setMargins((int) pxFromDp(context, 20), 0, (int) pxFromDp(context, 20), 0);
         EditText editText = new EditText(context);
         InputFilter[] filterArray = new InputFilter[]{new InputFilter.LengthFilter(32), (CharSequence source, int start, int end, Spanned dest, int sta, int en) -> {
-            if (source != null && "/\\:?;!~\'\",^ˇ|+<>[]{}".contains(("" + source))) {
+            if (source != null && "/\\:?;!~'\",^ˇ|+<>[]{}".contains(("" + source))) {
                 return "";
             }
             return null;
