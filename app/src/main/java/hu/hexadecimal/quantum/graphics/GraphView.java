@@ -190,9 +190,10 @@ public class GraphView extends View {
     }
 
     private void colorRectPaint(float argument) {
-        int baseColor = 0xff000022;
-        float argNorm = (float) ((argument + Math.PI) / 2f / Math.PI) * 216;
-        rectPaint.setColor((int)(baseColor + argNorm));
+        int baseColor = 0xff220022;
+        float blue = (float) ((argument + Math.PI) / 2f / Math.PI) * 216;
+        float red = 221 - (float) ((argument + Math.PI) / 2f / Math.PI) * 216;
+        rectPaint.setColor((int)(baseColor + blue + (int) red * 0x10000));
         Log.v("GraphView", "Paint color: " + Integer.toHexString(rectPaint.getColor()));
     }
 
