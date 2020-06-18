@@ -342,7 +342,14 @@ public class MainActivity extends AppCompatActivity {
                         ad.getButton(DialogInterface.BUTTON_NEGATIVE).setOnClickListener((View v) -> {
                             View layout = getLayoutInflater().inflate(R.layout.graph_layout, null);
                             int size = (int) Math.ceil(Math.pow(2, qv.getLastUsedQubit() + 1));
-                            ((GraphView) layout.findViewById(R.id.graphView)).setData(probabilities, size == 0 ? 2 : size);
+                            float[] arguments = null;
+                            if (stateVector != null) {
+                                arguments = new float[stateVector.length];
+                                for(int i = 0; i < stateVector.length; i++) {
+                                    arguments[i] = (float) stateVector[i].arg();
+                                }
+                            }
+                            ((GraphView) layout.findViewById(R.id.graphView)).setData(probabilities, size == 0 ? 2 : size, arguments);
                             layout.findViewById(R.id.closeButton).setOnClickListener((View button) -> {
                                 ad.dismiss();
                             });

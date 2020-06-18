@@ -47,10 +47,10 @@ public class Complex {
             if (Math.abs(imaginary) < 0.000000001) {
                 imaginary = 0;
                 return 0;
-            } else return (imaginary >= 0 ? Math.PI / 2 : -1 * Math.PI / 2);
+            } else return (imaginary >= 0 ? Math.PI / 2 : Math.PI / -2);
         }
         if (Math.abs(imaginary) < 0.000000001) imaginary = 0;
-        return Math.atan(imaginary / real) + (real < 0 ? Math.PI : 0);
+        return Math.atan2(imaginary, real);
     }
 
     public void invert() {
@@ -240,6 +240,7 @@ public class Complex {
 
     /**
      * Converts the Complex number to a string
+     *
      * @param decimals how many decimal places should the re and im parts have
      * @return the Complex number formatted as x+yi
      */

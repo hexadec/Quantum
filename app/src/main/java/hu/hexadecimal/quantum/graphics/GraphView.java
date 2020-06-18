@@ -23,6 +23,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 /**
  * A view used to display the probabilities/results as a graph
@@ -30,7 +31,7 @@ import androidx.annotation.NonNull;
 public class GraphView extends View {
 
     protected float min, max, size;
-    protected float[] positions, values;
+    protected float[] positions, values, complexArguments;
     protected Paint axisPaint, gridPaint, linePaint, labelPaint, rectPaint, naPaint;
     protected float START_X, START_Y, END_X, END_Y;
 
@@ -47,17 +48,11 @@ public class GraphView extends View {
         setupView();
     }
 
-    public GraphView(Context context, @NonNull float[] values, int size) {
-        super(context);
-        setupView();
-        this.values = values;
-        this.size = size;
-        positions = new float[values.length * 4];
-        calculateMinMax();
-        invalidate();
-    }
-
-    public void setData(@NonNull float[] data, int size) {
+    public void setData(@NonNull float[] data, int size, @Nullable float[] arguments) {
+        if (data.length < size || (arguments != null && arguments.length < size)) {
+            throw new RuntimeException("Data size error: " + data.length + " size: " + size);
+        }
+        this.complexArguments = arguments;
         this.values = data;
         this.size = size;
         positions = new float[values.length * 4];
@@ -178,6 +173,9 @@ public class GraphView extends View {
                 float w = avWidth / 1.2f;
                 float l = START_X + astroke2 + avWidth * j + (avWidth - w) / 2;
                 float r = l + w;
+                if (complexArguments != null) {
+                    colorRectPaint(complexArguments[j]);
+                }
                 canvas.drawRect(l, t, r, height + START_Y, rectPaint);
                 if (size < 32) {
                     canvas.save();
@@ -189,6 +187,13 @@ public class GraphView extends View {
         }
         blurBitmap(bitmap, 1.2f);
         c.drawBitmap(bitmap, new Rect(0, 0, canvas.getWidth(), canvas.getHeight()), new Rect(0, 0, c.getWidth(), c.getHeight()), rectPaint);
+    }
+
+    private void colorRectPaint(float argument) {
+        int baseColor = 0xff000022;
+        float argNorm = (float) ((argument + Math.PI) / 2f / Math.PI) * 216;
+        rectPaint.setColor((int)(baseColor + argNorm));
+        Log.v("GraphView", "Paint color: " + Integer.toHexString(rectPaint.getColor()));
     }
 
     private void blurBitmap(Bitmap bitmap, float radius) {
