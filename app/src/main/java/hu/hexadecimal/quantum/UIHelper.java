@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
-import android.text.Html;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.Spanned;
@@ -668,7 +667,10 @@ public class UIHelper {
     static void saveFileActivityResult(Uri treeUri, AppCompatActivity context, QuantumView qv, boolean export) {
         DocumentFile pickedDir = DocumentFile.fromTreeUri(context, treeUri);
         try {
-            DocumentFile newFile = pickedDir.createFile("application/octet-stream", qv.name + (export ? QuantumView.OPENQASM_FILE_EXTENSION : ""));
+            DocumentFile newFile = pickedDir.findFile(qv.name + (export ? QuantumView.OPENQASM_FILE_EXTENSION : QuantumView.FILE_EXTENSION));
+            if (newFile != null)
+                newFile.delete();
+            newFile = pickedDir.createFile("application/octet-stream", qv.name + (export ? QuantumView.OPENQASM_FILE_EXTENSION : QuantumView.FILE_EXTENSION));
             OutputStream out = context.getContentResolver().openOutputStream(newFile.getUri());
             if (export) {
                 out.write(qv.openQASMExport().getBytes());
@@ -677,7 +679,7 @@ public class UIHelper {
             }
             out.flush();
             out.close();
-            Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), context.getString(R.string.experiment_saved) + " \n" + qv.name + (export ? QuantumView.OPENQASM_FILE_EXTENSION : ""), Snackbar.LENGTH_LONG);
+            Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), context.getString(R.string.experiment_saved) + " \n" + qv.name + (export ? QuantumView.OPENQASM_FILE_EXTENSION : QuantumView.FILE_EXTENSION), Snackbar.LENGTH_LONG);
             ((TextView) snackbar.getView().findViewById(com.google.android.material.R.id.snackbar_text)).setSingleLine(false);
             snackbar.show();
         } catch (Exception e) {
@@ -704,7 +706,9 @@ public class UIHelper {
                         Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
                 pickedDir = null;
             }
-            DocumentFile newFile = pickedDir.findFile(name) == null ? pickedDir.createFile("application/octet-stream", name) : pickedDir.findFile(name);
+            if (pickedDir.findFile(name) != null)
+                pickedDir.findFile(name).delete();
+            DocumentFile newFile = pickedDir.createFile("application/octet-stream", name);
             OutputStream out = context.getContentResolver().openOutputStream(newFile.getUri());
             if (export) {
                 out.write(qv.openQASMExport().getBytes());

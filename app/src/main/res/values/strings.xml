@@ -95,7 +95,7 @@
     <string name="move_gate_to_left">Move the gate to the left</string>
     <string name="move_gate_to_right">Move the gate to the right</string>
     <string name="export_into_qasm">Export into OpenQASM</string>
-    <string name="export_into_qasm_compatibility">Please be careful! Multi-qubit user-defined gates and QFT cannot be exported to OpenQASM. Please check the export file for any messages.</string>
+    <string name="export_into_qasm_compatibility">Please be careful! Multi-qubit user-defined gates cannot be exported to OpenQASM. Please check the export file for any messages.</string>
     <string name="export">Export</string>
     <string name="warning">Warning</string>
     <string name="are_you_sure_to_delete">Do you really want to remove all gates?</string>

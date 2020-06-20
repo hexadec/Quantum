@@ -8,8 +8,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Field;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 
 import androidx.annotation.NonNull;
@@ -1004,11 +1007,21 @@ public class VisualOperator {
                 if (i == 0 || j == 0)
                     mat[i][j] = new Complex(1);
                 else {
-                    mat[i][j] = Complex.exponent(complexOmega, new Complex((i * j * (inverse ? -1 : 1)) % MATRIX_DIM));
+                    mat[reverseBits(i, qubit_ids.length)][reverseBits(j, qubit_ids.length)] = Complex.exponent(complexOmega, new Complex((i * j * (inverse ? -1 : 1)) % MATRIX_DIM));
                 }
             }
         }
         return mat;
+    }
+
+    private int reverseBits(int number, int bits) {
+        int reverse = 0;
+        for (int i = 0; i < bits; ++i) {
+            reverse <<= 1;
+            reverse |= (number & 1);
+            number >>= 1;
+        }
+        return reverse;
     }
 
     public boolean isSpecial() {
@@ -1164,6 +1177,30 @@ public class VisualOperator {
             double[] angles = getAngles();
             line += "u3(" + angles[0] + "," + angles[1] + "," + angles[2] + ") qubit[" + getQubitIDs()[0] + "];\n";
             line += "//U3 autoconvert: " + getName();
+        } else if (isQFT()) {
+            line += "//Begin QFT autoconvert\n";
+            DecimalFormat df = new DecimalFormat("#0.000####", new DecimalFormatSymbols(Locale.UK));
+            for (int i = qubit_ids.length - 1; i >= 0; i--) {
+                line += "h qubit[" + getQubitIDs()[i] + "];\n";
+                for (int j = 0; j < i; j++) {
+                    line += "cu1(" + df.format(Math.PI / 2 / Math.pow(2, i - j - 1)) + ") qubit[" + getQubitIDs()[i] + "],qubit[" + getQubitIDs()[j] + "];\n";
+                }
+            }
+            switch (qubit_ids.length) {
+                case 2:
+                    line += "swap qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[1] + "];\n";
+                    break;
+                case 3:
+                    line += "swap qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[2] + "];\n";
+                    break;
+                case 4:
+                    line += "swap qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[3] + "];\n";
+                    line += "swap qubit[" + getQubitIDs()[2] + "],qubit[" + getQubitIDs()[1] + "];\n";
+                    break;
+                default:
+                    Log.e("Visual Operator", "Too many qubits for QFT");
+            }
+            line += "//End QFT autoconvert";
         } else {
             line += "//The following gate cannot be exported into OpenQASM: " + getName();
         }
