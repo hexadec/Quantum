@@ -248,7 +248,6 @@ public class Complex {
         String decimalChars = new String(new char[decimals]).replace("\0", "#");
         StringBuilder sb = new StringBuilder();
         if (Math.abs(real) >= Math.pow(10, -1 * (decimals + 1)) * 5) {
-            //if (real >= 0) sb.append('+');
             sb.append(new DecimalFormat("0." + decimalChars, new DecimalFormatSymbols(Locale.UK)).format(real));
         }
         if (Math.abs(imaginary) >= Math.pow(10, -1 * (decimals + 1)) * 5) {

@@ -23,7 +23,7 @@ import androidx.annotation.NonNull;
  */
 public class VisualOperator {
 
-    public static final long helpVersion = 41L;
+    public static final long helpVersion = 44L;
     private Complex[][] matrix;
     //last one is to clarify meaning for navbar, so length is +1 to qubits
     private String[] symbols;
@@ -707,10 +707,6 @@ public class VisualOperator {
                 for (int o = 0; o < secondDim; o++)
                     for (int p = 0; p < secondDim; p++)
                         result[secondDim * m + o][secondDim * n + p] = Complex.multiply(first[m][n], second[o][p]);
-
-        for (int i = 0; i < result[0].length; i++)
-            for (int j = 0; j < result[0].length; j++)
-                if (result[i][j] == null) result[i][j] = new Complex(0);
 
         return result;
     }

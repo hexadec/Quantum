@@ -27,7 +27,7 @@ public class ExperimentRunner {
     public ExperimentRunner(QuantumView quantumView) {
         v = (LinkedList<VisualOperator>) quantumView.getOperators().clone();
         int lUsed = quantumView.getLastUsedQubit();
-        //TODO check bug source (tensor)
+        //TODO check bug source (tensor): fixed?
         MAX_QUBIT = lUsed < 2 ? 2 : lUsed + 1;
         this.quantumView = quantumView;
     }
