@@ -3,32 +3,33 @@ A software for Android that emulates the actions of a quantum computer
 
 > It's main purpose is to enable testing to everyone, even on the go. 
 > Since this app is only an emulator, it can show the position of the qubits on the bloch sphere.
-> This app will also show the matrix and vector representations of the states and operators in a straightforward way.
+> This app can also show the vector representations of the states in a straightforward way.
 > The limit is only the computing power of your device!
 
 ### About the backend
 > The app uses a home-made backend written entirely in Java. Since the app does not use
-> Qiskit, no such functionality is included. Scripts cannot be run, however, it is coming soon!
+> Qiskit, no such functionality is included. Scripts cannot be run, however, it is planned!
 
 ### Main features
 
-- At most 10 qubits
+- 10 qubits
 - Gates with at most 4 qubits
 - Parallel processing (1-64 threads)
 - Extremely high number of shots (up to 2^20)
-- Lots of predefined gates
-- Get results immediately
-- Export results
+- Numerous predefined gates
+- Users can define custom gates
+- Get results immediately &rarr; No queues, everything is done locally
+- Export results as .csv
 - Import / Export gate sequence & Export as OpenQASM
 - Show bloch sphere
 - Display the final state-vector of the system
+- Graph the probability distribution
 
 ### Predefined Gates
 ##### Single Qubit
 - Hadamard
 - Pauli-X/Y/Z
-- S-gate (π/2 phase shift)
-- T-gate (π/4 phase shift)
+- S-gate, T-gate (π/2 & π/4 phase shift)
 - √NOT
 - Identity
 - U3
@@ -40,8 +41,9 @@ A software for Android that emulates the actions of a quantum computer
 - Controlled S-gate
 - Controlled Hadamard
 - SWAP
-- Toffoli
-- Fredkin
+- Toffoli (CCNOT)
+- Fredkin (CSWAP)
+- Quantum Fourier Transform
 
 #### Desktop key shortcuts
 |Key|Action
