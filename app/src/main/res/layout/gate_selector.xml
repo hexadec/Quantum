@@ -376,7 +376,7 @@
                 android:progressDrawable="@drawable/seek_progress"
                 android:thumb="@drawable/seek_thumb"
                 android:visibility="gone"
-                app:layout_constraintBottom_toTopOf="@+id/hermitianConjugate"
+                app:layout_constraintBottom_toTopOf="@+id/order_fifth"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/qtext4"
                 app:layout_constraintTop_toBottomOf="@+id/order_third" />
@@ -392,6 +392,66 @@
                 app:layout_constraintEnd_toStartOf="@+id/order_fourth"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/order_fourth" />
+
+
+            <SeekBar
+                android:id="@+id/order_fifth"
+                style="@style/Widget.AppCompat.SeekBar.Discrete"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="12dp"
+                android:max="7"
+                android:progressDrawable="@drawable/seek_progress"
+                android:thumb="@drawable/seek_thumb"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/order_sixth"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/qtext5"
+                app:layout_constraintTop_toBottomOf="@+id/order_fourth" />
+
+            <TextView
+                android:id="@+id/qtext5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="q1"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/order_fifth"
+                app:layout_constraintEnd_toStartOf="@+id/order_fifth"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/order_fifth" />
+
+            <SeekBar
+                android:id="@+id/order_sixth"
+                style="@style/Widget.AppCompat.SeekBar.Discrete"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="12dp"
+                android:max="7"
+                android:progressDrawable="@drawable/seek_progress"
+                android:thumb="@drawable/seek_thumb"
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/hermitianConjugate"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/qtext6"
+                app:layout_constraintTop_toBottomOf="@+id/order_fifth" />
+
+            <TextView
+                android:id="@+id/qtext6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="q1"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="@id/order_sixth"
+                app:layout_constraintEnd_toStartOf="@+id/order_sixth"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/order_sixth" />
+
 
             <Button
                 android:id="@+id/cancel"
@@ -432,7 +492,7 @@
                 android:text="@string/hermitian_conjugate"
                 app:layout_constraintBottom_toTopOf="@+id/cancel"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/order_fourth" />
+                app:layout_constraintTop_toBottomOf="@+id/order_sixth" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

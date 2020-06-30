@@ -130,12 +130,16 @@ public class UIHelper {
                     mainView.findViewById(R.id.order_first),
                     mainView.findViewById(R.id.order_second),
                     mainView.findViewById(R.id.order_third),
-                    mainView.findViewById(R.id.order_fourth)};
+                    mainView.findViewById(R.id.order_fourth),
+                    mainView.findViewById(R.id.order_fifth),
+                    mainView.findViewById(R.id.order_sixth)};
             final TextView[] tX = new TextView[]{
                     mainView.findViewById(R.id.qtext1),
                     mainView.findViewById(R.id.qtext2),
                     mainView.findViewById(R.id.qtext3),
-                    mainView.findViewById(R.id.qtext4)};
+                    mainView.findViewById(R.id.qtext4),
+                    mainView.findViewById(R.id.qtext5),
+                    mainView.findViewById(R.id.qtext6)};
             final LinkedList<String> mGates = VisualOperator.getPredefinedGateNames();
             Collections.sort(mGates);
             ArrayAdapter<String> gateAdapter =
@@ -175,6 +179,12 @@ public class UIHelper {
                             }
                         }
                         switch (prevOperator.getQubitIDs().length) {
+                            case 6:
+                                qX[5].setVisibility(View.VISIBLE);
+                                tX[5].setVisibility(View.VISIBLE);
+                            case 5:
+                                qX[4].setVisibility(View.VISIBLE);
+                                tX[4].setVisibility(View.VISIBLE);
                             case 4:
                                 qX[3].setVisibility(View.VISIBLE);
                                 tX[3].setVisibility(View.VISIBLE);
@@ -196,7 +206,14 @@ public class UIHelper {
                             case 3:
                                 qX[3].setVisibility(GONE);
                                 tX[3].setVisibility(GONE);
+                            case 4:
+                                qX[4].setVisibility(GONE);
+                                tX[4].setVisibility(GONE);
+                            case 5:
+                                qX[5].setVisibility(GONE);
+                                tX[5].setVisibility(GONE);
                             default:
+
                         }
                         {
                             int qubits = prevOperator.getQubits();
@@ -309,7 +326,7 @@ public class UIHelper {
                                 qX[j].setVisibility(VISIBLE);
                                 tX[j].setVisibility(VISIBLE);
                             }
-                            for (int m = 3; m >= i + 2; m--) {
+                            for (int m = 5; m >= i + 2; m--) {
                                 qX[m].setVisibility(GONE);
                                 tX[m].setVisibility(GONE);
                             }

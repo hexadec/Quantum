@@ -212,6 +212,12 @@ public class VisualOperator {
             case 16:
                 NQBITS = 4;
                 break;
+            case 32:
+                NQBITS = 5;
+                break;
+            case 64:
+                NQBITS = 6;
+                break;
             default:
                 throw new NullPointerException("Invalid dimension");
         }
@@ -286,8 +292,9 @@ public class VisualOperator {
         this.lambda = lambda;
     }
 
+    //QFT
     public VisualOperator(int qubits, boolean inverse) {
-        if (qubits < 2 || qubits > 4) {
+        if (qubits < 2 || qubits > 6) {
             throw new IllegalArgumentException("Invalid value for qubits: " + qubits);
         }
         MATRIX_DIM = (int) Math.round(Math.pow(2, qubits));
@@ -867,6 +874,12 @@ public class VisualOperator {
             case 16:
                 NQBITS = 4;
                 break;
+            case 32:
+                NQBITS = 5;
+                break;
+            case 64:
+                NQBITS = 6;
+                break;
             default:
                 throw new NullPointerException("Invalid dimension");
         }
@@ -1191,7 +1204,16 @@ public class VisualOperator {
                     break;
                 case 4:
                     line += "swap qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[3] + "];\n";
-                    line += "swap qubit[" + getQubitIDs()[2] + "],qubit[" + getQubitIDs()[1] + "];\n";
+                    line += "swap qubit[" + getQubitIDs()[1] + "],qubit[" + getQubitIDs()[2] + "];\n";
+                    break;
+                case 5:
+                    line += "swap qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[4] + "];\n";
+                    line += "swap qubit[" + getQubitIDs()[1] + "],qubit[" + getQubitIDs()[3] + "];\n";
+                    break;
+                case 6:
+                    line += "swap qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[5] + "];\n";
+                    line += "swap qubit[" + getQubitIDs()[1] + "],qubit[" + getQubitIDs()[4] + "];\n";
+                    line += "swap qubit[" + getQubitIDs()[2] + "],qubit[" + getQubitIDs()[3] + "];\n";
                     break;
                 default:
                     Log.e("Visual Operator", "Too many qubits for QFT");
