@@ -528,6 +528,10 @@ public class UIHelper {
                                         qX[3].setVisibility(GONE);
                                         tX[3].setVisibility(GONE);
                                     default:
+                                        qX[4].setVisibility(GONE);
+                                        tX[4].setVisibility(GONE);
+                                        qX[5].setVisibility(GONE);
+                                        tX[5].setVisibility(GONE);
                                 }
                             }
                         }
