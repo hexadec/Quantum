@@ -239,17 +239,4 @@ public class ExperimentRunner {
             }
         }
     }
-
-    public Complex[][] getFinalUnitaryMatrix() {
-        final int DIM = 1 << MAX_QUBIT;
-        Complex[][] matrix = new Complex[DIM][DIM];
-        for (int i = 0; i < DIM; i++) {
-            Complex[] state = getStateVector(i);
-            for (int j = 0; j < DIM; j++) {
-                matrix[j][i] = state[j];
-                Log.w(i + "-" + j, state[j].toString(2));
-            }
-        }
-        return matrix;
-    }
 }

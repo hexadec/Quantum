@@ -56,6 +56,9 @@ import static android.view.View.VISIBLE;
  */
 public class UIHelper {
 
+    public static final int SNACKBAR_ERROR_COLOR = 0xffD81010;
+    public static final String STATUS_BAR_COLOR = "#171717";
+
     private static final double[] importantAngles = new double[]{0, Math.PI / 8, Math.PI / 6, Math.PI / 5, Math.PI / 4, Math.PI / 3, Math.PI / 8 * 3, Math.PI / 5 * 2, Math.PI / 2, Math.PI / 3 * 2, Math.PI / 4 * 3, Math.PI};
     private static final String[] importantAngleNames = new String[]{"0", "π/8", "π/6", "π/5", "π/4", "π/3", "3π/8", "2π/5", "π/2", "2π/3", "3π/4", "π"};
 
@@ -579,7 +582,7 @@ public class UIHelper {
                                         if (quids[i] == quids[j]) {
                                             d.cancel();
                                             Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), R.string.use_different_qubits, Snackbar.LENGTH_LONG);
-                                            snackbar.getView().setBackgroundColor(0xffD81010);
+                                            snackbar.getView().setBackgroundColor(SNACKBAR_ERROR_COLOR);
                                             snackbar.show();
                                             return;
                                         }
@@ -632,7 +635,7 @@ public class UIHelper {
                                     if (quids[i] == quids[j]) {
                                         d.cancel();
                                         Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), R.string.use_different_qubits, Snackbar.LENGTH_LONG);
-                                        snackbar.getView().setBackgroundColor(0xffD81010);
+                                        snackbar.getView().setBackgroundColor(SNACKBAR_ERROR_COLOR);
                                         snackbar.show();
                                         return;
                                     }
@@ -687,6 +690,9 @@ public class UIHelper {
 
     static void saveFileActivityResult(Uri treeUri, AppCompatActivity context, QuantumView qv, boolean export) {
         DocumentFile pickedDir = DocumentFile.fromTreeUri(context, treeUri);
+        if (qv.name.endsWith(QuantumView.FILE_EXTENSION) || qv.name.endsWith(QuantumView.OPENQASM_FILE_EXTENSION)) {
+            qv.name = qv.name.substring(0, qv.name.lastIndexOf('.'));
+        }
         try {
             DocumentFile newFile = pickedDir.findFile(qv.name + (export ? QuantumView.OPENQASM_FILE_EXTENSION : QuantumView.FILE_EXTENSION));
             if (newFile != null)
@@ -706,7 +712,7 @@ public class UIHelper {
         } catch (Exception e) {
             e.printStackTrace();
             Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
-            snackbar.getView().setBackgroundColor(0xffD81010);
+            snackbar.getView().setBackgroundColor(SNACKBAR_ERROR_COLOR);
             snackbar.show();
         }
     }
@@ -715,11 +721,11 @@ public class UIHelper {
     static void saveFile(AppCompatActivity context, EditText editText, QuantumView qv, String filename, boolean export) {
         try {
             String name = qv.name = editText.getText().toString().length() < 1 ? filename : editText.getText().toString();
-            if (!export && !name.endsWith(QuantumView.FILE_EXTENSION)) {
-                name += QuantumView.FILE_EXTENSION;
-            } else if (export && !name.endsWith(QuantumView.OPENQASM_FILE_EXTENSION)) {
-                name += QuantumView.OPENQASM_FILE_EXTENSION;
+            if (qv.name.endsWith(QuantumView.FILE_EXTENSION) || qv.name.endsWith(QuantumView.OPENQASM_FILE_EXTENSION)) {
+                qv.name = qv.name.substring(0, qv.name.lastIndexOf('.'));
+                name = qv.name;
             }
+            name += export ? QuantumView.OPENQASM_FILE_EXTENSION : QuantumView.FILE_EXTENSION;
             Uri uri = context.getContentResolver().getPersistedUriPermissions().get(0).getUri();
             DocumentFile pickedDir = DocumentFile.fromTreeUri(context, uri);
             if (!pickedDir.exists()) {
@@ -752,7 +758,7 @@ public class UIHelper {
         } catch (Exception e) {
             e.printStackTrace();
             Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), R.string.unknown_error, Snackbar.LENGTH_LONG);
-            snackbar.getView().setBackgroundColor(0xffD81010);
+            snackbar.getView().setBackgroundColor(SNACKBAR_ERROR_COLOR);
             snackbar.show();
         }
         qv.saved = true;

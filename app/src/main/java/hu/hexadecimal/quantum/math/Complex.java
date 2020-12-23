@@ -357,7 +357,7 @@ public class Complex {
                 double argument = arg.length() > 0 ? Double.valueOf(arg) : 1;
                 return new Complex(modulus, argument, false);
             } else {
-                throw new NumberFormatException("Unknown format!");
+                throw new NumberFormatException("Unknown complex format!");
             }
             return new Complex(real, imaginary);
         } catch (Exception e) {

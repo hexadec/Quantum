@@ -48,6 +48,9 @@ import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
+import static hu.hexadecimal.quantum.UIHelper.SNACKBAR_ERROR_COLOR;
+import static hu.hexadecimal.quantum.UIHelper.STATUS_BAR_COLOR;
+
 /**
  * Activity used to edit and store user defined VisualOperators
  */
@@ -66,9 +69,9 @@ public class MatrixEditorActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#171717")));
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor(STATUS_BAR_COLOR)));
         Window window = getWindow();
-        window.setStatusBarColor(Color.parseColor("#171717"));
+        window.setStatusBarColor(Color.parseColor(STATUS_BAR_COLOR));
 
         new Thread(() -> {
 
@@ -87,7 +90,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                     try {
                         if (file.getName().endsWith(VisualOperator.FILE_EXTENSION_LEGACY)) {
                             Snackbar snackbar = Snackbar.make(findViewById(R.id.parent3), R.string.fileformat_not_supported, Snackbar.LENGTH_SHORT);
-                            snackbar.getView().setBackgroundColor(0xffD81010);
+                            snackbar.getView().setBackgroundColor(SNACKBAR_ERROR_COLOR);
                             snackbar.show();
                         } else if (file.getName().endsWith(VisualOperator.FILE_EXTENSION)) {
                             BufferedReader in = new BufferedReader(new InputStreamReader(getContentResolver().openInputStream(file.getUri())));
@@ -274,7 +277,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                     } catch (Exception e) {
                         e.printStackTrace();
                         Snackbar snackbar = Snackbar.make(findViewById(R.id.parent3), R.string.unknown_error, Snackbar.LENGTH_LONG);
-                        snackbar.getView().setBackgroundColor(0xffD81010);
+                        snackbar.getView().setBackgroundColor(SNACKBAR_ERROR_COLOR);
                         snackbar.show();
                         d.cancel();
                         return;

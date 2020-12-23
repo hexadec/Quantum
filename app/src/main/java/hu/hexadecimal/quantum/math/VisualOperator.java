@@ -23,7 +23,7 @@ import androidx.annotation.NonNull;
  */
 public class VisualOperator {
 
-    public static final long helpVersion = 44L;
+    public static final long helpVersion = 45L;
     private Complex[][] matrix;
     //last one is to clarify meaning for navbar, so length is +1 to qubits
     private String[] symbols;
