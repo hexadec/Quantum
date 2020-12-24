@@ -45,6 +45,7 @@ public class QuantumView extends View {
 
     private LinkedList<VisualOperator> visualOperators;
     private short[] measuredQubits;
+    private boolean[] ignoredQubits;
     private int[] highlight = new int[]{-1, -1};
     private RectF highlightRect;
     public boolean saved;
@@ -104,6 +105,7 @@ public class QuantumView extends View {
         hlPaint.setStrokeWidth(UIHelper.pxFromDp(context, 1.5f));
 
         measuredQubits = new short[MAX_QUBITS];
+        ignoredQubits = new boolean[MAX_QUBITS];
 
         mTextPaint = new Paint(Paint.LINEAR_TEXT_FLAG | Paint.ANTI_ALIAS_FLAG);
         mTextPaint.setColor(Color.DKGRAY);
@@ -156,7 +158,7 @@ public class QuantumView extends View {
             mPath.close();
             canvas.drawPath(mPath, linePaint);
 
-            otherPaint.setColor(measuredQubits[qubitPos] > 0 ? 0xffBA2121 : 0xff555555);
+            otherPaint.setColor(ignoredQubits[qubitPos] ? 0xffaaaaaa : measuredQubits[qubitPos] > 0 ? 0xffba2121 : 0xff555555);
             canvas.drawRoundRect(START_X,
                     mPadding + i - UIHelper.pxFromDp(super.getContext(), GATE_SIZE),
                     START_X + UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 2),
@@ -283,6 +285,19 @@ public class QuantumView extends View {
         }
         for (int qubitID : qubitIDs) gatesNumber[qubitID] = max;
         return max;
+    }
+
+    public boolean isStartRow(float posx) {
+        return (START_X + UIHelper.pxFromDp(super.getContext(), GATE_SIZE * 2)) >= posx;
+    }
+
+    public void toggleIgnoredState(int qubit) {
+        ignoredQubits[qubit] = !ignoredQubits[qubit];
+        invalidate();
+    }
+
+    public boolean[] getIgnoredQubits() {
+        return ignoredQubits;
     }
 
     public VisualOperator whichGate(float posx, float posy) {

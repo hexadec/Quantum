@@ -27,8 +27,8 @@ public class ExperimentRunner {
     public ExperimentRunner(QuantumView quantumView) {
         v = (LinkedList<VisualOperator>) quantumView.getOperators().clone();
         int lUsed = quantumView.getLastUsedQubit();
-        //TODO check bug source (tensor): fixed?
-        MAX_QUBIT = lUsed < 2 ? 2 : lUsed + 1;
+        //TODO check bug source (tensor!!)
+        MAX_QUBIT = lUsed < 7 ? 7 : lUsed + 1;
         this.quantumView = quantumView;
     }
 
@@ -75,7 +75,7 @@ public class ExperimentRunner {
                 t[i] = new Thread(() -> {
                     try {
                         //To prevent each thread from using the same random numbers
-                        Thread.sleep(0, new Random().nextInt(1000) * t_id);
+                        Thread.sleep(0, new Random().nextInt(10000) * t_id);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

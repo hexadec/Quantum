@@ -672,6 +672,7 @@ public class VisualOperator {
         return inputMatrix;
     }
 
+    //TODO: WARNING! Serious bug here, something to do w/ MQ operator on last used qubit
     private static Complex[][] getQubitTensor(int qubits, VisualOperator v) {
         if (v.getQubitIDs().length != v.getQubits() || v.getQubits() < 1) return null;
         if (v.getQubits() == 1) return getSingleQubitTensor(qubits, v.getQubitIDs()[0], v);
@@ -762,6 +763,7 @@ public class VisualOperator {
         if (NQBITS == 1) {
             return operateOn(qubitArray, getQubitTensor(qubits, this));
         }
+        //TODO: WARNING! Serious bug here(?), something to do w/ MQ operator on last used qubit
         Complex[] inputMatrix = new Complex[qubitArray.length];
         for (int i = 0; i < qubitArray.length; i++) {
             inputMatrix[getPos(qubits, i)] = qubitArray[i].copy();

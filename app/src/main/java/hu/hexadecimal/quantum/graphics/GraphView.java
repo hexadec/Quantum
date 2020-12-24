@@ -154,7 +154,7 @@ public class GraphView extends View {
 
         //Step size
         final int step = 1;
-        if (size >= 256 /*2^5*/) {
+        if (size >= 512 /*2^9*/) {
             for (int i = 0; i < size - step; i += step) {
                 final float current = values[i];
                 final float next = values[i + step];

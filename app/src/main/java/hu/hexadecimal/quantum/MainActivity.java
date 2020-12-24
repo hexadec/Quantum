@@ -141,7 +141,11 @@ public class MainActivity extends AppCompatActivity {
                 executeFab.getLocationOnScreen(loc);
                 qv.highlightOperator(new int[]{-1, -1});
                 if (loc[0] < rx && loc[1] < ry) return false;
-                showAddGateDialog(x, y, null);
+                if (qv.isStartRow(x) && qv.whichQubit(y) >= 0) {
+                    qv.toggleIgnoredState(qv.whichQubit(y));
+                } else {
+                    showAddGateDialog(x, y, null);
+                }
                 return true;
             }
         });
@@ -163,6 +167,16 @@ public class MainActivity extends AppCompatActivity {
             //To prevent double clicking
             executeFab.setClickable(false);
             new Handler().postDelayed(() -> executeFab.setClickable(true), 500);
+            if (!pref.getBoolean("measurement_toggle_help", false)) {
+                AlertDialog.Builder meas_dialog_builder = new AlertDialog.Builder(MainActivity.this);
+                meas_dialog_builder.setTitle(R.string.ignoring_qubit_values);
+                meas_dialog_builder.setMessage(R.string.ignore_qubit_howto);
+                meas_dialog_builder.setCancelable(false);
+                meas_dialog_builder.setPositiveButton("OK", (DialogInterface dialog, int which) -> {
+                        pref.edit().putBoolean("measurement_toggle_help", true).apply();
+                });
+                meas_dialog_builder.show();
+            }
             final int shots = Integer.parseInt(pref.getString("shots", "4096"));
             final int threads = Integer.parseInt(pref.getString("threads", "8"));
             qv.shouldStop = false;
@@ -417,28 +431,27 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showAddGateDialog(float posx, float posy, VisualOperator vo) {
-        Dialog d = new Dialog(MainActivity.this, android.R.style.Theme_Translucent_NoTitleBar);
+        Dialog dialog = new Dialog(MainActivity.this, android.R.style.Theme_Translucent_NoTitleBar);
         final VisualOperator prevOperator;
 
         if (vo != null) {
             vo.setQubitIDs(new int[]{0});
             prevOperator = vo;
         } else if ((prevOperator = qv.whichGate(posx, posy)) != null) {
-            d.setTitle(R.string.select_action);
+            dialog.setTitle(R.string.select_action);
             View layout = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.gate_action_selector, null);
-            new UIHelper().applyActions(MainActivity.this, qv, prevOperator, posx, posy, d, layout);
-            d.setContentView(layout);
+            new UIHelper().applyActions(MainActivity.this, qv, prevOperator, posx, posy, dialog, layout);
+            dialog.setContentView(layout);
         }
 
         Runnable r = () ->
-                new UIHelper().runnableForGateSelection(MainActivity.this, qv, prevOperator, posx, posy, d);
-        d.setCancelable(true);
-        d.setCanceledOnTouchOutside(true);
+                new UIHelper().runnableForGateSelection(MainActivity.this, qv, prevOperator, posx, posy, dialog);
+        dialog.setCancelable(true);
+        dialog.setCanceledOnTouchOutside(true);
 
-        if (!(prevOperator != null && vo == null)) {
+        if (!(prevOperator != null && vo == null))
             runOnUiThread(r);
-        }
-        d.show();
+        dialog.show();
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {

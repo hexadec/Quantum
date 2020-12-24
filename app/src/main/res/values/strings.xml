@@ -117,4 +117,8 @@
     <string name="omega_value">\u03C9=e&lt;sup>2i\u03C0%1$d/%2$d&lt;/sup></string>
     <string name="openqasm_support_export_only">OpenQASM support is export only, such files cannot be opened</string>
     <string name="open_gate_files_gate_editor">Gate files can be opened with the Gate Editor</string>
+    <string name="ignoring_qubit_values">Toggle Qubit Measurement</string>
+    <string name="ignore_qubit_howto">You can toggle the measurement of any qubit by pressing on their name.
+    Red/dark-grey qubits will be measured whereas pale-grey qubits won\'t be.
+    This can simplify the evaluation of the results, for you.</string>
 </resources>

@@ -34,8 +34,6 @@ import hu.hexadecimal.quantum.R;
 import hu.hexadecimal.quantum.UIHelper;
 import hu.hexadecimal.quantum.math.Complex;
 
-import static hu.hexadecimal.quantum.graphics.QuantumView.MAX_QUBITS;
-
 public class ExecutionResultDialog {
 
     Activity context;
@@ -80,12 +78,18 @@ public class ExecutionResultDialog {
             DecimalFormat sf = (DecimalFormat) nf2;
             df.applyPattern(stateVector == null ? "0.########" : "0." + decimals);
             sf.applyPattern(stateVector == null ? "0.########" : "0." + (decimalPoints < 4 ? decimals.substring(2) : decimals.substring(3)) + "E0");
+            boolean[] ignoredQubits = qv.getIgnoredQubits();
+            int ignoredMask = 0;
+            for (int q = 0; q < qv.getLastUsedQubit() + 1; q++)
+                if (ignoredQubits[q])
+                    ignoredMask += (int) Math.pow(2, q);
+            boolean[] isAlreadyIncluded = ignoredMask > 0 ? new boolean[probabilities.length] : null;
             outerFor:
             for (int i = 0; i < probabilities.length; i++) {
-                if (shots == 1 && probabilities[i] == 0) {
+                if (shots == 1 && probabilities[i] == 0 || (isAlreadyIncluded != null && isAlreadyIncluded[i])) {
                     continue;
                 }
-                if (probabilities.length > Math.pow(2, 7) && probabilities[i] == 0) {
+                if (probabilities.length > Math.pow(2, 7) && probabilities[i] == 0 && ignoredMask == 0) {
                     continue;
                 }
                 TableRow tr = new TableRow(context);
@@ -96,23 +100,41 @@ public class ExecutionResultDialog {
                         continue outerFor;
                     }
                 }
+                int qubitNumber = qv.getLastUsedQubit() + 1;
+                if (qubitNumber < 4)
+                    qubitNumber = 4;
                 TableRow.LayoutParams params = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT, TableRow.LayoutParams.WRAP_CONTENT);
-                params.setMargins((int) UIHelper.pxFromDp(context, dpWidth < 330 || MAX_QUBITS > 7 ? 3 : 6), 0, (int) UIHelper.pxFromDp(context, dpWidth < 330 || MAX_QUBITS > 7 ? 3 : 6), 0);
+                params.setMargins((int) UIHelper.pxFromDp(context, dpWidth < 330 || qubitNumber > 7 ? 3 : 6), 0, (int) UIHelper.pxFromDp(context, dpWidth < 330 || qubitNumber > 7 ? 3 : 6), 0);
                 AppCompatTextView[] textView = new AppCompatTextView[]{
                         new AppCompatTextView(context),
                         new AppCompatTextView(context),
                         new AppCompatTextView(context)};
                 textView[0].setTypeface(Typeface.DEFAULT_BOLD);
-                textView[0].setText(String.format("%" + MAX_QUBITS + "s", Integer.toBinaryString(i)).replace(' ', '0'));
+                StringBuilder binaryIndex = new StringBuilder(String.format("%" + qubitNumber + "s", Integer.toBinaryString(i)).replace(' ', '0'));
+                for (int q = 0; q < qubitNumber; q++)
+                    if (ignoredQubits[q])
+                        binaryIndex.setCharAt(qubitNumber - q - 1, 'X');
+                textView[0].setText(binaryIndex.toString());
                 textView[0].setLayoutParams(params);
                 textView[1].setTypeface(Typeface.MONOSPACE);
+                double localProbability = 0;
+                for (int q = 0; q < qv.getLastUsedQubit() + 1; q++) {
+                    if (!ignoredQubits[q])
+                        continue;
+                    for (int j = 0; j < probabilities.length; j++) {
+                        if ((i & ~ignoredMask) == (j & ~ignoredMask) && !isAlreadyIncluded[j]) {
+                            localProbability += probabilities[j];
+                            isAlreadyIncluded[j] = true;
+                        }
+                    }
+                }
                 if (probabilities[i] * Math.pow(10, decimalPoints) < 1 && probabilities[i] != 0)
-                    textView[1].setText(sf.format(probabilities[i]));
+                    textView[1].setText(sf.format(ignoredMask > 0 ? localProbability : probabilities[i]));
                 else
-                    textView[1].setText(df.format(probabilities[i]));
+                    textView[1].setText(df.format(ignoredMask > 0 ? localProbability : probabilities[i]));
                 textView[1].setLayoutParams(params);
                 textView[2].setTypeface(Typeface.MONOSPACE);
-                textView[2].setText((stateVector != null ? stateVector[i].toString(decimalPoints) : ""));
+                textView[2].setText(ignoredMask > 0 ? "" : (stateVector != null ? stateVector[i].toString(decimalPoints) : ""));
                 textView[2].setLayoutParams(params);
                 if (dpWidth < 330 && stateVector != null) {
                     textView[0].setTextSize(TypedValue.COMPLEX_UNIT_SP, 12);
@@ -169,7 +191,7 @@ public class ExecutionResultDialog {
                     if (k != 0) sb.append("\r\n");
                     sb.append(k);
                     sb.append(separator);
-                    sb.append(String.format("%" + MAX_QUBITS + "s", Integer.toBinaryString(k)).replace(' ', '0'));
+                    sb.append(String.format("%" + QuantumView.MAX_QUBITS + "s", Integer.toBinaryString(k)).replace(' ', '0'));
                     sb.append(separator);
                     sb.append(df.format(probabilities[k]));
                     if (stateVector != null) {
