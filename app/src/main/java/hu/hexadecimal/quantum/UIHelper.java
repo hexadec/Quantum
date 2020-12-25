@@ -67,7 +67,7 @@ public class UIHelper {
     private static final String[] importantAngleNames2PI = new String[]{"0", "π/8", "π/6", "π/5", "π/4", "π/3", "3π/8", "2π/5", "π/2", "2π/3", "3π/4", "π",
             "5π/4", "4π/3", "3π/2", "5π/3", "7π/4"};
 
-    void runnableForGateSelection(AppCompatActivity context, QuantumView qv, VisualOperator prevOperator, float posx, float posy, @NonNull Dialog d) {
+    void runnableForGateSelection(AppCompatActivity context, QuantumView qv, VisualOperator prevOperator, float posx, float posy, @NonNull Dialog mainDialog) {
         final LinkedList<VisualOperator> operators = new LinkedList<>();
         final LinkedList<String> operatorNames = new LinkedList<>();
         new Thread(() -> {
@@ -370,23 +370,20 @@ public class UIHelper {
                             }
                         }));
                 mainView.postDelayed(() -> {
-                    fixedValues.setOnCheckedChangeListener((CompoundButton compoundButton, boolean b) ->
+                    fixedValues.setOnCheckedChangeListener((CompoundButton compoundButton, boolean newValue) ->
                             new Handler().postDelayed(() -> {
-                                if (b) {
+                                if (newValue) {
                                     thetaBar.setMax(importantAngles.length - 1);
                                     lamdaBar.setMax(importantAngles2PI.length - 1);
                                     phiBar.setMax(importantAngles2PI.length - 1);
-                                    thetaBar.setProgress(0);
-                                    phiBar.setProgress(0);
-                                    lamdaBar.setProgress(0);
                                 } else {
                                     thetaBar.setMax(3141);
                                     lamdaBar.setMax(6282);
                                     phiBar.setMax(6282);
-                                    thetaBar.setProgress(0);
-                                    phiBar.setProgress(0);
-                                    lamdaBar.setProgress(0);
                                 }
+                                thetaBar.setProgress(0);
+                                phiBar.setProgress(0);
+                                lamdaBar.setProgress(0);
                             }, 100));
                     DecimalFormat df = new DecimalFormat("0.000");
                     thetaBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -552,7 +549,7 @@ public class UIHelper {
                         public void onNothingSelected(AdapterView<?> adapterView) {
                         }
                     });
-                    mainView.findViewById(R.id.cancel).setOnClickListener((View view) -> d.cancel());
+                    mainView.findViewById(R.id.cancel).setOnClickListener((View view) -> mainDialog.cancel());
                     mainView.findViewById(R.id.ok).setOnClickListener((View view) -> {
                         if (gateType.getSelectedItemPosition() < 2) {
                             synchronized (UIHelper.this) {
@@ -589,7 +586,7 @@ public class UIHelper {
                                 for (int i = 0; i < qubits; i++) {
                                     for (int j = i + 1; j < qubits; j++) {
                                         if (quids[i] == quids[j]) {
-                                            d.cancel();
+                                            mainDialog.cancel();
                                             Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), R.string.use_different_qubits, Snackbar.LENGTH_LONG);
                                             snackbar.getView().setBackgroundColor(SNACKBAR_ERROR_COLOR);
                                             snackbar.show();
@@ -608,7 +605,7 @@ public class UIHelper {
                                 else
                                     qv.replaceGateAt(quids, gate, posx, posy);
                             }
-                            d.cancel();
+                            mainDialog.cancel();
                         } else if (gateType.getSelectedItemPosition() == 2) {
                             double theta = fixedValues.isChecked() ? importantAngles[thetaBar.getProgress()] : thetaBar.getProgress() / 1000f;
                             double phi = fixedValues.isChecked() ? importantAngles2PI[phiBar.getProgress()] : phiBar.getProgress() / 1000f;
@@ -619,7 +616,7 @@ public class UIHelper {
                                 qv.addGate(new int[]{qX[0].getProgress()}, gate);
                             else
                                 qv.replaceGateAt(new int[]{qX[0].getProgress()}, gate, posx, posy);
-                            d.cancel();
+                            mainDialog.cancel();
                         } else if (gateType.getSelectedItemPosition() == 3) {
                             double theta = fixedValues.isChecked() ? importantAngles[thetaBar.getProgress()] : thetaBar.getProgress() / 1000f;
                             double phi = fixedValues.isChecked() ? importantAngles2PI[phiBar.getProgress()] : phiBar.getProgress() / 1000f;
@@ -631,7 +628,7 @@ public class UIHelper {
                                 qv.addGate(new int[]{qX[0].getProgress()}, gate);
                             else
                                 qv.replaceGateAt(new int[]{qX[0].getProgress()}, gate, posx, posy);
-                            d.cancel();
+                            mainDialog.cancel();
                         } else if (gateType.getSelectedItemPosition() == 4) {
                             int qubits = qftQubits.getSelectedItemPosition() + 2;
                             VisualOperator gate = new VisualOperator(qubits, ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked());
@@ -642,7 +639,7 @@ public class UIHelper {
                             for (int i = 0; i < qubits; i++) {
                                 for (int j = i + 1; j < qubits; j++) {
                                     if (quids[i] == quids[j]) {
-                                        d.cancel();
+                                        mainDialog.cancel();
                                         Snackbar snackbar = Snackbar.make(context.findViewById(R.id.parent2), R.string.use_different_qubits, Snackbar.LENGTH_LONG);
                                         snackbar.getView().setBackgroundColor(SNACKBAR_ERROR_COLOR);
                                         snackbar.show();
@@ -654,14 +651,14 @@ public class UIHelper {
                                 qv.addGate(quids, gate);
                             else
                                 qv.replaceGateAt(quids, gate, posx, posy);
-                            d.cancel();
+                            mainDialog.cancel();
                         }
                     });
-                    mainView.findViewById(R.id.gate_selector_main).setOnClickListener((View v) -> d.cancel());
+                    mainView.findViewById(R.id.gate_selector_main).setOnClickListener((View v) -> mainDialog.cancel());
                 }, 100);
-                d.setTitle(R.string.select_gate);
+                mainDialog.setTitle(R.string.select_gate);
                 try {
-                    d.setContentView(mainView);
+                    mainDialog.setContentView(mainView);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -669,17 +666,17 @@ public class UIHelper {
         }).start();
     }
 
-    void applyActions(AppCompatActivity context, QuantumView qv, VisualOperator prevOperator, float posx, float posy, @NonNull Dialog d, View layout) {
+    void applyActions(AppCompatActivity context, QuantumView qv, VisualOperator prevOperator, float posx, float posy, @NonNull Dialog mainDialog, View layout) {
         layout.findViewById(R.id.delete_selected_gate).setOnClickListener((View view) -> {
             qv.deleteGateAt(posx, posy);
-            d.cancel();
+            mainDialog.cancel();
         });
         layout.findViewById(R.id.edit_selected_gate).setOnClickListener((View view) -> {
-            this.runnableForGateSelection(context, qv, prevOperator, posx, posy, d);
+            this.runnableForGateSelection(context, qv, prevOperator, posx, posy, mainDialog);
         });
         layout.findViewById(R.id.move_selected_gate_left).setOnClickListener((View view) -> {
             qv.moveGate(posx, posy, false);
-            d.cancel();
+            mainDialog.cancel();
         });
         layout.findViewById(R.id.move_selected_gate_left).setOnLongClickListener((View view) -> {
             Toast.makeText(context, R.string.move_gate_to_left, Toast.LENGTH_SHORT).show();
@@ -687,13 +684,13 @@ public class UIHelper {
         });
         layout.findViewById(R.id.move_selected_gate_right).setOnClickListener((View view) -> {
             qv.moveGate(posx, posy, true);
-            d.cancel();
+            mainDialog.cancel();
         });
         layout.findViewById(R.id.move_selected_gate_right).setOnLongClickListener((View view) -> {
             Toast.makeText(context, R.string.move_gate_to_right, Toast.LENGTH_SHORT).show();
             return true;
         });
-        layout.findViewById(R.id.gate_action_main).setOnClickListener((View view) -> d.cancel());
+        layout.findViewById(R.id.gate_action_main).setOnClickListener((View view) -> mainDialog.cancel());
     }
 
 

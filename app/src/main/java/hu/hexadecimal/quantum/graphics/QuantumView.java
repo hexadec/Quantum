@@ -634,7 +634,7 @@ public class QuantumView extends View {
                 if (rectList.get(j).contains(posx, posy)) {
                     operator = visualOperators.get(i);
                     qubit = operator.getQubitIDs()[j];
-                    Log.e("X", "" + qubit);
+                    //Log.e("X", "" + qubit);
                     index = i;
                     break outer;
                 }

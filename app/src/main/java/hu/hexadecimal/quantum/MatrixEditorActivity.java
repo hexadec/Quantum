@@ -30,6 +30,7 @@ import hu.hexadecimal.quantum.math.VisualOperator;
 
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -61,6 +62,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
     private ArrayList<VisualOperator> operators;
 
     static final String[] FILENAME_RESERVED_CHARS = {"/", "|", "\\", "?", "*", "<", "\"", ":", ">", "'", "~", "+", "[", "]"};
+    static final String qgfMimeType = "application/octet-stream"; // To avoid getting another extension
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +108,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                     }
                 }
             } catch (Exception e) {
+                Log.e("GateEditor", "Failed to load user defined gates from storage");
                 e.printStackTrace();
             }
             runOnUiThread(() -> {
@@ -260,11 +263,11 @@ public class MatrixEditorActivity extends AppCompatActivity {
                     try {
                         DocumentFile newFile;
                         if (overridden == null) {
-                            newFile = pickedDir.createFile("application/octet-stream", name + VisualOperator.FILE_EXTENSION);
+                            newFile = pickedDir.createFile(qgfMimeType, name + VisualOperator.FILE_EXTENSION);
                         } else {
                             DocumentFile df = pickedDir.findFile(name + VisualOperator.FILE_EXTENSION);
                             if (df == null || df.isDirectory()) {
-                                newFile = pickedDir.createFile("application/octet-stream", name + VisualOperator.FILE_EXTENSION);
+                                newFile = pickedDir.createFile(qgfMimeType, name + VisualOperator.FILE_EXTENSION);
                                 pickedDir.findFile(name + VisualOperator.FILE_EXTENSION_LEGACY).delete();
                             } else {
                                 newFile = df;
@@ -475,8 +478,8 @@ public class MatrixEditorActivity extends AppCompatActivity {
         VisualOperator vo = operators.get(info.position);
         if (item.getGroupId() == 2) {
             String name = vo.getName();
-            for (String s : FILENAME_RESERVED_CHARS)
-                name = name.replace(s, "_");
+            for (String ch : FILENAME_RESERVED_CHARS)
+                name = name.replace(ch, "_");
             try {
                 DocumentFile gate = pickedDir.findFile(name + VisualOperator.FILE_EXTENSION);
                 gate.delete();

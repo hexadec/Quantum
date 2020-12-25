@@ -60,7 +60,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         }
         holder.itemView.setLongClickable(true);
         holder.gateSymbols.setText(Html.fromHtml(symbol.toString()));
-        holder.gateMatrix.loadData(operator.toStringHtmlTable(), "text/html", "UTF-8");
+        holder.gateMatrix.loadDataWithBaseURL(null, operator.toStringHtmlTable(), "text/html", "UTF-8", null);
     }
 
     // total number of rows

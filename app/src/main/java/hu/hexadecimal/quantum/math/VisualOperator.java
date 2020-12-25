@@ -593,8 +593,7 @@ public class VisualOperator {
     public String toStringHtmlTable(int MODE) {
         StringBuilder sb = new StringBuilder();
         if ((MODE & HTML_MODE_BODY) > 0) {
-            sb.append("<!DOCTYPE html>\n" +
-                    "<html>\n" +
+            sb.append("<html>\n" +
                     "<head>\n" +
                     "<style>\n" +
                     "table, th, td {\n" +
@@ -632,7 +631,7 @@ public class VisualOperator {
         }
         sb.append("</table>\n");
         if ((MODE & HTML_MODE_BODY) > 0) {
-            sb.append("</body>\n");
+            sb.append("</body>\n</html>\n");
         }
         return sb.toString();
     }
@@ -733,7 +732,7 @@ public class VisualOperator {
                     thread.join();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                    Log.e("VisOp", "Thread join error!");
+                    Log.e("Quantum VisOp", "Thread join error!");
                 }
             }
         } else if (secondDim >= THREADS) {
@@ -757,7 +756,7 @@ public class VisualOperator {
                     thread.join();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                    Log.e("VisOp", "Thread join error!");
+                    Log.e("Quantum VisOp", "Thread join error!");
                 }
             }
         } else {
@@ -824,7 +823,7 @@ public class VisualOperator {
                     thread.join();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                    Log.e("VisOp", "Thread join error!");
+                    Log.e("Quantum VisOp", "Thread join error!");
                 }
         } else
             for (int i = 0; i < gateTensor[0].length; i++) {
@@ -1027,6 +1026,7 @@ public class VisualOperator {
                 }
             }
         } catch (Exception e) {
+            Log.e("Quantum VisOp", "An exception occurred while listing available gates!");
             e.printStackTrace();
             return null;
         }
@@ -1047,6 +1047,7 @@ public class VisualOperator {
                 }
             }
         } catch (Exception e) {
+            Log.e("Quantum VisOp", "An exception occurred while finding gate: " + name);
             e.printStackTrace();
             return null;
         }

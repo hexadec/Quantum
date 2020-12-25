@@ -5,6 +5,7 @@ package hu.hexadecimal.quantum.graphics;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.View;
 
@@ -36,7 +37,13 @@ public class ContextMenuRecyclerView extends RecyclerView {
 
     @Override
     public boolean showContextMenuForChild(View originalView) {
-        final int longPressPosition = getChildAdapterPosition(originalView);
+        final int longPressPosition;
+        try {
+            longPressPosition = getChildAdapterPosition(originalView);
+        } catch (ClassCastException cce) {
+            Log.d("Quantum GateEditor", "Failed long press on WebView");
+            return false;
+        }
         if (longPressPosition >= 0) {
             final long longPressId = getAdapter().getItemId(longPressPosition);
             mContextMenuInfo = new RecyclerContextMenuInfo(longPressPosition, longPressId);
