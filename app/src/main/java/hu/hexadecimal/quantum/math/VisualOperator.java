@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -23,7 +24,7 @@ import androidx.annotation.NonNull;
  */
 public class VisualOperator {
 
-    public static final long helpVersion = 45L;
+    public static final long helpVersion = 46L;
     private Complex[][] matrix;
     //last one is to clarify meaning for navbar, so length is +1 to qubits
     private String[] symbols;
@@ -710,11 +711,62 @@ public class VisualOperator {
             int col = firstDim * secondDim;
             result[m] = new Complex[col];
         }
-        for (int m = 0; m < firstDim; m++)
-            for (int n = 0; n < firstDim; n++)
-                for (int o = 0; o < secondDim; o++)
-                    for (int p = 0; p < secondDim; p++)
-                        result[secondDim * m + o][secondDim * n + p] = Complex.multiply(first[m][n], second[o][p]);
+        final int THREADS = 4;
+        if (firstDim >= THREADS) {
+            ArrayList<Thread> threads = new ArrayList<>();
+            for (int t = 0; t < THREADS; t++) {
+                final int currentThreadId = t;
+                Thread th = new Thread(() -> {
+                    int start = currentThreadId * firstDim / THREADS;
+                    int end = (currentThreadId + 1) * firstDim / THREADS;
+                    for (int m = start; m < end; m++)
+                        for (int n = 0; n < firstDim; n++)
+                            for (int o = 0; o < secondDim; o++)
+                                for (int p = 0; p < secondDim; p++)
+                                    result[secondDim * m + o][secondDim * n + p] = Complex.multiply(first[m][n], second[o][p]);
+                });
+                th.start();
+                threads.add(th);
+            }
+            for (Thread thread : threads) {
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    Log.e("VisOp", "Thread join error!");
+                }
+            }
+        } else if (secondDim >= THREADS) {
+            ArrayList<Thread> threads = new ArrayList<>();
+            for (int t = 0; t < THREADS; t++) {
+                final int currentThreadId = t;
+                Thread th = new Thread(() -> {
+                    int start = currentThreadId * secondDim / THREADS;
+                    int end = (currentThreadId + 1) * secondDim / THREADS;
+                    for (int m = 0; m < firstDim; m++)
+                        for (int n = 0; n < firstDim; n++)
+                            for (int o = start; o < end; o++)
+                                for (int p = 0; p < secondDim; p++)
+                                    result[secondDim * m + o][secondDim * n + p] = Complex.multiply(first[m][n], second[o][p]);
+                });
+                th.start();
+                threads.add(th);
+            }
+            for (Thread thread : threads) {
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    Log.e("VisOp", "Thread join error!");
+                }
+            }
+        } else {
+            for (int m = 0; m < firstDim; m++)
+                for (int n = 0; n < firstDim; n++)
+                    for (int o = 0; o < secondDim; o++)
+                        for (int p = 0; p < secondDim; p++)
+                            result[secondDim * m + o][secondDim * n + p] = Complex.multiply(first[m][n], second[o][p]);
+        }
 
         return result;
     }
@@ -750,12 +802,36 @@ public class VisualOperator {
 
     private static Complex[] operateOn(final Complex[] qubitArray, final Complex[][] gateTensor) {
         Complex[] resultMatrix = new Complex[qubitArray.length];
-        for (int i = 0; i < gateTensor[0].length; i++) {
-            resultMatrix[i] = new Complex(0);
-            for (int j = 0; j < gateTensor[0].length; j++) {
-                resultMatrix[i].add(Complex.multiply(gateTensor[i][j], qubitArray[j]));
+        final int THREADS = 4;
+        if (gateTensor[0].length > THREADS) {
+            ArrayList<Thread> threads = new ArrayList<>();
+            for (int t = 0; t < THREADS; t++) {
+                final int currentThreadId = t;
+                Thread th = new Thread(() -> {
+                    int start = currentThreadId * gateTensor[0].length / THREADS;
+                    int end = (currentThreadId + 1) * gateTensor[0].length / THREADS;
+                    for (int i = start; i < end; i++) {
+                        resultMatrix[i] = new Complex(0);
+                        for (int j = 0; j < gateTensor[0].length; j++)
+                            resultMatrix[i].add(Complex.multiply(gateTensor[i][j], qubitArray[j]));
+                    }
+                });
+                th.start();
+                threads.add(th);
             }
-        }
+            for (Thread thread : threads)
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    Log.e("VisOp", "Thread join error!");
+                }
+        } else
+            for (int i = 0; i < gateTensor[0].length; i++) {
+                resultMatrix[i] = new Complex(0);
+                for (int j = 0; j < gateTensor[0].length; j++)
+                    resultMatrix[i].add(Complex.multiply(gateTensor[i][j], qubitArray[j]));
+            }
         return resultMatrix;
     }
 
@@ -770,7 +846,7 @@ public class VisualOperator {
         }
         inputMatrix = operateOn(inputMatrix, getQubitTensor(qubits, this));
         for (int i = 0; i < qubitArray.length; i++) {
-            qubitArray[i] = inputMatrix[getPos(qubits, i)].copy();
+            qubitArray[i] = inputMatrix[getPos(qubits, i)];
         }
         return qubitArray;
     }

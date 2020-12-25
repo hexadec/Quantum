@@ -115,15 +115,6 @@ public class ExperimentRunner {
                 }
             }
         } else {
-            Qubit[] qubits = new Qubit[MAX_QUBIT];
-            try {
-                Thread.sleep(0, new Random().nextInt(1000));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            for (int k = 0; k < qubits.length; k++) {
-                qubits[k] = new Qubit();
-            }
             new Thread(() -> {
                 while (!finished && !quantumView.shouldStop) {
                     try {

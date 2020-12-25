@@ -393,6 +393,9 @@ public class UIHelper {
                         @Override
                         public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                             if (fixedValues.isChecked()) {
+                                // Fix ArrayIndexOutOfBoundsException bug
+                                if (i >= importantAngles.length)
+                                    return;
                                 thetaText.setText(String.format("\u03B8 %-4s", importantAngleNames[i]));
                             } else {
                                 thetaText.setText("\u03B8 " + df.format(i / 1000f));
@@ -413,6 +416,9 @@ public class UIHelper {
                         @Override
                         public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                             if (fixedValues.isChecked()) {
+                                // Fix ArrayIndexOutOfBoundsException bug
+                                if (i >= importantAngles2PI.length)
+                                    return;
                                 lambdaText.setText(String.format("\u03BB %-4s", importantAngleNames2PI[i]));
                             } else {
                                 lambdaText.setText("\u03BB " + df.format(i / 1000f));
@@ -433,6 +439,9 @@ public class UIHelper {
                         @Override
                         public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                             if (fixedValues.isChecked()) {
+                                // Fix ArrayIndexOutOfBoundsException bug
+                                if (i >= importantAngles2PI.length)
+                                    return;
                                 phiText.setText(String.format("\u03C6 %-4s", importantAngleNames2PI[i]));
                             } else {
                                 phiText.setText("\u03C6 " + df.format(i / 1000f));

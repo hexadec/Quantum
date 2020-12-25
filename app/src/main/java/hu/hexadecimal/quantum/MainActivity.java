@@ -677,6 +677,13 @@ public class MainActivity extends AppCompatActivity {
                     if (rect != null)
                         showAddGateDialog(rect.centerX(), rect.centerY(), null);
                     return true;
+                case KeyEvent.KEYCODE_M:
+                    //TOGGLE MEASUREMENT STATUS
+                    RectF selection = qv.getRectInGrid(qv.getHighlight());
+                    if (selection != null)
+                        qv.toggleIgnoredState(qv.whichQubit(selection.centerY()));
+                    return true;
+
             }
         }
         return super.onKeyUp(keyCode, event);

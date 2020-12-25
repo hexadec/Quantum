@@ -596,6 +596,7 @@ public class QuantumView extends View {
         visualOperators = new LinkedList<>();
         measuredQubits = null;
         measuredQubits = new short[MAX_QUBITS];
+        ignoredQubits = new boolean[MAX_QUBITS];
         undoList.clear();
         redoList.clear();
         invalidate();
