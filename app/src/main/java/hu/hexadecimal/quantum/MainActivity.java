@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
@@ -240,9 +241,19 @@ public class MainActivity extends AppCompatActivity {
         }), 200);
 
         int help_shown = pref.getInt("help_shown", 0);
+        boolean release_notes_shown = pref.getBoolean("release_notes" + BuildConfig.VERSION_CODE, false);
         if (help_shown < 5) {
             Snackbar.make(findViewById(R.id.parent2), R.string.click_to_start, Snackbar.LENGTH_LONG).show();
             pref.edit().putInt("help_shown", ++help_shown).apply();
+        }
+        if (!release_notes_shown) {
+            AlertDialog.Builder meas_dialog_builder = new AlertDialog.Builder(MainActivity.this);
+            meas_dialog_builder.setMessage(Html.fromHtml(getString(R.string.release_notes)));
+            meas_dialog_builder.setCancelable(false);
+            meas_dialog_builder.setPositiveButton("OK", (DialogInterface dialog, int which) -> {
+                pref.edit().putBoolean("release_notes" + BuildConfig.VERSION_CODE, true).apply();
+            });
+            meas_dialog_builder.show();
         }
 
         drawerLayout = findViewById(R.id.activity_main2);
@@ -255,13 +266,7 @@ public class MainActivity extends AppCompatActivity {
 
         navigationView = findViewById(R.id.nv);
         View v = ((LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE)).inflate(R.layout.navigation_header, null, false);
-        try {
-            ((TextView) v.findViewById(R.id.version)).setText(getPackageManager()
-                    .getPackageInfo(getPackageName(), 0).versionName);
-        } catch (Exception e) {
-            e.printStackTrace();
-            ((TextView) v.findViewById(R.id.version)).setText("?.?.?");
-        }
+        ((TextView) v.findViewById(R.id.version)).setText(BuildConfig.VERSION_NAME);
         navigationView.addHeaderView(v);
         drawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override

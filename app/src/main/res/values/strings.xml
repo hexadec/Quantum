@@ -1,4 +1,10 @@
 <resources>
+    <string name="release_notes"><![CDATA[
+    <b>Changes in controlled phase shift gates</b><br/><br/>
+    In order to follow up changes in Qiskit, the Controlled-T and Controlled-S gates
+    will NOT perform relative phase shift between the two qubits. Newly placed gates will perform
+    the phase shift only on the target qubit!
+    ]]></string>
     <string name="app_name" translatable="false">Quantum Computing</string>
     <string name="app_name_long" translatable="false">Quantum Computing for Android</string>
     <string name="bloch_sphere">Bloch sphere</string>
