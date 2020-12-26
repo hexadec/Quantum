@@ -96,8 +96,8 @@ public class VisualOperator {
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(-Math.PI / 4), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(0), new Complex(Math.PI / 4)}
+                            {new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(Math.PI / 2)}
                     }, "Controlled π/2 shift", new String[]{"●", "S", "cS"}, 0xff21BAAB);
 
     public static final VisualOperator CT =
@@ -105,8 +105,8 @@ public class VisualOperator {
                     new Complex[][]{
                             {new Complex(1), new Complex(0), new Complex(0), new Complex(0)},
                             {new Complex(0), new Complex(1), new Complex(0), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(-Math.PI / 8), new Complex(0)},
-                            {new Complex(0), new Complex(0), new Complex(0), new Complex(Math.PI / 8)}
+                            {new Complex(0), new Complex(0), new Complex(1), new Complex(0)},
+                            {new Complex(0), new Complex(0), new Complex(0), new Complex(Math.PI / 4)}
                     }, "Controlled π/4 shift", new String[]{"●", "T", "cT"}, 0xffBA7021);
 
     public static final VisualOperator CH =
@@ -307,17 +307,12 @@ public class VisualOperator {
         this.theta = NULL_ANGLE;
         this.phi = NULL_ANGLE;
         Complex complexOmega = new Complex(1, Math.PI * 2 / MATRIX_DIM, true);
-        if (qubits == 2) {
-            matrix = generateQFTMatrix(complexOmega, inverse);
-        } else {
-            matrix = generateQFTMatrix(complexOmega, inverse);
-        }
+        matrix = generateQFTMatrix(complexOmega, inverse);
         symbols = new String[qubits + 1];
         for (int i = 1; i <= qubits; i++) {
             symbols[i - 1] = "QF" + i;
         }
         symbols[qubits] = "QFT";
-        this.multiply(new Complex(1.0 / Math.sqrt(MATRIX_DIM), 0));
     }
 
     public String[] getSymbols() {
@@ -1092,10 +1087,12 @@ public class VisualOperator {
         Complex[][] mat = new Complex[MATRIX_DIM][MATRIX_DIM];
         for (int i = 0; i < MATRIX_DIM; i++) {
             for (int j = 0; j < MATRIX_DIM; j++) {
-                if (i == 0 || j == 0)
+                if (i == 0 || j == 0) {
                     mat[i][j] = new Complex(1);
-                else {
+                    mat[i][j].multiply(new Complex(1 / Math.sqrt(MATRIX_DIM), 0));
+                } else {
                     mat[reverseBits(i, qubit_ids.length)][reverseBits(j, qubit_ids.length)] = Complex.exponent(complexOmega, new Complex((i * j * (inverse ? -1 : 1)) % MATRIX_DIM));
+                    mat[reverseBits(i, qubit_ids.length)][reverseBits(j, qubit_ids.length)].multiply(new Complex(1 / Math.sqrt(MATRIX_DIM), 0));
                 }
             }
         }
@@ -1271,7 +1268,7 @@ public class VisualOperator {
             for (int i = qubit_ids.length - 1; i >= 0; i--) {
                 line += "h qubit[" + getQubitIDs()[i] + "];\n";
                 for (int j = 0; j < i; j++) {
-                    line += "cu1(" + df.format(Math.PI / 2 / Math.pow(2, i - j - 1)) + ") qubit[" + getQubitIDs()[i] + "],qubit[" + getQubitIDs()[j] + "];\n";
+                    line += "cu1(" + df.format(Math.PI / Math.pow(2, i - j)) + ") qubit[" + getQubitIDs()[i] + "],qubit[" + getQubitIDs()[j] + "];\n";
                 }
             }
             switch (qubit_ids.length) {
