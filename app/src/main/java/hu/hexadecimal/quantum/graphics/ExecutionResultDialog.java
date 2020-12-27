@@ -50,6 +50,12 @@ public class ExecutionResultDialog {
         this.context = context;
         this.stateVector = stateVector;
         this.probabilities = probabilities;
+        for(int i = 0; i < probabilities.length; i++) {
+            if (probabilities[i] < 10E-12)
+                probabilities[i] = 0;
+            else if (probabilities[i] > 1 - 10E-12)
+                probabilities[i] = 1;
+        }
         final SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
         separator = pref.getString("separator", ",");
         scientific = pref.getBoolean("sci_form", false);

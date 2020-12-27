@@ -4,9 +4,9 @@ android {
     compileSdkVersion 30
     defaultConfig {
         applicationId "hu.hexadecimal.quantum"
-        minSdkVersion 24
+        minSdkVersion 21
         targetSdkVersion 29
-        versionCode 1805
+        versionCode 1806
         versionName getVersionNameString(versionCode)
         resConfig "en"
     }

@@ -1,6 +1,7 @@
 package hu.hexadecimal.quantum.math;
 
 import android.graphics.RectF;
+import android.os.Build;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -848,10 +849,17 @@ public class VisualOperator {
         for (int i = 0; i < qubit_ids.length; i++) {
             changed[qubits - i - 1] = x[qubit_ids[qubit_ids.length - i - 1]];
         }
+        outer:
         for (int i = 0; i < qubits; i++) {
             int finalI = qubits - i - 1;
-            if (IntStream.of(qubit_ids).noneMatch(z -> z == finalI))
+            if (Build.VERSION.SDK_INT >= 24 && IntStream.of(qubit_ids).noneMatch(z -> z == finalI))
                 changed[qubits - qubit_ids.length - 1 - saved_count++] = x[qubits - i - 1];
+            else if (Build.VERSION.SDK_INT < 24) {
+                for (int qubit : qubit_ids)
+                    if (qubit == finalI)
+                        continue outer;
+                changed[qubits - qubit_ids.length - 1 - saved_count++] = x[qubits - i - 1];
+            }
         }
         int ret = 0;
         for (int i = 0; i < qubits; i++) {
@@ -1089,6 +1097,7 @@ public class VisualOperator {
                     mat[i][j] = new Complex(1);
                     mat[i][j].multiply(new Complex(1 / Math.sqrt(MATRIX_DIM), 0));
                 } else {
+                    // Warning! Bit reversion necessary (or use inverse bit order when processing)
                     mat[reverseBits(i, qubit_ids.length)][reverseBits(j, qubit_ids.length)] = Complex.exponent(complexOmega, new Complex((i * j * (inverse ? -1 : 1)) % MATRIX_DIM));
                     mat[reverseBits(i, qubit_ids.length)][reverseBits(j, qubit_ids.length)].multiply(new Complex(1 / Math.sqrt(MATRIX_DIM), 0));
                 }
