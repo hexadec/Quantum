@@ -63,7 +63,7 @@ public class UIHelper {
     private static final String[] importantAngleNames = new String[]{"0", "π/8", "π/6", "π/5", "π/4", "π/3", "3π/8", "2π/5", "π/2", "2π/3", "3π/4", "π"};
 
     private static final double[] importantAngles2PI = new double[]{0, Math.PI / 8, Math.PI / 6, Math.PI / 5, Math.PI / 4, Math.PI / 3, Math.PI / 8 * 3, Math.PI / 5 * 2, Math.PI / 2, Math.PI / 3 * 2, Math.PI / 4 * 3, Math.PI,
-            Math.PI / 5 * 4, Math.PI / 3 * 4, Math.PI / 2 * 3, Math.PI / 3 * 5, Math.PI / 4 * 7};
+            Math.PI / 4 * 5, Math.PI / 3 * 4, Math.PI / 2 * 3, Math.PI / 3 * 5, Math.PI / 4 * 7};
     private static final String[] importantAngleNames2PI = new String[]{"0", "π/8", "π/6", "π/5", "π/4", "π/3", "3π/8", "2π/5", "π/2", "2π/3", "3π/4", "π",
             "5π/4", "4π/3", "3π/2", "5π/3", "7π/4"};
 
@@ -170,7 +170,7 @@ public class UIHelper {
                     });
                 }
                 if (prevOperator != null) {
-                    if (!prevOperator.isRotation() && !prevOperator.isU3()) {
+                    if (!prevOperator.isU3()) {
                         for (int i = 0; i < prevOperator.getQubitIDs().length; i++) {
                             qX[i].setProgress(prevOperator.getQubitIDs()[i]);
                             tX[i].setText("q" + (prevOperator.getQubitIDs()[i] + 1));
@@ -181,43 +181,7 @@ public class UIHelper {
                                 gateName.setSelection(mGates.indexOf(VisualOperator.HADAMARD.getName()));
                             }
                         }
-                        switch (prevOperator.getQubitIDs().length) {
-                            case 6:
-                                qX[5].setVisibility(View.VISIBLE);
-                                tX[5].setVisibility(View.VISIBLE);
-                            case 5:
-                                qX[4].setVisibility(View.VISIBLE);
-                                tX[4].setVisibility(View.VISIBLE);
-                            case 4:
-                                qX[3].setVisibility(View.VISIBLE);
-                                tX[3].setVisibility(View.VISIBLE);
-                            case 3:
-                                qX[2].setVisibility(View.VISIBLE);
-                                tX[2].setVisibility(View.VISIBLE);
-                            case 2:
-                                qX[1].setVisibility(View.VISIBLE);
-                                tX[1].setVisibility(View.VISIBLE);
-                            default:
-                        }
-                        switch (prevOperator.getQubitIDs().length) {
-                            case 1:
-                                qX[1].setVisibility(View.INVISIBLE);
-                                tX[1].setVisibility(View.INVISIBLE);
-                            case 2:
-                                qX[2].setVisibility(GONE);
-                                tX[2].setVisibility(GONE);
-                            case 3:
-                                qX[3].setVisibility(GONE);
-                                tX[3].setVisibility(GONE);
-                            case 4:
-                                qX[4].setVisibility(GONE);
-                                tX[4].setVisibility(GONE);
-                            case 5:
-                                qX[5].setVisibility(GONE);
-                                tX[5].setVisibility(GONE);
-                            default:
-
-                        }
+                        showQubitSelectors(qX, tX, prevOperator.getQubits());
                         {
                             int qubits = prevOperator.getQubits();
                             if (qubits > 1)
@@ -281,38 +245,27 @@ public class UIHelper {
                                     }
                                     ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.hermitian_conjugate);
                                 }
-                            } else if (i == 2 || i == 3) {
+                            } else if (i == 2) {
                                 for (int k = 1; k < qX.length; k++) {
                                     qX[k].setVisibility(GONE);
                                     tX[k].setVisibility(GONE);
                                 }
-                                if (i == 2) {
-                                    lambdaText.setVisibility(GONE);
-                                    lamdaBar.setVisibility(GONE);
-                                } else {
-                                    lambdaText.setVisibility(VISIBLE);
-                                    lamdaBar.setVisibility(VISIBLE);
-                                }
+                                showQubitSelectors(qX, tX, ((CheckBox) mainView.findViewById(R.id.controlled)).isChecked() ? 2 : 1);
+                                lambdaText.setVisibility(VISIBLE);
+                                lamdaBar.setVisibility(VISIBLE);
                                 subLayout.setVisibility(GONE);
                                 qftLayout.setVisibility(GONE);
                                 rotLayout.setVisibility(VISIBLE);
                                 filter.setSelection(0);
                                 ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.hermitian_conjugate);
                                 mainView.findViewById(R.id.hermitianConjugate).setEnabled(true);
-                            } else if (i == 4) {
+                            } else if (i == 3) {
                                 filter.setSelection(0);
                                 subLayout.setVisibility(GONE);
                                 rotLayout.setVisibility(GONE);
                                 qftLayout.setVisibility(VISIBLE);
                                 int qftPosition = qftQubits.getSelectedItemPosition();
-                                for (int j = 0; j < qftPosition + 2; j++) {
-                                    qX[j].setVisibility(VISIBLE);
-                                    tX[j].setVisibility(VISIBLE);
-                                }
-                                for (int m = 3; m >= qftPosition + 2; m--) {
-                                    qX[m].setVisibility(GONE);
-                                    tX[m].setVisibility(GONE);
-                                }
+                                showQubitSelectors(qX, tX, qftPosition + 2);
                                 ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.inverse_qft);
                                 mainView.findViewById(R.id.hermitianConjugate).setEnabled(true);
                             }
@@ -325,14 +278,7 @@ public class UIHelper {
                     qftQubits.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                            for (int j = 0; j < i + 2; j++) {
-                                qX[j].setVisibility(VISIBLE);
-                                tX[j].setVisibility(VISIBLE);
-                            }
-                            for (int m = 5; m >= i + 2; m--) {
-                                qX[m].setVisibility(GONE);
-                                tX[m].setVisibility(GONE);
-                            }
+                            showQubitSelectors(qX, tX, i + 2);
                         }
 
                         @Override
@@ -370,6 +316,12 @@ public class UIHelper {
                             }
                         }));
                 mainView.postDelayed(() -> {
+                    ((CheckBox) mainView.findViewById(R.id.controlled))
+                            .setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> {
+                                new Handler().postDelayed(() -> {
+                                    showQubitSelectors(qX, tX, isChecked ? 2 : 1);
+                                }, 100);
+                    });
                     fixedValues.setOnCheckedChangeListener((CompoundButton compoundButton, boolean newValue) ->
                             new Handler().postDelayed(() -> {
                                 if (newValue) {
@@ -456,17 +408,8 @@ public class UIHelper {
                         }
                     });
                     //Edit selected gate
-                    if (prevOperator != null && prevOperator.isRotation()) {
+                    if (prevOperator != null && (prevOperator.isU3() || prevOperator.isCU3())) {
                         gateType.setSelection(2);
-                        qX[0].setProgress(prevOperator.getQubitIDs()[0]);
-                        phiBar.setMax(6282);
-                        thetaBar.setProgress((int) Math.abs(prevOperator.getAngles()[0] * 1000));
-                        phiBar.setProgress((int) Math.abs(prevOperator.getAngles()[1] * 1000));
-                        if (prevOperator.getAngles()[0] < 0 || prevOperator.getAngles()[1] < 0) {
-                            ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(true);
-                        }
-                    } else if (prevOperator != null && prevOperator.isU3()) {
-                        gateType.setSelection(3);
                         qX[0].setProgress(prevOperator.getQubitIDs()[0]);
                         thetaBar.setProgress((int) Math.abs(prevOperator.getAngles()[0] * 1000));
                         lamdaBar.setProgress((int) Math.abs(prevOperator.getAngles()[2] * 1000));
@@ -474,8 +417,13 @@ public class UIHelper {
                         if (prevOperator.getAngles()[0] < 0 || prevOperator.getAngles()[1] < 0 || prevOperator.getAngles()[2] < 0) {
                             ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(true);
                         }
+                        if (prevOperator.isCU3()) {
+                            ((CheckBox) mainView.findViewById(R.id.controlled)).setChecked(true);
+                            showQubitSelectors(qX, tX, 2);
+                            qX[1].setProgress(prevOperator.getQubitIDs()[1]);
+                        }
                     } else if (prevOperator != null && prevOperator.isQFT()) {
-                        gateType.setSelection(4);
+                        gateType.setSelection(3);
                         for (int i = 0; i < prevOperator.getQubits(); i++) {
                             qX[i].setProgress(prevOperator.getQubitIDs()[i]);
                         }
@@ -514,34 +462,7 @@ public class UIHelper {
                                 if (qubits > 1)
                                     ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
                                 ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(qubits == 1);
-                                switch (qubits) {
-                                    case 4:
-                                        qX[3].setVisibility(View.VISIBLE);
-                                        tX[3].setVisibility(View.VISIBLE);
-                                    case 3:
-                                        qX[2].setVisibility(View.VISIBLE);
-                                        tX[2].setVisibility(View.VISIBLE);
-                                    case 2:
-                                        qX[1].setVisibility(View.VISIBLE);
-                                        tX[1].setVisibility(View.VISIBLE);
-                                    default:
-                                }
-                                switch (qubits) {
-                                    case 1:
-                                        qX[1].setVisibility(View.INVISIBLE);
-                                        tX[1].setVisibility(View.INVISIBLE);
-                                    case 2:
-                                        qX[2].setVisibility(GONE);
-                                        tX[2].setVisibility(GONE);
-                                    case 3:
-                                        qX[3].setVisibility(GONE);
-                                        tX[3].setVisibility(GONE);
-                                    default:
-                                        qX[4].setVisibility(GONE);
-                                        tX[4].setVisibility(GONE);
-                                        qX[5].setVisibility(GONE);
-                                        tX[5].setVisibility(GONE);
-                                }
+                                showQubitSelectors(qX, tX, qubits);
                             }
                         }
 
@@ -609,27 +530,25 @@ public class UIHelper {
                         } else if (gateType.getSelectedItemPosition() == 2) {
                             double theta = fixedValues.isChecked() ? importantAngles[thetaBar.getProgress()] : thetaBar.getProgress() / 1000f;
                             double phi = fixedValues.isChecked() ? importantAngles2PI[phiBar.getProgress()] : phiBar.getProgress() / 1000f;
-                            VisualOperator gate = new VisualOperator(theta, phi);
+                            double lambda = fixedValues.isChecked() ? importantAngles2PI[lamdaBar.getProgress()] : lamdaBar.getProgress() / 1000f;
+                            VisualOperator gate = new VisualOperator(theta, phi, lambda, ((CheckBox) mainView.findViewById(R.id.controlled)).isChecked());
                             if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
                                 gate.hermitianConjugate();
-                            if (prevOperator == null)
-                                qv.addGate(new int[]{qX[0].getProgress()}, gate);
-                            else
-                                qv.replaceGateAt(new int[]{qX[0].getProgress()}, gate, posx, posy);
+                            if (prevOperator == null) {
+                                if (gate.isCU3()) {
+                                    qv.addGate(new int[]{qX[0].getProgress(), qX[1].getProgress()}, gate);
+                                } else {
+                                    qv.addGate(new int[]{qX[0].getProgress()}, gate);
+                                }
+                            } else {
+                                if (gate.isCU3()) {
+                                    qv.replaceGateAt(new int[]{qX[0].getProgress(), qX[1].getProgress()}, gate, posx, posy);
+                                } else {
+                                    qv.replaceGateAt(new int[]{qX[0].getProgress()}, gate, posx, posy);
+                                }
+                            }
                             mainDialog.cancel();
                         } else if (gateType.getSelectedItemPosition() == 3) {
-                            double theta = fixedValues.isChecked() ? importantAngles[thetaBar.getProgress()] : thetaBar.getProgress() / 1000f;
-                            double phi = fixedValues.isChecked() ? importantAngles2PI[phiBar.getProgress()] : phiBar.getProgress() / 1000f;
-                            double lambda = fixedValues.isChecked() ? importantAngles2PI[lamdaBar.getProgress()] : lamdaBar.getProgress() / 1000f;
-                            VisualOperator gate = new VisualOperator(theta, phi, lambda);
-                            if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
-                                gate.hermitianConjugate();
-                            if (prevOperator == null)
-                                qv.addGate(new int[]{qX[0].getProgress()}, gate);
-                            else
-                                qv.replaceGateAt(new int[]{qX[0].getProgress()}, gate, posx, posy);
-                            mainDialog.cancel();
-                        } else if (gateType.getSelectedItemPosition() == 4) {
                             int qubits = qftQubits.getSelectedItemPosition() + 2;
                             VisualOperator gate = new VisualOperator(qubits, ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked());
                             int[] quids = new int[qubits];
@@ -664,6 +583,45 @@ public class UIHelper {
                 }
             });
         }).start();
+    }
+
+    private void showQubitSelectors(SeekBar[] qX, TextView[] tX, int qubits) {
+        switch (qubits) {
+            case 6:
+                qX[5].setVisibility(View.VISIBLE);
+                tX[5].setVisibility(View.VISIBLE);
+            case 5:
+                qX[4].setVisibility(View.VISIBLE);
+                tX[4].setVisibility(View.VISIBLE);
+            case 4:
+                qX[3].setVisibility(View.VISIBLE);
+                tX[3].setVisibility(View.VISIBLE);
+            case 3:
+                qX[2].setVisibility(View.VISIBLE);
+                tX[2].setVisibility(View.VISIBLE);
+            case 2:
+                qX[1].setVisibility(View.VISIBLE);
+                tX[1].setVisibility(View.VISIBLE);
+            default:
+        }
+        switch (qubits) {
+            case 1:
+                qX[1].setVisibility(View.INVISIBLE);
+                tX[1].setVisibility(View.INVISIBLE);
+            case 2:
+                qX[2].setVisibility(GONE);
+                tX[2].setVisibility(GONE);
+            case 3:
+                qX[3].setVisibility(GONE);
+                tX[3].setVisibility(GONE);
+            case 4:
+                qX[4].setVisibility(GONE);
+                tX[4].setVisibility(GONE);
+            case 5:
+                qX[5].setVisibility(GONE);
+                tX[5].setVisibility(GONE);
+            default:
+        }
     }
 
     void applyActions(AppCompatActivity context, QuantumView qv, VisualOperator prevOperator, float posx, float posy, @NonNull Dialog mainDialog, View layout) {

@@ -45,7 +45,6 @@
     <string-array name="gate_types">
         <item>Predefined</item>
         <item>User defined</item>
-        <item>Rotation</item>
         <item>U3</item>
         <item>Quantum Fourier T.</item>
     </string-array>

@@ -11,10 +11,12 @@ import java.lang.reflect.Field;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 import androidx.annotation.NonNull;
 
@@ -24,7 +26,7 @@ import androidx.annotation.NonNull;
  */
 public class VisualOperator {
 
-    public static final long helpVersion = 47L;
+    public static final long helpVersion = 49L;
     private Complex[][] matrix;
     //last one is to clarify meaning for navbar, so length is +1 to qubits
     private String[] symbols;
@@ -254,40 +256,25 @@ public class VisualOperator {
         theta = phi = lambda = NULL_ANGLE;
     }
 
-    public VisualOperator(double theta, double phi) {
-        if (theta < -Math.PI || theta > Math.PI || phi < -Math.PI * 2 || phi > Math.PI * 2)
-            throw new IllegalArgumentException("Invalid angle size! theta: " + theta + ", phi: " + phi);
-        Complex[][] matrixTheta = new Complex[][]{
-                new Complex[]{new Complex(Math.cos(theta / 2), 0), new Complex(0, -Math.sin(theta / 2))},
-                new Complex[]{new Complex(0, -Math.sin(theta / 2)), new Complex(Math.cos(theta / 2), 0)}
-        };
-        Complex[][] matrixPhi = new Complex[][]{
-                new Complex[]{new Complex(1), new Complex(0)},
-                new Complex[]{new Complex(0), new Complex(phi)}
-        };
-        matrix = matrixProduct(matrixPhi, matrixTheta);
-        MATRIX_DIM = 2;
-        qubit_ids = new int[NQBITS = 1];
-        rectangle = new LinkedList<>();
-        color = 0xffDEAC38;
-        symbols = new String[]{"R" + (theta == 0 ? "" : "\u03B8") + (phi == 0 ? "" : "\u03C6")};
-        name = "Custom Rotation";
-        this.theta = theta;
-        this.phi = phi;
-        lambda = NULL_ANGLE;
-    }
-
-    public VisualOperator(double theta, double phi, double lambda) {
+    public VisualOperator(double theta, double phi, double lambda, boolean controlled) {
         matrix = new Complex[][]{
                 new Complex[]{new Complex(Math.cos(theta / 2), 0), Complex.multiply(new Complex(lambda), new Complex(-Math.sin(theta / 2), 0))},
                 new Complex[]{Complex.multiply(new Complex(phi), new Complex(Math.sin(theta / 2), 0)), Complex.multiply(new Complex(lambda + phi), new Complex(Math.cos(theta / 2), 0))}
         };
-        MATRIX_DIM = 2;
-        qubit_ids = new int[NQBITS = 1];
+        if (controlled) {
+            Complex[][] dim_4_identity = tensorProduct(ID.matrix, ID.matrix);
+            dim_4_identity[2][2] = matrix[0][0];
+            dim_4_identity[2][3] = matrix[0][1];
+            dim_4_identity[3][2] = matrix[1][0];
+            dim_4_identity[3][3] = matrix[1][1];
+            matrix = dim_4_identity;
+        }
+        MATRIX_DIM = controlled ? 4 : 2;
+        qubit_ids = new int[NQBITS = controlled ? 2 : 1];
         rectangle = new LinkedList<>();
         color = 0xFFD12000;
-        symbols = new String[]{"U3"};
-        name = "U3";
+        symbols = controlled ? new String[]{"●", "U3"} : new String[]{"U3"};
+        name = controlled ? "cU3" : "U3";
         this.theta = theta;
         this.phi = phi;
         this.lambda = lambda;
@@ -408,12 +395,12 @@ public class VisualOperator {
         return visualOperator;
     }
 
-    public boolean isRotation() {
-        return lambda == NULL_ANGLE && theta != NULL_ANGLE && phi != NULL_ANGLE && !isMultiQubit() && (name.equals("CustRot") || name.equals("Custom Rotation"));
+    public boolean isU3() {
+        return lambda != NULL_ANGLE && theta != NULL_ANGLE && phi != NULL_ANGLE && !isMultiQubit() && name.equalsIgnoreCase("U3");
     }
 
-    public boolean isU3() {
-        return lambda != NULL_ANGLE && theta != NULL_ANGLE && phi != NULL_ANGLE && !isMultiQubit() && name.equals("U3");
+    public boolean isCU3() {
+        return lambda != NULL_ANGLE && theta != NULL_ANGLE && phi != NULL_ANGLE && isMultiQubit() && name.equalsIgnoreCase("cU3");
     }
 
     public boolean isQFT() {
@@ -421,7 +408,7 @@ public class VisualOperator {
     }
 
     public double[] getAngles() {
-        if (isU3() || isRotation()) {
+        if (isU3()) {
             return new double[]{theta, phi, lambda};
         } else if (!isMultiQubit()) {
             VisualOperator operator = copy();
@@ -502,7 +489,7 @@ public class VisualOperator {
         for (int i = 0; i < this.symbols.length; i++) {
             symbols.put(this.symbols[i]);
         }
-        if (isU3() || isRotation()) {
+        if (isU3()) {
             JSONObject angles = new JSONObject();
             angles.put("theta", theta);
             angles.put("phi", phi);
@@ -667,7 +654,6 @@ public class VisualOperator {
         return inputMatrix;
     }
 
-    //TODO: WARNING! Serious bug here, something to do w/ MQ operator on last used qubit
     private static Complex[][] getQubitTensor(int qubits, VisualOperator v) {
         if (v.getQubitIDs().length != v.getQubits() || v.getQubits() < 1) return null;
         if (v.getQubits() == 1) return getSingleQubitTensor(qubits, v.getQubitIDs()[0], v);
@@ -833,7 +819,7 @@ public class VisualOperator {
         if (NQBITS == 1) {
             return operateOn(qubitArray, getQubitTensor(qubits, this));
         }
-        //TODO: WARNING! Serious bug here(?), something to do w/ MQ operator on last used qubit
+        //bug here was caused by getPos
         Complex[] inputMatrix = new Complex[qubitArray.length];
         for (int i = 0; i < qubitArray.length; i++) {
             inputMatrix[getPos(qubits, i)] = qubitArray[i].copy();
@@ -845,19 +831,31 @@ public class VisualOperator {
         return qubitArray;
     }
 
-    private int getPos(final int qubits, final int posNow) {
+    /**
+     * This function places the states in the incoming statevector to the correct places,
+     * as the matrix of the operator itself does not change (moves qubits in \p qubit_ids
+     * to the beginning of the vector) eg. Hadamard on 3rd qubit will cause 0100 to move to
+     * position 0001. 1001 -> 1010, 0101 -> 0011, 1001 -> 1010, 1111 -> 1111
+     */
+    private int getPos(final int qubits, final int currentPosition) {
         int[] x = new int[qubits];
+        int[] changed = new int[qubits];
+        Arrays.fill(changed, -1);
+        int saved_count = 0;
         for (int i = 0; i < qubits; i++) {
-            x[i] = ((posNow) >> (qubits - i - 1)) % 2;
+            x[i] = ((currentPosition) >> (qubits - i - 1)) % 2;
         }
         for (int i = 0; i < qubit_ids.length; i++) {
-            int tmp = x[qubits - i - 1];
-            x[qubits - i - 1] = x[qubit_ids[qubit_ids.length - i - 1]];
-            x[qubit_ids[qubit_ids.length - i - 1]] = tmp;
+            changed[qubits - i - 1] = x[qubit_ids[qubit_ids.length - i - 1]];
+        }
+        for (int i = 0; i < qubits; i++) {
+            int finalI = qubits - i - 1;
+            if (IntStream.of(qubit_ids).noneMatch(z -> z == finalI))
+                changed[qubits - qubit_ids.length - 1 - saved_count++] = x[qubits - i - 1];
         }
         int ret = 0;
         for (int i = 0; i < qubits; i++) {
-            ret += x[i] << (qubits - i - 1);
+            ret += changed[i] << (qubits - i - 1);
         }
         return ret;
     }
@@ -1255,9 +1253,8 @@ public class VisualOperator {
             line += "h qubit[" + getQubitIDs()[0] + "];";
         } else if (isU3()) {
             line += "u3(" + theta + "," + phi + "," + lambda + ") qubit[" + getQubitIDs()[0] + "];";
-        } else if (isRotation()) {
-            line += "rx(" + theta + ") qubit[" + getQubitIDs()[0] + "];\n";
-            line += "rz(" + phi + ") qubit[" + getQubitIDs()[0] + "];";
+        } else if (isCU3()) {
+            line += "cu3(" + theta + "," + phi + "," + lambda + ") qubit[" + getQubitIDs()[0] + "],qubit[" + getQubitIDs()[1] + "];";
         } else if (!isMultiQubit()) {
             double[] angles = getAngles();
             line += "u3(" + angles[0] + "," + angles[1] + "," + angles[2] + ") qubit[" + getQubitIDs()[0] + "];\n";

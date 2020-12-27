@@ -36,14 +36,14 @@ A software for Android that emulates the actions of a quantum computer
 - Rotation (using spherical coordinates)
 
 ##### Multi Qubit
+- Controlled U3-gate
 - CNOT/CY/CZ (Controlled Pauli)
-- Controlled T-gate
-- Controlled S-gate
+- Controlled T and S gates
 - Controlled Hadamard
 - SWAP
 - Toffoli (CCNOT)
 - Fredkin (CSWAP)
-- Quantum Fourier Transform
+- Quantum Fourier Transform (up to 6 qubits)
 
 #### Desktop key shortcuts
 |Key|Action
@@ -67,8 +67,10 @@ A software for Android that emulates the actions of a quantum computer
 | S |  Go down
 | D |  Go right
 | E |  Edit selected
+| M |  Toggle qubit measurement on/off
 
 ###### Planned features
+Display multi-qubit Bloch sphere
 Create and run algorithms with loops and conditions  
 Display the final unitary matrix of the system
 

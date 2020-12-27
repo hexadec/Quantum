@@ -27,8 +27,8 @@ public class ExperimentRunner {
     public ExperimentRunner(QuantumView quantumView) {
         v = (LinkedList<VisualOperator>) quantumView.getOperators().clone();
         int lUsed = quantumView.getLastUsedQubit();
-        //TODO check bug source (tensor!!)
-        MAX_QUBIT = lUsed < 7 ? 7 : lUsed + 1;
+        //TODO bug source getPos fixed(?)
+        MAX_QUBIT = lUsed < 2 ? 2 : lUsed + 1;
         this.quantumView = quantumView;
     }
 
@@ -129,6 +129,7 @@ public class ExperimentRunner {
                 optimizeFurther();
             }
             quArray = getStateVector();
+            //getFinalUnitaryMatrix();
             if (quantumView.shouldStop)
                 return null;
             float[] probs = VisualOperator.measureProbabilities(quArray);
@@ -161,6 +162,7 @@ public class ExperimentRunner {
         }
         Complex[] quArray = VisualOperator.toQubitArray(qubits);
         if (which >= 0 && which < quArray.length) {
+            quArray[0] = new Complex(0);
             quArray[which] = new Complex(1);
         }
         try {
@@ -189,6 +191,23 @@ public class ExperimentRunner {
             orderedQuArray[m] = quArray[ret];
         }
         return orderedQuArray;
+    }
+
+    public Complex[][] getFinalUnitaryMatrix() {
+        Complex[][] unitary = new Complex[1 << MAX_QUBIT][];
+        for (int i = 0; i < 1 << MAX_QUBIT; i++) {
+            unitary[i] = getStateVector(i);
+        }
+        for (Complex[] row : unitary) {
+            StringBuilder sb = new StringBuilder();
+            for (Complex cell : row) {
+                sb.append(cell.toString3Decimals());
+                sb.append(" ");
+            }
+            sb.append("\n");
+            Log.e("unitary",sb.toString());
+        }
+        return unitary;
     }
 
     public boolean shouldOptimizeFurther() {

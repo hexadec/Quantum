@@ -194,7 +194,7 @@ public class GraphView extends View {
         float blue = (float) ((argument + Math.PI) / 2f / Math.PI) * 216;
         float red = 221 - (float) ((argument + Math.PI) / 2f / Math.PI) * 216;
         rectPaint.setColor((int)(baseColor + blue + (int) red * 0x10000));
-        Log.v("GraphView", "Paint color: " + Integer.toHexString(rectPaint.getColor()));
+        //Log.v("GraphView", "Paint color: " + Integer.toHexString(rectPaint.getColor()));
     }
 
     private void blurBitmap(Bitmap bitmap, float radius) {

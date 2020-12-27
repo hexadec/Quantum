@@ -30,9 +30,6 @@
                 <a href="#qlgs">Quantum Logic Gates</a>
             </li>
             <li>
-                <a href="#rotation">Rotation Gate</a>
-            </li>
-            <li>
                 <a href="#u3">U3 gate</a>
             </li>
             <li>
@@ -132,15 +129,8 @@
             <i>Rotation Gates</i>
         </p>
         <p style="text-align: justify;">
-            Rotation gates as their name suggests, rotate the state-vector of the selected qubit
-            along a selected axis.
-            Using the standard parametrization of the sphere, we can easily describe these
-            operations. Let's denote &theta; the angle of rotation around the X-axis of the bloch
-            sphere, and &phi; the angle of rotation around the Z-axis, where &theta;&nbsp;&isin;&nbsp;[0,&nbsp;&pi;]
-            and &phi;&nbsp;&isin;&nbsp;[0,&nbsp;2&pi;[. The rotation around the Z-axis is also
-            called phase-shift. When you create a rotation gate using the
-            app, always the rotation around the X-axis will be performed first, followed by the
-            rotation around the Z-axis.
+            Support for rotation gates has been removed as it was a nonstandard way to manipulate qubits.
+            You can perfectly replace them with U3 gates. See its matrix below for help.
         <table align="center">
             <tr>
                 <td>
@@ -168,8 +158,8 @@
         </p>
         <p style="text-align: justify;">
             The U3 gate is a unitary gate that has three parameters, hence its name.
-            Using this gate, any single qubit gate can be constructed. It is somewhat similar to a
-            rotation gate, however, the parameters don't have the same meaning.
+            Using this gate, any single qubit gate can be constructed. It is also possible
+            to create a controlled U3 gate, which can replace any two-qubit gate.
         <table align="center">
             <tr>
                 <td>

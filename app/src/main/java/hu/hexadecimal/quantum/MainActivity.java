@@ -241,20 +241,20 @@ public class MainActivity extends AppCompatActivity {
         }), 200);
 
         int help_shown = pref.getInt("help_shown", 0);
-        boolean release_notes_shown = pref.getBoolean("release_notes" + BuildConfig.VERSION_CODE, false);
+//        boolean release_notes_shown = pref.getBoolean("release_notes" + BuildConfig.VERSION_CODE, false);
         if (help_shown < 5) {
             Snackbar.make(findViewById(R.id.parent2), R.string.click_to_start, Snackbar.LENGTH_LONG).show();
             pref.edit().putInt("help_shown", ++help_shown).apply();
         }
-        if (!release_notes_shown) {
-            AlertDialog.Builder meas_dialog_builder = new AlertDialog.Builder(MainActivity.this);
-            meas_dialog_builder.setMessage(Html.fromHtml(getString(R.string.release_notes)));
-            meas_dialog_builder.setCancelable(false);
-            meas_dialog_builder.setPositiveButton("OK", (DialogInterface dialog, int which) -> {
-                pref.edit().putBoolean("release_notes" + BuildConfig.VERSION_CODE, true).apply();
-            });
-            meas_dialog_builder.show();
-        }
+//        if (!release_notes_shown) {
+//            AlertDialog.Builder meas_dialog_builder = new AlertDialog.Builder(MainActivity.this);
+//            meas_dialog_builder.setMessage(Html.fromHtml(getString(R.string.release_notes)));
+//            meas_dialog_builder.setCancelable(false);
+//            meas_dialog_builder.setPositiveButton("OK", (DialogInterface dialog, int which) -> {
+//                pref.edit().putBoolean("release_notes" + BuildConfig.VERSION_CODE, true).apply();
+//            });
+//            meas_dialog_builder.show();
+//        }
 
         drawerLayout = findViewById(R.id.activity_main2);
         toggle = new ActionBarDrawerToggle(this, drawerLayout, R.string.yes, R.string.no);
@@ -720,8 +720,8 @@ public class MainActivity extends AppCompatActivity {
     public void setUpShortcuts(TableLayout gateHolder, SharedPreferences pref, DisplayMetrics displayMetrics, Configuration config, int navWidth) {
         gateHolder.removeAllViews();
         LinkedList<VisualOperator> operators = VisualOperator.getPredefinedGates(false);
-        operators.add(0, new VisualOperator(0f, 0f));
-        operators.add(0, new VisualOperator(0f, 0f, 0f));
+        //operators.add(0, new VisualOperator(0f, 0f));
+        operators.add(0, new VisualOperator(0f, 0f, 0f, false));
         operators.add(0, new VisualOperator(2, false));
         TableRow tr = new TableRow(MainActivity.this);
         int gwMargin = 3;
