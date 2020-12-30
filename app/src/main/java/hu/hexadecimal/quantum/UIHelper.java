@@ -59,13 +59,13 @@ public class UIHelper {
     public static final int SNACKBAR_ERROR_COLOR = 0xffD81010;
     public static final String STATUS_BAR_COLOR = "#171717";
 
-    private static final double[] importantAngles = new double[]{0, Math.PI / 8, Math.PI / 6, Math.PI / 5, Math.PI / 4, Math.PI / 3, Math.PI / 8 * 3, Math.PI / 5 * 2, Math.PI / 2, Math.PI / 3 * 2, Math.PI / 4 * 3, Math.PI};
-    private static final String[] importantAngleNames = new String[]{"0", "π/8", "π/6", "π/5", "π/4", "π/3", "3π/8", "2π/5", "π/2", "2π/3", "3π/4", "π"};
+    private static final double[] importantAngles = new double[]{0, Math.PI / 8, Math.PI / 6, Math.PI / 5, Math.PI / 4, Math.PI / 3, Math.PI / 8 * 3, Math.PI / 5 * 2, Math.PI / 2, Math.PI / 5 * 3, Math.PI / 8 * 5, Math.PI / 3 * 2, Math.PI / 4 * 3, Math.PI / 5 * 4, Math.PI / 6 * 5, Math.PI / 8 * 7, Math.PI};
+    private static final String[] importantAngleNames = new String[]{"0", "π/8", "π/6", "π/5", "π/4", "π/3", "3π/8", "2π/5", "π/2", "3π/5", "5π/8", "2π/3", "3π/4", "4π/5", "5π/6", "7π/8", "π"};
 
-    private static final double[] importantAngles2PI = new double[]{0, Math.PI / 8, Math.PI / 6, Math.PI / 5, Math.PI / 4, Math.PI / 3, Math.PI / 8 * 3, Math.PI / 5 * 2, Math.PI / 2, Math.PI / 3 * 2, Math.PI / 4 * 3, Math.PI,
-            Math.PI / 4 * 5, Math.PI / 3 * 4, Math.PI / 2 * 3, Math.PI / 3 * 5, Math.PI / 4 * 7};
-    private static final String[] importantAngleNames2PI = new String[]{"0", "π/8", "π/6", "π/5", "π/4", "π/3", "3π/8", "2π/5", "π/2", "2π/3", "3π/4", "π",
-            "5π/4", "4π/3", "3π/2", "5π/3", "7π/4"};
+    private static final double[] importantAngles2PI = new double[]{0, Math.PI / 8, Math.PI / 6, Math.PI / 5, Math.PI / 4, Math.PI / 3, Math.PI / 8 * 3, Math.PI / 5 * 2, Math.PI / 2, Math.PI / 5 * 3, Math.PI / 8 * 5, Math.PI / 3 * 2, Math.PI / 4 * 3, Math.PI / 5 * 4, Math.PI / 6 * 5, Math.PI / 8 * 7, Math.PI,
+            Math.PI / 8 * 9, Math.PI / 6 * 7, Math.PI / 5 * 6, Math.PI / 4 * 5, Math.PI / 3 * 4, Math.PI / 8 * 11, Math.PI / 5 * 7, Math.PI / 2 * 3, Math.PI / 5 * 8, Math.PI / 8 * 13, Math.PI / 3 * 5, Math.PI / 4 * 7, Math.PI / 5 * 9, Math.PI / 6 * 11, Math.PI / 8 * 15, Math.PI * 2};
+    private static final String[] importantAngleNames2PI = new String[]{"0", "π/8", "π/6", "π/5", "π/4", "π/3", "3π/8", "2π/5", "π/2", "3π/5", "5π/8", "2π/3", "3π/4", "4π/5", "5π/6", "7π/8", "π",
+            "9π/8", "7π/6", "6π/5", "5π/4", "4π/3", "11π/8", "7π/5", "3π/2", "8π/5", "13π/8", "5π/3", "7π/4", "9π/5", "11π/6", "15π/8", "2π"};
 
     void runnableForGateSelection(AppCompatActivity context, QuantumView qv, VisualOperator prevOperator, float posx, float posy, @NonNull Dialog mainDialog) {
         final LinkedList<VisualOperator> operators = new LinkedList<>();
