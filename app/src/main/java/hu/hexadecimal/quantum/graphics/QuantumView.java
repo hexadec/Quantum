@@ -19,6 +19,7 @@ import android.widget.LinearLayout;
 
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -27,6 +28,7 @@ import java.util.stream.IntStream;
 import androidx.core.graphics.PaintCompat;
 import hu.hexadecimal.quantum.R;
 import hu.hexadecimal.quantum.UIHelper;
+import hu.hexadecimal.quantum.math.Complex;
 import hu.hexadecimal.quantum.tools.Doable;
 import hu.hexadecimal.quantum.tools.DoableType;
 import hu.hexadecimal.quantum.tools.GateSequence;
@@ -45,6 +47,7 @@ public class QuantumView extends View {
 
     private LinkedList<VisualOperator> visualOperators;
     private short[] measuredQubits;
+    private Complex[] statevector;
     private boolean[] ignoredQubits;
     private int[] highlight = new int[]{-1, -1};
     private RectF highlightRect;
@@ -293,7 +296,7 @@ public class QuantumView extends View {
 
     public void toggleIgnoredState(int qubit) {
         ignoredQubits[qubit] = !ignoredQubits[qubit];
-        invalidate();
+        super.invalidate();
     }
 
     public boolean[] getIgnoredQubits() {
@@ -319,7 +322,7 @@ public class QuantumView extends View {
     public void highlightOperator(int[] gridPos) {
         this.highlight = gridPos;
         this.highlightRect = getRectInGrid(gridPos);
-        invalidate();
+        super.invalidate();
     }
 
     public void moveHighlight(int where) {
@@ -551,7 +554,7 @@ public class QuantumView extends View {
     }
 
     public QuantumViewData getData() {
-        return new QuantumViewData(undoList, redoList, new GateSequence<>(visualOperators, name));
+        return new QuantumViewData(undoList, redoList, new GateSequence<>(visualOperators, name), new LinkedList(Arrays.asList(statevector)));
     }
 
     public boolean setData(QuantumViewData data) {
@@ -569,12 +572,30 @@ public class QuantumView extends View {
             }
             undoList = data.undoList;
             redoList = data.redoList;
-            invalidate();
+            statevector = (Complex[]) data.statevector.toArray();
+            super.invalidate();
             return !hadError;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
+    }
+
+    /**
+     * Call this.invalidate() if the gates have changed
+     * call super.invalidate() if the gates haven't changed
+     */
+    public void invalidate() {
+        statevector = null;
+        super.invalidate();
+    }
+
+    public void setStatevector(Complex[] statevector) {
+        this.statevector = statevector;
+    }
+
+    public Complex[] getStatevector() {
+        return statevector;
     }
 
     public boolean removeLastGate() {
@@ -696,6 +717,7 @@ public class QuantumView extends View {
     public int optimizeCircuit() {
         if (visualOperators.size() == 0) return 0;
         int counter = MAX_QUBITS;
+        boolean hasChanged = false;
         for (int i = MAX_QUBITS - 1; i > -1; i--) {
             if (measuredQubits[i] == 0) {
                 counter--;
@@ -707,11 +729,13 @@ public class QuantumView extends View {
                         measuredQubits[quids[k] - 1]++;
                         measuredQubits[quids[k]]--;
                         quids[k]--;
+                        hasChanged = true;
                     }
                 }
             }
         }
-        invalidate();
+        if (hasChanged)
+            invalidate();
         return counter;
     }
 

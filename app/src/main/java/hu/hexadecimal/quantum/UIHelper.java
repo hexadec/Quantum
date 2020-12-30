@@ -16,7 +16,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -43,6 +42,7 @@ import java.util.TimeZone;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.documentfile.provider.DocumentFile;
 import hu.hexadecimal.quantum.graphics.QuantumView;
@@ -128,7 +128,7 @@ public class UIHelper {
             final TextView thetaText = mainView.findViewById(R.id.rx_text);
             final TextView phiText = mainView.findViewById(R.id.rz_text);
             final TextView lambdaText = mainView.findViewById(R.id.ry_text);
-            final CheckBox fixedValues = mainView.findViewById(R.id.fixed_values);
+            final SwitchCompat fixedValues = mainView.findViewById(R.id.fixed_values);
             final SeekBar[] qX = new SeekBar[]{
                     mainView.findViewById(R.id.order_first),
                     mainView.findViewById(R.id.order_second),
@@ -185,15 +185,15 @@ public class UIHelper {
                         {
                             int qubits = prevOperator.getQubits();
                             if (qubits > 1)
-                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
-                            ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(qubits == 1);
+                                ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
+                            mainView.findViewById(R.id.hermitianConjugate).setEnabled(qubits == 1);
                         }
                     }
                 } else {
                     {
                         int qubits = VisualOperator.findGateByName(gateAdapter.getItem(0)).getQubits();
                         if (qubits > 1)
-                            ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
+                            ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
                         mainView.findViewById(R.id.hermitianConjugate).setEnabled(qubits == 1);
                     }
                     int which = qv.whichQubit(posy);
@@ -224,7 +224,7 @@ public class UIHelper {
                                     gateAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                                     gateName.setAdapter(gateAdapter);
                                 }
-                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.hermitian_conjugate);
+                                ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.hermitian_conjugate);
                             } else if (i == 1) {
                                 synchronized (UIHelper.this) {
                                     if (operators.size() > 0) {
@@ -243,21 +243,21 @@ public class UIHelper {
                                         t.setGravity(Gravity.CENTER, 0, 0);
                                         t.show();
                                     }
-                                    ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.hermitian_conjugate);
+                                    ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.hermitian_conjugate);
                                 }
                             } else if (i == 2) {
                                 for (int k = 1; k < qX.length; k++) {
                                     qX[k].setVisibility(GONE);
                                     tX[k].setVisibility(GONE);
                                 }
-                                showQubitSelectors(qX, tX, ((CheckBox) mainView.findViewById(R.id.controlled)).isChecked() ? 2 : 1);
+                                showQubitSelectors(qX, tX, ((SwitchCompat) mainView.findViewById(R.id.controlled)).isChecked() ? 2 : 1);
                                 lambdaText.setVisibility(VISIBLE);
                                 lamdaBar.setVisibility(VISIBLE);
                                 subLayout.setVisibility(GONE);
                                 qftLayout.setVisibility(GONE);
                                 rotLayout.setVisibility(VISIBLE);
                                 filter.setSelection(0);
-                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.hermitian_conjugate);
+                                ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.hermitian_conjugate);
                                 mainView.findViewById(R.id.hermitianConjugate).setEnabled(true);
                             } else if (i == 3) {
                                 filter.setSelection(0);
@@ -266,7 +266,7 @@ public class UIHelper {
                                 qftLayout.setVisibility(VISIBLE);
                                 int qftPosition = qftQubits.getSelectedItemPosition();
                                 showQubitSelectors(qX, tX, qftPosition + 2);
-                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.inverse_qft);
+                                ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.inverse_qft);
                                 mainView.findViewById(R.id.hermitianConjugate).setEnabled(true);
                             }
                         }
@@ -316,7 +316,7 @@ public class UIHelper {
                             }
                         }));
                 mainView.postDelayed(() -> {
-                    ((CheckBox) mainView.findViewById(R.id.controlled))
+                    ((SwitchCompat) mainView.findViewById(R.id.controlled))
                             .setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> {
                                 new Handler().postDelayed(() -> {
                                     showQubitSelectors(qX, tX, isChecked ? 2 : 1);
@@ -415,10 +415,10 @@ public class UIHelper {
                         lamdaBar.setProgress((int) Math.abs(prevOperator.getAngles()[2] * 1000));
                         phiBar.setProgress((int) Math.abs(prevOperator.getAngles()[1] * 1000));
                         if (prevOperator.getAngles()[0] < 0 || prevOperator.getAngles()[1] < 0 || prevOperator.getAngles()[2] < 0) {
-                            ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(true);
+                            ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setChecked(true);
                         }
                         if (prevOperator.isCU3()) {
-                            ((CheckBox) mainView.findViewById(R.id.controlled)).setChecked(true);
+                            ((SwitchCompat) mainView.findViewById(R.id.controlled)).setChecked(true);
                             showQubitSelectors(qX, tX, 2);
                             qX[1].setProgress(prevOperator.getQubitIDs()[1]);
                         }
@@ -428,8 +428,8 @@ public class UIHelper {
                             qX[i].setProgress(prevOperator.getQubitIDs()[i]);
                         }
                         qftQubits.setSelection(prevOperator.getQubits() - 2);
-                        ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.inverse_qft);
-                        ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(prevOperator.getAngles()[2] == -1);
+                        ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.inverse_qft);
+                        ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setChecked(prevOperator.getAngles()[2] == -1);
                         mainView.findViewById(R.id.hermitianConjugate).setEnabled(true);
 
                     } else {
@@ -460,8 +460,8 @@ public class UIHelper {
                                         gateType.getSelectedItemPosition() == 1 ?
                                                 operators.get(i).getQubits() : 1;
                                 if (qubits > 1)
-                                    ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
-                                ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).setEnabled(qubits == 1);
+                                    ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
+                                mainView.findViewById(R.id.hermitianConjugate).setEnabled(qubits == 1);
                                 showQubitSelectors(qX, tX, qubits);
                             }
                         }
@@ -519,7 +519,7 @@ public class UIHelper {
                                 VisualOperator gate = gateType.getSelectedItemPosition() == 0
                                         ? VisualOperator.findGateByName((String) gateName.getSelectedItem()).copy()
                                         : operators.get(gateName.getSelectedItemPosition()).copy();
-                                if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
+                                if (((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
                                     gate.hermitianConjugate();
                                 if (prevOperator == null)
                                     qv.addGate(quids, gate);
@@ -531,8 +531,8 @@ public class UIHelper {
                             double theta = fixedValues.isChecked() ? importantAngles[thetaBar.getProgress()] : thetaBar.getProgress() / 1000f;
                             double phi = fixedValues.isChecked() ? importantAngles2PI[phiBar.getProgress()] : phiBar.getProgress() / 1000f;
                             double lambda = fixedValues.isChecked() ? importantAngles2PI[lamdaBar.getProgress()] : lamdaBar.getProgress() / 1000f;
-                            VisualOperator gate = new VisualOperator(theta, phi, lambda, ((CheckBox) mainView.findViewById(R.id.controlled)).isChecked());
-                            if (((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
+                            VisualOperator gate = new VisualOperator(theta, phi, lambda, ((SwitchCompat) mainView.findViewById(R.id.controlled)).isChecked());
+                            if (((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).isChecked())
                                 gate.hermitianConjugate();
                             if (prevOperator == null) {
                                 if (gate.isCU3()) {
@@ -550,7 +550,7 @@ public class UIHelper {
                             mainDialog.cancel();
                         } else if (gateType.getSelectedItemPosition() == 3) {
                             int qubits = qftQubits.getSelectedItemPosition() + 2;
-                            VisualOperator gate = new VisualOperator(qubits, ((CheckBox) mainView.findViewById(R.id.hermitianConjugate)).isChecked());
+                            VisualOperator gate = new VisualOperator(qubits, ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).isChecked());
                             int[] quids = new int[qubits];
                             for (int i = 0; i < qubits; i++) {
                                 quids[i] = qX[i].getProgress();

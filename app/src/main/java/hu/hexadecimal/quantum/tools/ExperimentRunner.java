@@ -57,7 +57,9 @@ public class ExperimentRunner {
                 if (shouldOptimizeFurther()) {
                     optimizeFurther();
                 }
-                quArray = getStateVector();
+                if ((quArray = quantumView.getStatevector()) == null)
+                    quArray = getStateVector();
+                quantumView.setStatevector(quArray);
             });
             new Thread(() -> {
                 while (status < shots2 && !finished && !quantumView.shouldStop) {
@@ -128,7 +130,9 @@ public class ExperimentRunner {
             if (shouldOptimizeFurther()) {
                 optimizeFurther();
             }
-            quArray = getStateVector();
+            if ((quArray = quantumView.getStatevector()) == null)
+                quArray = getStateVector();
+            quantumView.setStatevector(quArray);
             //getFinalUnitaryMatrix();
             if (quantumView.shouldStop)
                 return null;

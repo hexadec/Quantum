@@ -13,7 +13,7 @@
     <string name="single_gate">Single Qubit</string>
     <string name="multi_gate">Multi Qubit</string>
     <string name="operate_on">Operate on</string>
-    <string name="select_order_of_qubits">Select the order of qubits for the chosen operator</string>
+    <string name="select_order_of_qubits">Select the order of qubits</string>
     <string name="results">Results</string>
     <string name="wait">Executing experiment, please wait&#8230;</string>
     <string name="clear_screen">Clear timeline</string>
@@ -82,7 +82,7 @@
     <string name="csv_separator">Separator</string>
     <string name="csv_number_format">Scientific notation</string>
     <string name="csv_number_format_long">Using the scientific notation more significant digits can be displayed, however, some programs may not support it</string>
-    <string name="fixed_values">Significant angles only</string>
+    <string name="fixed_values">Significant angles</string>
     <string name="optimize_circuit">Optimize circuit</string>
     <string name="optimize_circuit_long">This will move the circuit to the smallest qubits. Useful when using many qubits or gates. (EXPERIMENTAL)</string>
     <string name="state_of_qubit_warning">State before first MQ gate</string>
@@ -121,4 +121,5 @@
     Red/dark-grey qubits will be measured whereas pale-grey qubits won\'t be.
     This can simplify the evaluation of the results, for you.</string>
     <string name="controlled">Controlled</string>
+    <string name="single">Single</string>
 </resources>

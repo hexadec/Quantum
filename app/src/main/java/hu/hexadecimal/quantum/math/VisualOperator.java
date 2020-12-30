@@ -27,7 +27,7 @@ import androidx.annotation.NonNull;
  */
 public class VisualOperator {
 
-    public static final long helpVersion = 49L;
+    public static final long helpVersion = 52L;
     private Complex[][] matrix;
     //last one is to clarify meaning for navbar, so length is +1 to qubits
     private String[] symbols;
@@ -286,7 +286,7 @@ public class VisualOperator {
         if (qubits < 2 || qubits > 6) {
             throw new IllegalArgumentException("Invalid value for qubits: " + qubits);
         }
-        MATRIX_DIM = (int) Math.round(Math.pow(2, qubits));
+        MATRIX_DIM = 1 << qubits;
         name = "QFT";
         qubit_ids = new int[NQBITS = qubits];
         rectangle = new LinkedList<>();

@@ -49,12 +49,23 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <View
+                android:id="@+id/type_selector_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="8dp"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/sub_layout"
+                app:layout_constraintTop_toBottomOf="@+id/type_spinner" />
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/sub_layout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="0dp"
-                android:layout_marginTop="0dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
                 android:visibility="visible"
@@ -162,11 +173,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="0dp"
-                android:layout_marginTop="0dp"
+                android:layout_marginTop="16dp"
                 android:layout_marginEnd="0dp"
                 android:layout_marginBottom="0dp"
                 android:visibility="gone"
-                app:layout_constraintBottom_toTopOf="@+id/order_info"
+                app:layout_constraintBottom_toTopOf="@+id/qubit_selector_divider"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/qft_layout">
@@ -252,37 +263,50 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="@+id/ry" />
 
-                <CheckBox
+                <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/fixed_values"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="32dp"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="12dp"
                     android:layout_marginBottom="0dp"
                     android:layout_marginEnd="8dp"
                     android:checked="false"
                     android:text="@string/fixed_values"
+                    android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/controlled"
-                    app:layout_constraintTop_toBottomOf="@+id/rz" />
+                    app:layout_constraintTop_toBottomOf="@+id/ry" />
 
-                <CheckBox
+                <androidx.appcompat.widget.SwitchCompat
                     android:id="@+id/controlled"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="32dp"
                     android:layout_marginStart="8dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="12dp"
                     android:layout_marginBottom="0dp"
                     android:layout_marginEnd="16dp"
                     android:checked="false"
                     android:text="@string/controlled"
+                    android:textSize="16sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@id/fixed_values"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/rz" />
+                    app:layout_constraintTop_toBottomOf="@+id/ry" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                android:id="@+id/qubit_selector_divider"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="8dp"
+                android:background="?android:attr/listDivider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/order_info"
+                app:layout_constraintTop_toBottomOf="@+id/rot_layout" />
 
             <TextView
                 android:id="@+id/order_info"
@@ -290,12 +314,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="4dp"
                 android:text="@string/select_order_of_qubits"
+                android:textSize="16sp"
                 app:layout_constraintBottom_toTopOf="@+id/order_first"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/sub_layout" />
+                app:layout_constraintTop_toBottomOf="@+id/qubit_selector_divider" />
 
             <SeekBar
                 android:id="@+id/order_first"
@@ -496,7 +521,7 @@
                 app:layout_constraintStart_toEndOf="@+id/cancel"
                 app:layout_constraintTop_toBottomOf="@+id/hermitianConjugate" />
 
-            <CheckBox
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/hermitianConjugate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -505,6 +530,8 @@
                 android:layout_marginBottom="24dp"
                 android:checked="false"
                 android:text="@string/hermitian_conjugate"
+                android:textSize="16sp"
+                app:switchPadding="4dp"
                 app:layout_constraintBottom_toTopOf="@+id/cancel"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/order_sixth" />
