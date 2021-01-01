@@ -256,7 +256,7 @@ public class MatrixEditorActivity extends AppCompatActivity {
                         return;
                     }
                     VisualOperator v = new VisualOperator(DIM, cMatrix, name, symbols, color);
-                    if (!v.isSpecial() || !v.isUnitary()) {
+                    if (!v.isUnitary()) {
                         showErr(4);
                         return;
                     }
@@ -342,11 +342,9 @@ public class MatrixEditorActivity extends AppCompatActivity {
                     VisualOperator vo = new VisualOperator(DIM, cMatrix);
                     ((TextInputLayout) v.findViewById(R.id.editText3)).setErrorEnabled(true);
                     ((TextInputLayout) v.findViewById(R.id.editText3))
-                            .setErrorTextColor(ColorStateList.valueOf(!vo.isSpecial() || !vo.isUnitary() ? Color.RED : Color.GREEN));
+                            .setErrorTextColor(ColorStateList.valueOf(!vo.isUnitary() ? Color.RED : Color.GREEN));
                     ((TextInputLayout) v.findViewById(R.id.editText3))
-                            .setError(getString(R.string.determinant) + ": "
-                                    + new DecimalFormat("0.0###").format(vo.determinantMod()) + ". "
-                                    + getString(R.string.unitary) + ": "
+                            .setError(getString(R.string.unitary) + ": "
                                     + (vo.isUnitary() ? getString(R.string.yes) : getString(R.string.no)));
 
                 });

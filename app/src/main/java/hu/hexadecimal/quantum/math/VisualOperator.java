@@ -379,9 +379,14 @@ public class VisualOperator {
     }
 
     public boolean isHermitian() {
-        VisualOperator t = copy();
-        t.hermitianConjugate();
-        return equals3Decimals(t);
+        for (int i = 0; i < MATRIX_DIM; i++) {
+            for (int j = i + 1; j < MATRIX_DIM; j++) {
+                if (!matrix[i][j].equals3Decimals(Complex.conjugate(matrix[j][i]))) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public void multiply(Complex complex) {
@@ -1068,38 +1073,41 @@ public class VisualOperator {
         return null;
     }
 
-    public double determinantMod() {
-        if (NQBITS == 1) {
-            return Complex.sub(Complex.multiply(matrix[0][0], matrix[1][1]), Complex.multiply(matrix[0][1], matrix[1][0])).mod();
-        } else {
-            Qubit[] qs = new Qubit[NQBITS];
-            for (int m = 0; m < NQBITS; m++) {
-                qs[m] = new Qubit();
-            }
-            Complex[] inputMatrix = new Complex[MATRIX_DIM];
-            Complex[] resultMatrix = new Complex[MATRIX_DIM];
+    /**
+     * Calculates the change in the amplitude of some possible statevectors
+     * If they are not 1, the matrix is not *Unitary* (see: https://en.wikipedia.org/wiki/Unitary_matrix#Equivalent_conditions)
+     */
+    public boolean isUnitary() {
+        double lastProbability = Double.NaN;
+        for (int column = 0; column <= MATRIX_DIM; column++) {
+            Complex[] inputVector = new Complex[MATRIX_DIM];
+            Complex[] resultVector = new Complex[MATRIX_DIM];
             for (int i = 0; i < MATRIX_DIM; i++) {
-                resultMatrix[i] = new Complex(0);
-                for (int k = 0; k < NQBITS; k++) {
-                    if (k == 0) {
-                        inputMatrix[i] = Complex.multiply(qs[NQBITS - 2].matrix[(i >> 1) % 2], qs[NQBITS - 1].matrix[i % 2]);
-                        k += 1;
-                        continue;
-                    }
-                    inputMatrix[i] = Complex.multiply(inputMatrix[i], qs[NQBITS - k - 1].matrix[(i >> k) % 2]);
-                }
+                resultVector[i] = new Complex(0);
+                if (column < MATRIX_DIM)
+                    if (i == column)
+                        inputVector[i] = new Complex(1);
+                    else
+                        inputVector[i] = new Complex(0);
+                else
+                    inputVector[i] = new Complex(1 / Math.sqrt(MATRIX_DIM), 0);
             }
             for (int i = 0; i < MATRIX_DIM; i++) {
                 for (int j = 0; j < MATRIX_DIM; j++) {
-                    resultMatrix[i].add(Complex.multiply(matrix[i][j], inputMatrix[j]));
+                    resultVector[i].add(Complex.multiply(matrix[i][j], inputVector[j]));
                 }
             }
-            double prob = 0f;
+            double prob = 0.0;
             for (int i = 0; i < MATRIX_DIM; i++) {
-                prob += Complex.multiply(Complex.conjugate(resultMatrix[i]), resultMatrix[i]).real;
+                prob += Math.pow(resultVector[i].mod(), 2);
             }
-            return prob;
+            if (!Double.isNaN(lastProbability) && Math.round(prob * 1E4D) / 1E4D != lastProbability) {
+                return false;
+            } else {
+                lastProbability = Math.round(prob * 1E4D) / 1E4D;
+            }
         }
+        return lastProbability < 1.0001 && lastProbability > 0.9999;
     }
 
     private Complex[][] generateQFTMatrix(Complex complexOmega, boolean inverse) {
@@ -1127,52 +1135,6 @@ public class VisualOperator {
             number >>= 1;
         }
         return reverse;
-    }
-
-    public boolean isSpecial() {
-        double detMod = determinantMod();
-        return detMod < 1.0001 && detMod > 0.9999;
-    }
-
-    public boolean isUnitary() {
-        Qubit[] qX = new Qubit[]{new Qubit(), new Qubit(), new Qubit(), new Qubit()};
-        qX[1].applyOperator(VisualOperator.HADAMARD);
-        qX[2].applyOperator(VisualOperator.HADAMARD);
-        qX[2].applyOperator(VisualOperator.S_GATE);
-        qX[3].applyOperator(VisualOperator.SQRT_NOT);
-        Qubit[][] qAX = new Qubit[qX.length][NQBITS + 2];
-        if (NQBITS != 1) {
-            for (int i = 0; i < NQBITS + 2; i++) {
-                if (i < NQBITS) qubit_ids[i] = i;
-                for (int m = 0; m < qX.length; m++) {
-                    qAX[m][i] = qX[m].copy();
-                }
-            }
-            Complex[][] aX = new Complex[qX.length][];
-            Complex[][] bX = new Complex[qX.length][];
-            Complex[][] oX = new Complex[qX.length][];
-            for (int m = 0; m < qX.length; m++) {
-                aX[m] = toQubitArray(qAX[m]);
-                bX[m] = toQubitArray(qAX[m]);
-            }
-            VisualOperator vo = hermitianConjugate(this);
-            for (int m = 0; m < qX.length; m++) {
-                oX[m] = vo.copy().operateOn(copy().operateOn(aX[m], NQBITS + 2), NQBITS + 2);
-            }
-            for (int m = qX.length - 1; m >= 0; m--) {
-                for (int i = 0; i < oX[0].length; i++) {
-                    if (!bX[m][i].equals3Decimals(oX[m][i])) return false;
-                }
-            }
-        } else {
-            for (int m = qX.length - 1; m >= 0; m--) {
-                Qubit o = hermitianConjugate(this).operateOn(operateOn(new Qubit[]{qX[m].copy()}))[0];
-                for (int j = 0; j < 2; j++) {
-                    if (!o.matrix[j].equals3Decimals(qX[m].matrix[j])) return false;
-                }
-            }
-        }
-        return true;
     }
 
     public void setColor(int color1) {

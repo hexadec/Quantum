@@ -41,7 +41,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         VisualOperator operator = operators.get(position);
-        if (!operator.isSpecial() || ! operator.isUnitary()) {
+        if (!operator.isUnitary()) {
             holder.gateName.setText(operator.getName() + ": " + holder.gateName.getContext().getString(R.string.invalid_gate_short));
             holder.itemView.setBackgroundColor(0xffff8888);
             holder.color.setBackgroundColor(0xffff8888);

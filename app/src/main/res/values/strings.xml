@@ -42,7 +42,7 @@
     <string name="invalid_symbols">Use as many symbols as qubits separated by commas</string>
     <string name="invalid_name">Enter a valid unused name</string>
     <string name="invalid_complex">Invalid complex number: try the format x±yi</string>
-    <string name="invalid_matrix">The matrix has to be member of the group SU(n) </string>
+    <string name="invalid_matrix">The matrix has to be unitary</string>
     <string name="check_matrix">Check matrix</string>
     <string name="determinant">Det modulus</string>
     <string name="unitary">Unitary</string>
