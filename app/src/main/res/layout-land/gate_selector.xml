@@ -107,7 +107,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="0dp"
                     android:text="@string/filter"
                     app:autoSizeMinTextSize="16sp"
                     app:layout_constraintStart_toStartOf="parent"
@@ -331,14 +331,27 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
-                android:max="7"
+                android:layout_marginEnd="8dp"
+                android:max="9"
                 android:progressDrawable="@drawable/seek_progress"
                 android:thumb="@drawable/seek_thumb"
                 app:layout_constraintBottom_toTopOf="@+id/order_second"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/helper_first"
                 app:layout_constraintStart_toEndOf="@+id/qtext1"
                 app:layout_constraintTop_toBottomOf="@+id/order_info" />
+
+            <TextView
+                android:id="@+id/helper_first"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                android:typeface="monospace"
+                android:text="@string/control_short"
+                app:layout_constraintTop_toTopOf="@+id/order_first"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/order_first"
+                app:layout_constraintBottom_toBottomOf="@+id/order_first" />
 
             <TextView
                 android:id="@+id/qtext1"
@@ -358,15 +371,28 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="12dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginBottom="12dp"
-                android:max="7"
+                android:max="9"
                 android:progressDrawable="@drawable/seek_progress"
                 android:thumb="@drawable/seek_thumb"
                 app:layout_constraintBottom_toTopOf="@+id/order_third"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/helper_second"
                 app:layout_constraintStart_toEndOf="@+id/qtext2"
                 app:layout_constraintTop_toBottomOf="@+id/order_first" />
+
+            <TextView
+                android:id="@+id/helper_second"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                android:typeface="monospace"
+                android:text="@string/target_short"
+                app:layout_constraintTop_toTopOf="@+id/order_second"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/order_second"
+                app:layout_constraintBottom_toBottomOf="@+id/order_second" />
 
             <TextView
                 android:id="@+id/qtext2"
@@ -385,16 +411,29 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginBottom="12dp"
-                android:max="7"
+                android:max="9"
                 android:progressDrawable="@drawable/seek_progress"
                 android:thumb="@drawable/seek_thumb"
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@+id/order_fourth"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/helper_third"
                 app:layout_constraintStart_toEndOf="@+id/qtext3"
                 app:layout_constraintTop_toBottomOf="@+id/order_second" />
+
+            <TextView
+                android:id="@+id/helper_third"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                android:typeface="monospace"
+                android:text=" "
+                app:layout_constraintTop_toTopOf="@+id/order_third"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/order_third"
+                app:layout_constraintBottom_toBottomOf="@+id/order_third" />
 
             <TextView
                 android:id="@+id/qtext3"
@@ -414,16 +453,29 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginBottom="12dp"
-                android:max="7"
+                android:max="9"
                 android:progressDrawable="@drawable/seek_progress"
                 android:thumb="@drawable/seek_thumb"
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@+id/order_fifth"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/helper_fourth"
                 app:layout_constraintStart_toEndOf="@+id/qtext4"
                 app:layout_constraintTop_toBottomOf="@+id/order_third" />
+
+            <TextView
+                android:id="@+id/helper_fourth"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                android:typeface="monospace"
+                android:text=" "
+                app:layout_constraintTop_toTopOf="@+id/order_fourth"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/order_fourth"
+                app:layout_constraintBottom_toBottomOf="@+id/order_fourth" />
 
             <TextView
                 android:id="@+id/qtext4"
@@ -437,22 +489,36 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/order_fourth" />
 
+
             <SeekBar
                 android:id="@+id/order_fifth"
                 style="@style/Widget.AppCompat.SeekBar.Discrete"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginBottom="12dp"
-                android:max="7"
+                android:max="9"
                 android:progressDrawable="@drawable/seek_progress"
                 android:thumb="@drawable/seek_thumb"
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@+id/order_sixth"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/helper_fifth"
                 app:layout_constraintStart_toEndOf="@+id/qtext5"
                 app:layout_constraintTop_toBottomOf="@+id/order_fourth" />
+
+            <TextView
+                android:id="@+id/helper_fifth"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                android:typeface="monospace"
+                android:text=" "
+                app:layout_constraintTop_toTopOf="@+id/order_fifth"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/order_fifth"
+                app:layout_constraintBottom_toBottomOf="@+id/order_fifth" />
 
             <TextView
                 android:id="@+id/qtext5"
@@ -472,16 +538,29 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginBottom="12dp"
-                android:max="7"
+                android:max="9"
                 android:progressDrawable="@drawable/seek_progress"
                 android:thumb="@drawable/seek_thumb"
                 android:visibility="gone"
                 app:layout_constraintBottom_toTopOf="@+id/hermitianConjugate"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/helper_sixth"
                 app:layout_constraintStart_toEndOf="@+id/qtext6"
                 app:layout_constraintTop_toBottomOf="@+id/order_fifth" />
+
+            <TextView
+                android:id="@+id/helper_sixth"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="16dp"
+                android:typeface="monospace"
+                android:text=" "
+                app:layout_constraintTop_toTopOf="@+id/order_sixth"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/order_sixth"
+                app:layout_constraintBottom_toBottomOf="@+id/order_sixth" />
 
             <TextView
                 android:id="@+id/qtext6"
@@ -494,6 +573,7 @@
                 app:layout_constraintEnd_toStartOf="@+id/order_sixth"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="@+id/order_sixth" />
+
 
             <Button
                 android:id="@+id/cancel"
@@ -525,7 +605,7 @@
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/hermitianConjugate"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"

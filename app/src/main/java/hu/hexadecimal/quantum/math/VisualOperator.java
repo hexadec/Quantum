@@ -41,6 +41,7 @@ public class VisualOperator {
      * Quantum Gate File
      */
     public static final String FILE_EXTENSION = ".qgf";
+    public static final String HERMITIAN_CONJUGATE_SYMBOL = "†";
     private final int NQBITS;
     public int color = 0xff000000;
     public String name;
@@ -357,7 +358,8 @@ public class VisualOperator {
         transpose();
         conjugate();
         for (int i = 0; i < symbols.length; i++) {
-            symbols[i] += "†";
+            if (!symbols[i].equals(CNOT.symbols[0]))
+                symbols[i] += HERMITIAN_CONJUGATE_SYMBOL;
         }
         if (theta != NULL_ANGLE) {
             theta = -theta;
@@ -406,6 +408,17 @@ public class VisualOperator {
 
     public boolean isQFT() {
         return (lambda == 1 || lambda == -1) && theta == NULL_ANGLE && phi == NULL_ANGLE && isMultiQubit() && name.equals("QFT");
+    }
+
+    public boolean isHermitianConjugate() {
+        if ((isU3() || isCU3()) && (lambda < 0 || theta < 0 || phi < 0))
+            return true;
+        if (isQFT() && lambda == -1)
+            return true;
+        for (String symbol : symbols)
+            if (symbol.endsWith(HERMITIAN_CONJUGATE_SYMBOL))
+                return true;
+        return false;
     }
 
     public double[] getAngles() {

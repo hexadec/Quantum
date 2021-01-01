@@ -122,4 +122,6 @@
     This can simplify the evaluation of the results, for you.</string>
     <string name="controlled">Controlled</string>
     <string name="single">Single</string>
+    <string name="control_short">c</string>
+    <string name="target_short">t</string>
 </resources>

@@ -143,6 +143,13 @@ public class UIHelper {
                     mainView.findViewById(R.id.qtext4),
                     mainView.findViewById(R.id.qtext5),
                     mainView.findViewById(R.id.qtext6)};
+            final TextView[] hX = new TextView[]{
+                    mainView.findViewById(R.id.helper_first),
+                    mainView.findViewById(R.id.helper_second),
+                    mainView.findViewById(R.id.helper_third),
+                    mainView.findViewById(R.id.helper_fourth),
+                    mainView.findViewById(R.id.helper_fifth),
+                    mainView.findViewById(R.id.helper_sixth)};
             final LinkedList<String> mGates = VisualOperator.getPredefinedGateNames();
             Collections.sort(mGates);
             ArrayAdapter<String> gateAdapter =
@@ -170,6 +177,7 @@ public class UIHelper {
                     });
                 }
                 if (prevOperator != null) {
+                    setHelperText(hX, prevOperator);
                     if (!prevOperator.isU3()) {
                         for (int i = 0; i < prevOperator.getQubitIDs().length; i++) {
                             qX[i].setProgress(prevOperator.getQubitIDs()[i]);
@@ -181,24 +189,28 @@ public class UIHelper {
                                 gateName.setSelection(mGates.indexOf(VisualOperator.HADAMARD.getName()));
                             }
                         }
-                        showQubitSelectors(qX, tX, prevOperator.getQubits());
+                        showQubitSelectors(qX, tX, hX, prevOperator.getQubits());
                         {
                             int qubits = prevOperator.getQubits();
                             if (qubits > 1)
                                 ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
+                            else if (prevOperator.isHermitianConjugate())
+                                ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setChecked(true);
                             mainView.findViewById(R.id.hermitianConjugate).setEnabled(qubits == 1);
                         }
                     }
                 } else {
-                    {
-                        int qubits = VisualOperator.findGateByName(gateAdapter.getItem(0)).getQubits();
-                        if (qubits > 1)
-                            ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
-                        mainView.findViewById(R.id.hermitianConjugate).setEnabled(qubits == 1);
-                    }
+                    VisualOperator operator = VisualOperator.findGateByName(gateAdapter.getItem(0));
+                    int qubits = operator.getQubits();
+                    if (qubits > 1)
+                        ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
+                    mainView.findViewById(R.id.hermitianConjugate).setEnabled(qubits == 1);
+                    setHelperText(hX, operator);
+
                     int which = qv.whichQubit(posy);
                     qX[0].setProgress(which);
                     tX[0].setText("q" + (which + 1));
+                    showQubitSelectors(qX, tX, hX, qubits);
                 }
                 gateType.post(() -> {
                     gateType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -250,7 +262,14 @@ public class UIHelper {
                                     qX[k].setVisibility(GONE);
                                     tX[k].setVisibility(GONE);
                                 }
-                                showQubitSelectors(qX, tX, ((SwitchCompat) mainView.findViewById(R.id.controlled)).isChecked() ? 2 : 1);
+                                showQubitSelectors(qX, tX, hX, ((SwitchCompat) mainView.findViewById(R.id.controlled)).isChecked() ? 2 : 1);
+                                if (((SwitchCompat) mainView.findViewById(R.id.controlled)).isChecked()) {
+                                    hX[0].setText(R.string.control_short);
+                                    hX[1].setText(R.string.target_short);
+                                } else {
+                                    hX[0].setText(" ");
+                                    hX[1].setText(" ");
+                                }
                                 lambdaText.setVisibility(VISIBLE);
                                 lamdaBar.setVisibility(VISIBLE);
                                 subLayout.setVisibility(GONE);
@@ -260,12 +279,14 @@ public class UIHelper {
                                 ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.hermitian_conjugate);
                                 mainView.findViewById(R.id.hermitianConjugate).setEnabled(true);
                             } else if (i == 3) {
+                                for (TextView helpText : hX)
+                                    helpText.setText(" ");
                                 filter.setSelection(0);
                                 subLayout.setVisibility(GONE);
                                 rotLayout.setVisibility(GONE);
                                 qftLayout.setVisibility(VISIBLE);
                                 int qftPosition = qftQubits.getSelectedItemPosition();
-                                showQubitSelectors(qX, tX, qftPosition + 2);
+                                showQubitSelectors(qX, tX, hX, qftPosition + 2);
                                 ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.inverse_qft);
                                 mainView.findViewById(R.id.hermitianConjugate).setEnabled(true);
                             }
@@ -278,7 +299,7 @@ public class UIHelper {
                     qftQubits.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
                         @Override
                         public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                            showQubitSelectors(qX, tX, i + 2);
+                            showQubitSelectors(qX, tX, hX, i + 2);
                         }
 
                         @Override
@@ -319,7 +340,14 @@ public class UIHelper {
                     ((SwitchCompat) mainView.findViewById(R.id.controlled))
                             .setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> {
                                 new Handler().postDelayed(() -> {
-                                    showQubitSelectors(qX, tX, isChecked ? 2 : 1);
+                                    showQubitSelectors(qX, tX, hX, isChecked ? 2 : 1);
+                                    if (isChecked) {
+                                        hX[0].setText(R.string.control_short);
+                                        hX[1].setText(R.string.target_short);
+                                    } else {
+                                        hX[0].setText(" ");
+                                        hX[1].setText(" ");
+                                    }
                                 }, 100);
                     });
                     fixedValues.setOnCheckedChangeListener((CompoundButton compoundButton, boolean newValue) ->
@@ -419,8 +447,10 @@ public class UIHelper {
                         }
                         if (prevOperator.isCU3()) {
                             ((SwitchCompat) mainView.findViewById(R.id.controlled)).setChecked(true);
-                            showQubitSelectors(qX, tX, 2);
+                            showQubitSelectors(qX, tX, hX, 2);
                             qX[1].setProgress(prevOperator.getQubitIDs()[1]);
+                        } else {
+                            ((SwitchCompat) mainView.findViewById(R.id.controlled)).setChecked(false);
                         }
                     } else if (prevOperator != null && prevOperator.isQFT()) {
                         gateType.setSelection(3);
@@ -431,7 +461,8 @@ public class UIHelper {
                         ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setText(R.string.inverse_qft);
                         ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setChecked(prevOperator.getAngles()[2] == -1);
                         mainView.findViewById(R.id.hermitianConjugate).setEnabled(true);
-
+                        for (TextView helpText : hX)
+                            helpText.setText(" ");
                     } else {
                         subLayout.setVisibility(VISIBLE);
                     }
@@ -455,14 +486,21 @@ public class UIHelper {
                                     Log.e("Unknown error", "Gate name index is unacceptably large");
                                     gateName.setSelection(0);
                                 }
+                                VisualOperator operator = gateType.getSelectedItemPosition() == 0 ?
+                                        VisualOperator.findGateByName(adapter.getItem(i)) : operators.get(i);
                                 int qubits = gateType.getSelectedItemPosition() == 0 ?
                                         VisualOperator.findGateByName(adapter.getItem(i)).getQubits() :
                                         gateType.getSelectedItemPosition() == 1 ?
                                                 operators.get(i).getQubits() : 1;
-                                if (qubits > 1)
+                                if (qubits > 1) {
                                     ((SwitchCompat) mainView.findViewById(R.id.hermitianConjugate)).setChecked(false);
+                                    setHelperText(hX, operator);
+                                } else {
+                                    for (TextView helpText : hX)
+                                        helpText.setText(" ");
+                                }
                                 mainView.findViewById(R.id.hermitianConjugate).setEnabled(qubits == 1);
-                                showQubitSelectors(qX, tX, qubits);
+                                showQubitSelectors(qX, tX, hX, qubits);
                             }
                         }
 
@@ -585,41 +623,64 @@ public class UIHelper {
         }).start();
     }
 
-    private void showQubitSelectors(SeekBar[] qX, TextView[] tX, int qubits) {
+    private void setHelperText(TextView[] hX, VisualOperator operator) {
+        boolean controlled = false;
+        for (int q = 0; q < operator.getQubitIDs().length; q++)
+            if (operator.getSymbols() != null && operator.getSymbols()[q].equals(VisualOperator.CNOT.getSymbols()[0])) {
+                hX[q].setText(R.string.control_short);
+                controlled = true;
+            } else if (controlled) {
+                hX[q].setText(R.string.target_short);
+            } else {
+                hX[q].setText(" ");
+            }
+    }
+
+    private void showQubitSelectors(SeekBar[] qX, TextView[] tX, TextView[] hX, int qubits) {
         switch (qubits) {
             case 6:
                 qX[5].setVisibility(View.VISIBLE);
                 tX[5].setVisibility(View.VISIBLE);
+                hX[5].setVisibility(View.VISIBLE);
             case 5:
                 qX[4].setVisibility(View.VISIBLE);
                 tX[4].setVisibility(View.VISIBLE);
+                hX[4].setVisibility(View.VISIBLE);
             case 4:
                 qX[3].setVisibility(View.VISIBLE);
                 tX[3].setVisibility(View.VISIBLE);
+                hX[3].setVisibility(View.VISIBLE);
             case 3:
                 qX[2].setVisibility(View.VISIBLE);
                 tX[2].setVisibility(View.VISIBLE);
+                hX[2].setVisibility(View.VISIBLE);
             case 2:
                 qX[1].setVisibility(View.VISIBLE);
                 tX[1].setVisibility(View.VISIBLE);
+                hX[1].setVisibility(View.VISIBLE);
             default:
         }
         switch (qubits) {
             case 1:
                 qX[1].setVisibility(View.INVISIBLE);
                 tX[1].setVisibility(View.INVISIBLE);
+                hX[1].setVisibility(View.INVISIBLE);
             case 2:
                 qX[2].setVisibility(GONE);
                 tX[2].setVisibility(GONE);
+                hX[2].setVisibility(GONE);
             case 3:
                 qX[3].setVisibility(GONE);
                 tX[3].setVisibility(GONE);
+                hX[3].setVisibility(GONE);
             case 4:
                 qX[4].setVisibility(GONE);
                 tX[4].setVisibility(GONE);
+                hX[4].setVisibility(GONE);
             case 5:
                 qX[5].setVisibility(GONE);
                 tX[5].setVisibility(GONE);
+                hX[5].setVisibility(GONE);
             default:
         }
     }
