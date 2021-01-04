@@ -485,6 +485,10 @@ public class UIHelper {
                                 } else if (gateType.getSelectedItemPosition() == 1 && operators.size() - 1 < i) {
                                     Log.e("Unknown error", "Gate name index is unacceptably large");
                                     gateName.setSelection(0);
+                                    Toast t = Toast.makeText(context, R.string.unknown_error, Toast.LENGTH_SHORT);
+                                    t.setGravity(Gravity.CENTER, 0, 0);
+                                    t.show();
+                                    return;
                                 }
                                 VisualOperator operator = gateType.getSelectedItemPosition() == 0 ?
                                         VisualOperator.findGateByName(adapter.getItem(i)) : operators.get(i);

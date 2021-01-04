@@ -554,7 +554,7 @@ public class QuantumView extends View {
     }
 
     public QuantumViewData getData() {
-        return new QuantumViewData(undoList, redoList, new GateSequence<>(visualOperators, name), new LinkedList(Arrays.asList(statevector)));
+        return new QuantumViewData(undoList, redoList, new GateSequence<>(visualOperators, name), statevector != null ? new LinkedList(Arrays.asList(statevector)) : new LinkedList<Complex>());
     }
 
     public boolean setData(QuantumViewData data) {
@@ -572,7 +572,7 @@ public class QuantumView extends View {
             }
             undoList = data.undoList;
             redoList = data.redoList;
-            statevector = (Complex[]) data.statevector.toArray();
+            statevector = data.statevector.size() == 0 ? null : (Complex[]) data.statevector.toArray();
             super.invalidate();
             return !hadError;
         } catch (Exception e) {

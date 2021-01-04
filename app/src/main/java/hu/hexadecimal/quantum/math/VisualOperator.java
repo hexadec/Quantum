@@ -29,7 +29,7 @@ public class VisualOperator {
 
     public static final long helpVersion = 52L;
     private Complex[][] matrix;
-    //last one is to clarify meaning for navbar, so length is +1 to qubits
+    //last one is to clarify meaning for navigation drawer, so length is qubits+1 if qubits > 1
     private String[] symbols;
     private Random random;
 
